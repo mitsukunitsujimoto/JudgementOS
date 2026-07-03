@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="JudgmentOS Ğúóã">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <text x="600" y="72" text-anchor="middle" fill="#f8fafc" font-family="Inter, sans-serif" font-size="42" font-weight="700">JudgmentOS</text>
+  <text x="600" y="108" text-anchor="middle" fill="#94a3b8" font-family="Inter, sans-serif" font-size="18">AIBãnL¶nzšOS</text>
+  <rect x="80" y="160" width="240" height="120" rx="16" fill="#1e293b" stroke="#334155"/>
+  <text x="200" y="210" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">$­’øO</text>
+  <text x="200" y="240" text-anchor="middle" fill="#cbd5e1" font-size="13">L¶ne›</text>
+  <path d="M320 220 H380" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="380" y="160" width="240" height="120" rx="16" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+  <text x="500" y="210" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">‡’ Y</text>
+  <text x="500" y="240" text-anchor="middle" fill="#cbd5e1" font-size="13">MĞû‹H‹/‹HjD</text>
+  <path d="M620 220 H680" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="680" y="160" width="240" height="120" rx="16" fill="#1e293b" stroke="#334155"/>
+  <text x="800" y="210" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">AIhşq</text>
+  <text x="800" y="240" text-anchor="middle" fill="#cbd5e1" font-size="13">‡’!Wf<</text>
+  <path d="M920 220 H980" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="980" y="160" width="140" height="120" rx="16" fill="url(#gold)"/>
+  <text x="1050" y="215" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">°WD</text>
+  <text x="1050" y="240" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">$­</text>
+  <rect x="120" y="360" width="960" height="220" rx="20" fill="#0f172a" stroke="#334155"/>
+  <text x="600" y="400" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="600">AIoTH’:Y*e’z‹noL¶</text>
+  <text x="200" y="470" text-anchor="middle" fill="#94a3b8" font-size="13">Premise</text>
+  <text x="400" y="470" text-anchor="middle" fill="#94a3b8" font-size="13">Decision Context</text>
+  <text x="600" y="470" text-anchor="middle" fill="#94a3b8" font-size="13">Question</text>
+  <text x="800" y="470" text-anchor="middle" fill="#94a3b8" font-size="13">AI</text>
+  <text x="1000" y="470" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700">Judgment</text>
+  <line x1="200" y1="490" x2="1000" y2="490" stroke="#475569" stroke-width="2"/>
+  <text x="600" y="540" text-anchor="middle" fill="#64748b" font-size="12">AI-Driven School Ğúóã · JudgmentOS v1</text>
+</svg>

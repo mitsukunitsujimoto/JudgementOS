@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JudgmentOS — 提出・プロダクト紹介</title>
+  <meta name="description" content="JudgmentOSは、AI時代の経営者の意思決定OS。判断を構造化し、AIと共に未来を設計する。">
+  <meta property="og:title" content="JudgmentOS — AI時代の経営者の意思決定OS">
+  <meta property="og:description" content="経営判断を構造化し、AIと共に、未来を設計する。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --background: 224 71% 4%;
+      --foreground: 210 40% 96%;
+      --card: 224 47% 8%;
+      --primary: 38 92% 50%;
+      --primary-fg: 224 71% 4%;
+      --muted-fg: 215 16% 65%;
+      --border: 215 28% 18%;
+      --radius: 0.75rem;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      font-family: Inter, "Noto Sans JP", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell { max-width: 52rem; margin: 0 auto; padding: 0 1.25rem; }
+    .shell-wide { max-width: 64rem; margin: 0 auto; padding: 0 1.25rem; }
+    .card {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+    }
+    @media (min-width: 768px) { .card { padding: 2rem 2.25rem; } }
+    .section { padding: 4.5rem 0; }
+    .section-label {
+      font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: hsl(var(--primary)); margin-bottom: 0.75rem;
+    }
+    .fade-in {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: none; }
+    .hero-glow {
+      position: absolute; inset: -40% -20% auto; height: 60%;
+      background: radial-gradient(ellipse at center, hsl(var(--primary) / 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .url-pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem; border-radius: 9999px;
+      background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+      font-size: 0.8125rem; color: hsl(var(--muted-fg));
+      word-break: break-all;
+    }
+    .url-pill a { color: hsl(var(--primary)); text-decoration: none; }
+    .url-pill a:hover { text-decoration: underline; }
+    .process-step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: 1.25rem; border-radius: var(--radius);
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+    }
+    .process-icon {
+      flex-shrink: 0; width: 2.75rem; height: 2.75rem;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: calc(var(--radius) - 2px);
+      background: hsl(var(--primary) / 0.12); color: hsl(var(--primary));
+    }
+    .process-arrow { text-align: center; color: hsl(var(--primary)); opacity: 0.5; padding: 0.25rem 0; }
+    .tech-flow {
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      padding: 1.5rem; border-radius: var(--radius);
+      background: hsl(var(--background)); border: 1px dashed hsl(var(--border));
+    }
+    @media (min-width: 640px) {
+      .tech-flow { flex-direction: row; justify-content: center; gap: 1rem; }
+      .tech-flow .tech-arrow { transform: rotate(-90deg); }
+    }
+    .tech-node {
+      padding: 0.75rem 1.25rem; border-radius: var(--radius);
+      border: 1px solid hsl(var(--border)); background: hsl(var(--card));
+      font-weight: 600; font-size: 0.9375rem; min-width: 7rem; text-align: center;
+    }
+    .tech-node.highlight { border-color: hsl(var(--primary)); color: hsl(var(--primary)); }
+    .tag {
+      display: inline-block; padding: 0.35rem 0.75rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 600;
+      background: hsl(var(--primary) / 0.1); color: hsl(var(--primary));
+      border: 1px solid hsl(var(--primary) / 0.25);
+    }
+    .diagram-wrap {
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid hsl(var(--border)); cursor: zoom-in;
+      transition: box-shadow 0.25s, border-color 0.25s;
+    }
+    .diagram-wrap:hover {
+      border-color: hsl(var(--primary) / 0.5);
+      box-shadow: 0 8px 40px hsl(var(--primary) / 0.08);
+    }
+    .diagram-wrap img { width: 100%; height: auto; display: block; }
+    .lightbox {
+      position: fixed; inset: 0; z-50; display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.88); padding: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius); }
+    .lightbox-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+      color: hsl(var(--foreground)); border-radius: 9999px;
+      width: 2.5rem; height: 2.5rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feature-item {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      padding: 0.875rem 0; border-bottom: 1px solid hsl(var(--border));
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .feature-dot {
+      width: 0.5rem; height: 0.5rem; border-radius: 9999px;
+      background: hsl(var(--primary)); margin-top: 0.5rem; flex-shrink: 0;
+    }
+    .roadmap-item {
+      padding: 0.75rem 1rem; border-radius: calc(var(--radius) - 2px);
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      font-size: 0.875rem;
+    }
+    footer a { color: hsl(var(--primary)); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- ① ヒーロー -->
+  <header class="relative overflow-hidden">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="shell section text-center fade-in" style="padding-top: 5rem; padding-bottom: 4rem;">
+      <p class="section-label">AI-Driven School 提出 · Product Introduction</p>
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-3">JudgmentOS</h1>
+      <p class="text-lg md:text-xl text-[hsl(var(--muted-fg))] font-medium mb-8">AI時代の経営者の意思決定OS</p>
+      <p class="text-base md:text-lg leading-relaxed max-w-md mx-auto mb-10">
+        経営判断を構造化し、<br class="hidden sm:inline">
+        AIと共に、<br>
+        未来を設計する。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
+        <div class="url-pill">
+          <i data-lucide="globe" class="w-4 h-4 shrink-0"></i>
+          <a href="https://judgementos-v1.vercel.app/" target="_blank" rel="noopener">judgementos-v1.vercel.app</a>
+        </div>
+        <div class="url-pill">
+          <i data-lucide="file-text" class="w-4 h-4 shrink-0"></i>
+          <a href="https://judgementos-v1.vercel.app/submission.html">/submission.html</a>
+        </div>
+      </div>
+      <a href="/" class="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--primary))] hover:opacity-80 transition-opacity">
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        JudgmentOS を体験する
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ② プロダクト概要 -->
+    <section class="section border-t border-[hsl(var(--border))]">
+      <div class="shell fade-in">
+        <p class="section-label">Overview</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-6">JudgmentOSとは</h2>
+        <div class="card space-y-6">
+          <p class="text-base md:text-lg leading-relaxed text-[hsl(var(--muted-fg))]">
+            AIに答えを求める前に、<br>
+            <strong class="text-[hsl(var(--foreground))]">経営者自身の判断構造と文脈</strong>を可視化するツール。
+          </p>
+          <div class="border-l-2 border-[hsl(var(--primary))] pl-5 space-y-3 text-base leading-loose">
+            <p>AIは最適解を提示できる。</p>
+            <p>しかし、<br>どの未来を目指すかは決められない。</p>
+            <p class="font-semibold text-[hsl(var(--foreground))]">その未来を決めるのは<br>経営者である。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ 判断プロセス -->
+    <section class="section">
+      <div class="shell fade-in">
+        <p class="section-label">Process</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-8">判断プロセス</h2>
+        <div class="space-y-0 max-w-lg mx-auto">
+          <div class="process-step">
+            <div class="process-icon"><i data-lucide="pen-line" class="w-5 h-5"></i></div>
+            <div>
+              <p class="text-xs font-bold text-[hsl(var(--primary))] tracking-wider mb-1">STEP 1</p>
+              <p class="font-semibold text-lg">判断を書く</p>
+              <p class="text-sm text-[hsl(var(--muted-fg))] mt-1">今、決めようとしていることをそのまま言語化する</p>
+            </div>
+          </div>
+          <div class="process-arrow"><i data-lucide="chevron-down" class="w-5 h-5 inline"></i></div>
+          <div class="process-step">
+            <div class="process-icon"><i data-lucide="scan-eye" class="w-5 h-5"></i></div>
+            <div>
+              <p class="text-xs font-bold text-[hsl(var(--primary))] tracking-wider mb-1">STEP 2</p>
+              <p class="font-semibold text-lg">判断の文脈を映す</p>
+              <p class="text-sm text-[hsl(var(--muted-fg))] mt-1">前提と、見えている・見えていないものを構造化する</p>
+            </div>
+          </div>
+          <div class="process-arrow"><i data-lucide="chevron-down" class="w-5 h-5 inline"></i></div>
+          <div class="process-step">
+            <div class="process-icon"><i data-lucide="layers" class="w-5 h-5"></i></div>
+            <div>
+              <p class="text-xs font-bold text-[hsl(var(--primary))] tracking-wider mb-1">STEP 3</p>
+              <p class="font-semibold text-lg">見えているもの・見えていないものを整理</p>
+              <p class="text-sm text-[hsl(var(--muted-fg))] mt-1">AIが鏡として構造を映し、経営者が気づく</p>
+            </div>
+          </div>
+          <div class="process-arrow"><i data-lucide="chevron-down" class="w-5 h-5 inline"></i></div>
+          <div class="process-step border-[hsl(var(--primary)/0.4)] bg-[hsl(var(--primary)/0.06)]">
+            <div class="process-icon bg-[hsl(var(--primary)/0.2)]"><i data-lucide="compass" class="w-5 h-5"></i></div>
+            <div>
+              <p class="text-xs font-bold text-[hsl(var(--primary))] tracking-wider mb-1">STEP 4</p>
+              <p class="font-semibold text-lg">経営者自身が未来を決める</p>
+              <p class="text-sm text-[hsl(var(--muted-fg))] mt-1">新しい判断を言葉にする — これが最終成果物</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ④ 提出図解 -->
+    <section class="section border-t border-[hsl(var(--border))]">
+      <div class="shell-wide fade-in">
+        <p class="section-label">Submission</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-2">提出図解</h2>
+        <p class="text-sm text-[hsl(var(--muted-fg))] mb-6">クリックで拡大表示</p>
+        <div class="diagram-wrap" id="diagram-trigger" role="button" tabindex="0" aria-label="提出図解を拡大表示">
+          <img
+            src="submission-diagram.png"
+            alt="JudgmentOS 提出図解"
+            id="diagram-img"
+            onerror="this.onerror=null;this.src='submission-diagram.svg';"
+          >
+        </div>
+        <p class="text-xs text-[hsl(var(--muted-fg))] mt-3 text-center">PNG差し替え: <code class="text-[hsl(var(--foreground))]">output/submission-diagram.png</code></p>
+      </div>
+    </section>
+
+    <!-- ⑤ 技術構成 -->
+    <section class="section">
+      <div class="shell fade-in">
+        <p class="section-label">Architecture</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-8">技術構成</h2>
+        <div class="card mb-6">
+          <div class="tech-flow">
+            <div class="tech-node"><i data-lucide="github" class="w-4 h-4 inline mr-1"></i> GitHub</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-[hsl(var(--primary))] tech-arrow opacity-60"></i>
+            <div class="tech-node"><i data-lucide="triangle" class="w-4 h-4 inline mr-1"></i> Vercel</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-[hsl(var(--primary))] tech-arrow opacity-60"></i>
+            <div class="tech-node highlight">JudgmentOS</div>
+          </div>
+        </div>
+        <p class="text-sm font-semibold mb-3 text-[hsl(var(--muted-fg))]">使用技術</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="tag">HTML</span>
+          <span class="tag">CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">GitHub</span>
+          <span class="tag">Vercel</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑥ 工夫した点 -->
+    <section class="section border-t border-[hsl(var(--border))]">
+      <div class="shell fade-in">
+        <p class="section-label">Design Decisions</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-6">工夫した点</h2>
+        <div class="card">
+          <div class="feature-item">
+            <span class="feature-dot"></span>
+            <p><strong>AIではなく判断を中心</strong>に設計した — 主役は経営者の Judgment</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot"></span>
+            <p><strong>文脈（Context）を先に設計する</strong> — 問いの前に、判断の構造を映す</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot"></span>
+            <p><strong>AIは答えではなく鏡</strong>として使う — 診断・断定・解決策は出さない</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-dot"></span>
+            <p><strong>経営者自身が未来を選択する</strong> — 持ち帰るのは AI の答えではない</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑦ 今後の展望 -->
+    <section class="section">
+      <div class="shell fade-in">
+        <p class="section-label">Roadmap</p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">今後の展望</h2>
+        <p class="text-[hsl(var(--muted-fg))] mb-6 leading-relaxed">
+          JudgmentOSは MVP ではありません。<br>
+          AI時代の経営者の判断 OS として、次へ発展させます。
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="roadmap-item flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-[hsl(var(--primary))]"></i> 判断履歴</div>
+          <div class="roadmap-item flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-[hsl(var(--primary))]"></i> 経営会議支援</div>
+          <div class="roadmap-item flex items-center gap-2"><i data-lucide="network" class="w-4 h-4 text-[hsl(var(--primary))]"></i> チーム意思決定</div>
+          <div class="roadmap-item flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4 text-[hsl(var(--primary))]"></i> AIとの対話履歴</div>
+          <div class="roadmap-item flex items-center gap-2 sm:col-span-2"><i data-lucide="database" class="w-4 h-4 text-[hsl(var(--primary))]"></i> 判断データベース</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ⑧ フッター -->
+  <footer class="section border-t border-[hsl(var(--border))] text-center fade-in" style="padding-bottom: 3rem;">
+    <div class="shell space-y-4">
+      <p class="text-xs text-[hsl(var(--muted-fg))] tracking-widest uppercase">Developed by</p>
+      <p class="text-xl font-bold">辻本光邦</p>
+      <p class="text-lg font-semibold text-[hsl(var(--primary))]">JudgmentOS</p>
+      <p class="text-sm text-[hsl(var(--muted-fg))]">AI時代の経営者の意思決定OS</p>
+      <div class="flex flex-wrap justify-center gap-4 pt-4 text-sm font-medium">
+        <a href="https://github.com/mitsukunitsujimoto/JudgementOS" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub
+        </a>
+        <a href="/" class="inline-flex items-center gap-1.5">
+          <i data-lucide="home" class="w-4 h-4"></i> JudgmentOS トップ
+        </a>
+      </div>
+      <p class="text-xs text-[hsl(var(--muted-fg))] pt-6">AI-Driven School · JudgmentOS v1 · 2026</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="図解拡大表示">
+    <button class="lightbox-close" id="lightbox-close" aria-label="閉じる">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <img src="" alt="JudgmentOS 提出図解（拡大）" id="lightbox-img">
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    requestAnimationFrame(() => {
+      document.querySelector('header .fade-in')?.classList.add('visible');
+    });
+
+    const trigger = document.getElementById('diagram-trigger');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const diagramImg = document.getElementById('diagram-img');
+
+    function openLightbox() {
+      lightboxImg.src = diagramImg.currentSrc || diagramImg.src;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    trigger?.addEventListener('click', openLightbox);
+    trigger?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(); } });
+    document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+    lightbox?.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
+</body>
+</html>
