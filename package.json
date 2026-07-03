@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
+    "build": "node --input-type=module -e \"import fs from 'fs'; fs.accessSync('output/index.html')\"",
     "db:schema": "node scripts/apply-schema.js"
   },
   "dependencies": {

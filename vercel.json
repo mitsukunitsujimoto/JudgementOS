@@ -1,10 +1,15 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": "output",
   "functions": {
     "api/**/*.js": {
       "memory": 256,
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/judgment-structure-demo", "destination": "/judgment-structure-demo.html" },
+    { "source": "/judgment-structure-demo/", "destination": "/judgment-structure-demo.html" }
+  ]
 }

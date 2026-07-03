@@ -45,7 +45,8 @@ npm run dev
 
 `npm run dev` は `vercel dev` を起動します。
 
-- デモ: http://localhost:3000/judgment-structure-demo.html
+- デモ: https://your-project.vercel.app/ （`output/index.html`）
+- 旧URL: `/judgment-structure-demo.html` も同内容
 - API: POST http://localhost:3000/api/decision-session
 
 `serve` だけでは API は動きません。DB 保存を試すときは **必ず `vercel dev`** を使ってください。

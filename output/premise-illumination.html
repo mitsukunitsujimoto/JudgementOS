@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:title" content="JudgmentOS — 問いの鏡">
+  <meta property="og:description" content="JudgmentOS — Decision Context Mirror。経営者自身の意思決定文脈を映し出すOS。">
+  <title>JudgmentOS — 判断構造マップ Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', '"Noto Sans JP"', 'sans-serif'] },
+          colors: {
+            border: 'hsl(var(--border))',
+            input: 'hsl(var(--input))',
+            ring: 'hsl(var(--ring))',
+            background: 'hsl(var(--background))',
+            foreground: 'hsl(var(--foreground))',
+            primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+            secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+            destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+            muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+            accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+            card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+            warn: { DEFAULT: 'hsl(var(--warn))', foreground: 'hsl(var(--warn-foreground))' },
+          },
+          borderRadius: { lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)' },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(6px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+          },
+          animation: { 'fade-in': 'fadeIn 0.35s ease-out both' }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* shadcn/ui dark theme tokens */
+    .dark {
+      --background: 224 71% 4%;
+      --foreground: 210 40% 96%;
+      --card: 224 47% 8%;
+      --card-foreground: 210 40% 96%;
+      --primary: 38 92% 50%;
+      --primary-foreground: 224 71% 4%;
+      --secondary: 215 28% 14%;
+      --secondary-foreground: 210 40% 96%;
+      --muted: 215 28% 14%;
+      --muted-foreground: 215 16% 65%;
+      --accent: 215 28% 17%;
+      --accent-foreground: 210 40% 96%;
+      --destructive: 0 72% 51%;
+      --destructive-foreground: 210 40% 98%;
+      --warn: 38 92% 50%;
+      --warn-foreground: 224 71% 4%;
+      --border: 215 28% 18%;
+      --input: 215 28% 18%;
+      --ring: 38 92% 50%;
+      --radius: 0.625rem;
+    }
+    * { border-color: hsl(var(--border)); }
+    body { background: hsl(var(--background)); color: hsl(var(--foreground)); min-height: 100vh; }
+
+    /* shadcn-like components */
+    .card { background: hsl(var(--card)); color: hsl(var(--card-foreground)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+    .card-header { padding: 1.25rem 1.25rem 0; }
+    .card-content { padding: 1.25rem; }
+    .card-footer { padding: 0 1.25rem 1.25rem; }
+
+    .badge { display: inline-flex; align-items: center; border-radius: calc(var(--radius) - 4px); padding: 0.125rem 0.625rem; font-size: 0.6875rem; font-weight: 600; line-height: 1.5; border: 1px solid transparent; white-space: nowrap; }
+    .badge-outline { background: transparent; border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+    .badge-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+    .badge-muted { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+    .badge-destructive { background: hsl(0 72% 51% / 0.15); color: hsl(0 90% 75%); border-color: hsl(0 60% 40%); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: calc(var(--radius) - 2px); font-size: 0.875rem; font-weight: 600; padding: 0.625rem 1.25rem; transition: background .15s, opacity .15s; cursor: pointer; }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: none; }
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-secondary { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); border: 1px solid hsl(var(--border)); }
+    .btn-secondary:hover { background: hsl(var(--accent)); }
+    .btn-ghost { background: transparent; color: hsl(var(--muted-foreground)); border: 1px solid hsl(var(--border)); }
+    .btn-ghost:hover { background: hsl(var(--accent)); color: hsl(var(--foreground)); }
+
+    .input, .textarea {
+      width: 100%; background: hsl(var(--background)); color: hsl(var(--foreground));
+      border: 1px solid hsl(var(--input)); border-radius: calc(var(--radius) - 2px);
+      padding: 0.625rem 0.75rem; font-size: 0.875rem; line-height: 1.5;
+    }
+    .input:focus, .textarea:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)); }
+    .textarea { resize: vertical; min-height: 5rem; }
+
+    .label { font-size: 0.875rem; font-weight: 600; color: hsl(var(--foreground)); margin-bottom: 0.375rem; display: block; }
+    .label-desc { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-bottom: 0.5rem; }
+
+    .separator { height: 1px; background: hsl(var(--border)); flex: 1; }
+
+    /* Lens badges — solid bg, high contrast (fixes ③ readability) */
+    .lens-block { padding: 0.875rem; border-radius: calc(var(--radius) - 2px); border: 1px solid hsl(var(--border)); background: hsl(var(--background)); }
+    .lens-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.25rem 0.625rem; margin-bottom: 0.5rem;
+      border-radius: calc(var(--radius) - 4px);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.01em;
+      border: 1px solid;
+    }
+    .lens-badge-5 { background: hsl(38 80% 18%); color: hsl(38 95% 75%); border-color: hsl(38 70% 35%); }
+    .lens-badge-2 { background: hsl(270 50% 18%); color: hsl(270 80% 82%); border-color: hsl(270 45% 35%); }
+    .lens-badge-3 { background: hsl(214 55% 18%); color: hsl(214 95% 88%); border-color: hsl(214 50% 38%); }
+    .lens-badge-4 { background: hsl(160 45% 15%); color: hsl(160 70% 78%); border-color: hsl(160 40% 32%); }
+    .lens-body { font-size: 0.875rem; line-height: 1.6; color: hsl(var(--foreground)); }
+
+    .rewrite-hero { border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.06); }
+    .rewrite-hero .label { color: hsl(var(--primary)); font-size: 0.9375rem; }
+    .rewrite-hero .textarea { min-height: 5rem; font-size: 0.9375rem; }
+    .aha-quote { font-size: 1rem; font-weight: 600; text-align: center; color: hsl(var(--foreground)); padding: 0.5rem 0; line-height: 1.5; }
+    .premise-hero {
+      border: 2px solid hsl(38 70% 35%);
+      background: linear-gradient(180deg, hsl(38 50% 8%) 0%, hsl(var(--card)) 120px);
+    }
+    .premise-hero-title { font-size: 1.25rem; font-weight: 700; line-height: 1.4; }
+    .premise-challenge { font-size: 1.125rem; font-weight: 700; color: hsl(var(--primary)); text-align: center; padding: 0.75rem 0; }
+    .organize-section { border-color: hsl(var(--primary) / 0.35); }
+    .ai-later-section summary { cursor: pointer; }
+    .ai-later-section[open] { border-color: hsl(var(--border)); }
+    .mirror-output { font-size: 0.9375rem; line-height: 1.65; }
+    .mirror-output li { position: relative; padding-left: 1.25rem; margin-bottom: 0.625rem; }
+    .mirror-output li::before { content: '·'; position: absolute; left: 0; color: hsl(var(--primary)); font-weight: 700; font-size: 1.125rem; }
+    .learn-example { border-left: 3px solid hsl(var(--primary) / 0.5); padding-left: 0.875rem; }
+    .reflection-q { padding: 0.625rem 0.875rem; border-radius: var(--radius); background: hsl(var(--muted) / 0.35); font-size: 0.875rem; line-height: 1.5; }
+    .inference-ladder {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem;
+      font-size: 0.6875rem; font-weight: 600; color: hsl(var(--muted-foreground));
+      padding: 0.75rem 1rem; border-radius: var(--radius); background: hsl(var(--muted) / 0.25);
+    }
+    .inference-ladder .ladder-step { color: hsl(var(--foreground)); }
+    .inference-ladder .ladder-arrow { color: hsl(var(--primary)); opacity: 0.7; }
+    .causal-flow {
+      display: flex; flex-direction: column; align-items: stretch;
+      max-width: 28rem; margin: 0 auto; gap: 0;
+    }
+    .causal-node {
+      position: relative; border-radius: var(--radius);
+      padding: 0.875rem 1rem; text-align: center;
+      border: 2px solid hsl(var(--border)); background: hsl(var(--card));
+    }
+    .causal-node-philosophy { border-color: hsl(var(--primary) / 0.55); background: hsl(var(--primary) / 0.08); }
+    .causal-node-premise { border-color: hsl(var(--primary) / 0.35); }
+    .causal-node-seeing { border-left: 4px solid hsl(var(--primary)); text-align: left; }
+    .causal-node-unseen { border-color: hsl(38 70% 40% / 0.6); background: hsl(38 50% 8% / 0.45); text-align: left; }
+    .causal-node-judgment { border-color: hsl(var(--primary)); background: hsl(var(--primary) / 0.12); font-weight: 600; }
+    .causal-label {
+      display: block; font-size: 0.625rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: hsl(var(--muted-foreground)); margin-bottom: 0.35rem;
+    }
+    .causal-text { font-size: 0.9375rem; line-height: 1.45; color: hsl(var(--foreground)); margin: 0; }
+    .causal-arrow {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0.25rem 0; color: hsl(var(--primary)); flex-shrink: 0;
+    }
+    .causal-arrow-line {
+      width: 2px; height: 1.25rem; background: hsl(var(--primary) / 0.5);
+    }
+    .causal-arrow-cap {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em;
+      opacity: 0.85; margin-top: 0.125rem;
+    }
+    .causal-caption {
+      text-align: center; font-size: 0.6875rem; color: hsl(var(--muted-foreground));
+      margin-top: 1rem; line-height: 1.5;
+    }
+    .stage-block { padding-top: 1.25rem; border-top: 1px solid hsl(var(--border)); }
+    .stage-block:first-of-type { border-top: none; padding-top: 0; }
+    .stage-label { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: hsl(var(--muted-foreground)); margin-bottom: 0.35rem; }
+    .stage-philosophy { border: 2px solid hsl(var(--primary) / 0.45); border-radius: var(--radius); padding: 1rem 1.25rem; background: hsl(var(--primary) / 0.06); }
+    .philosophy-prose { font-size: 0.9375rem; line-height: 1.75; color: hsl(var(--foreground)); }
+    .philosophy-prose p { margin-bottom: 0.75rem; }
+    .narrative-block { border-left: 3px solid hsl(var(--primary)); padding: 0.75rem 0 0.75rem 1rem; margin: 1rem 0; }
+    .narrative-headline { font-weight: 700; font-size: 0.9375rem; margin-bottom: 0.35rem; }
+    .philosophy-grid { display: grid; gap: 0.5rem; font-size: 0.8125rem; }
+    .philosophy-grid dt { color: hsl(var(--muted-foreground)); font-weight: 600; }
+    .stage-blindspot { border: 2px solid hsl(38 70% 40%); border-radius: var(--radius); padding: 1rem 1.25rem; background: hsl(38 50% 8% / 0.6); }
+    .stage-visible { border-left: 3px solid hsl(var(--primary)); padding-left: 1rem; }
+    .attention-bias { font-size: 0.9375rem; line-height: 1.65; padding: 1rem 1.25rem; border-radius: var(--radius); background: hsl(var(--muted) / 0.4); border: 1px solid hsl(var(--border)); }
+    .inference-process { font-size: 0.8125rem; }
+    .premise-pick input[type="radio"] { width: 1.125rem; height: 1.125rem; margin-top: 0.125rem; accent-color: hsl(var(--primary)); shrink: 0; cursor: pointer; }
+
+    details summary { list-style: none; cursor: pointer; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .chevron { transform: rotate(180deg); }
+    .chevron { transition: transform .2s; color: hsl(var(--muted-foreground)); }
+
+    .premise-row:nth-child(1) { animation-delay: 0.03s; }
+    .premise-row:nth-child(2) { animation-delay: 0.06s; }
+    .premise-row:nth-child(3) { animation-delay: 0.09s; }
+    .premise-row:nth-child(4) { animation-delay: 0.12s; }
+    .premise-row:nth-child(5) { animation-delay: 0.15s; }
+
+    .premise-pick {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      padding: 0.875rem 1rem; border-radius: calc(var(--radius) - 2px);
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .premise-pick:hover { background: hsl(var(--accent)); }
+    .premise-pick.selected { border-color: hsl(var(--primary)); background: hsl(38 60% 10% / 0.4); }
+    .premise-pick input[type="checkbox"] { width: 1.125rem; height: 1.125rem; margin-top: 0.125rem; accent-color: hsl(var(--primary)); shrink: 0; cursor: pointer; }
+    .premise-pick-text { flex: 1; min-width: 0; }
+    .premise-pick-title { font-size: 0.9375rem; font-weight: 600; line-height: 1.5; }
+
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.5rem; height: 1.5rem; border-radius: 9999px;
+      background: hsl(var(--primary)); color: hsl(var(--primary-foreground));
+      font-size: 0.6875rem; font-weight: 700; margin-right: 0.5rem;
+    }
+
+    .consult-block { border-left: 3px solid hsl(var(--primary)); padding-left: 1rem; }
+    .reaction-btn.ring-active { box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)); }
+
+    /* レイアウト — 大画面対応 */
+    .layout-shell {
+      width: 100%;
+      max-width: 42rem;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    @media (min-width: 1024px) {
+      .layout-shell { max-width: 56rem; }
+    }
+    @media (min-width: 1280px) {
+      .layout-shell { max-width: 80rem; }
+      .workspace-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 34%) 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .workspace-left { position: sticky; top: 4.5rem; }
+    }
+    body.layout-wide .layout-shell { max-width: 96rem; }
+    body.layout-wide .premise-picker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 1536px) {
+      body.layout-wide .premise-picker-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .results-step34 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    }
+    .premise-picker-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <header class="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+    <div class="layout-shell h-14 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-[10px] font-semibold tracking-widest text-primary uppercase">JudgmentOS</p>
+        <p class="text-[10px] text-muted-foreground">Judgment（意思決定）全体を支える OS</p>
+        <p class="text-[10px] text-muted-foreground/80">Decision Context Mirror — 中核機能</p>
+        <h1 class="text-base font-bold text-foreground leading-tight truncate">判断構造マップ <span class="text-xs font-normal text-muted-foreground">Preview</span></h1>
+        <p class="text-[10px] text-muted-foreground truncate">AI時代の意思決定プラットフォーム</p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="judgment-structure-demo.html" class="btn btn-ghost text-xs py-1.5 px-2.5">問いの鏡</a>
+        <a href="../AI_DECISION_DESIGN_CONSTITUTION.md" class="btn btn-ghost text-xs py-1.5 px-2.5" title="設計憲法">憲法</a>
+        <button type="button" id="btn-wide" class="btn btn-ghost text-xs py-1.5 px-2.5" title="画面幅いっぱいに広げる">広い表示</button>
+        <button type="button" id="btn-fullscreen" class="btn btn-ghost text-xs py-1.5 px-2.5" title="F11 と同じ全画面">全画面</button>
+        <span class="badge badge-outline hidden sm:inline-flex">Preview</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout-shell py-6 space-y-6">
+
+    <!-- 入口 — JudgmentOS ブランド構造 -->
+    <section class="card">
+      <div class="card-header space-y-2">
+        <span class="badge badge-muted">JudgmentOS · Decision Context Mirror · 問いの鏡の拡張</span>
+        <div class="text-xs border border-primary/30 rounded-md p-3 bg-primary/5 space-y-1">
+          <p class="font-semibold text-foreground">JudgmentOS — Judgment（意思決定）全体を支える OS</p>
+          <p class="text-muted-foreground pl-3">Decision Context Mirror — 中核機能</p>
+          <p class="text-primary pl-6 font-medium">判断構造マップ — 拡張ワークスペース</p>
+        </div>
+        <p class="text-xs text-muted-foreground leading-relaxed pt-1">
+          Premise → Decision Context → Question → AI → <strong class="text-foreground">Judgment</strong>
+        </p>
+      </div>
+      <div class="card-content pt-2 text-sm text-muted-foreground leading-relaxed space-y-3">
+        <p class="text-xs border border-border rounded-md p-3 bg-background">
+          主役は Decision Context ではなく <strong class="text-foreground">Judgment（意思決定）</strong> です。Decision Context は Judgment を支える構造です。
+        </p>
+        <p class="text-xs border border-primary/30 rounded-md p-3 bg-primary/5">
+          成功条件：<strong class="text-foreground">「私はこの前提で判断していたのか。」</strong>と、本人が自分で気づいたときだけ。
+        </p>
+      </div>
+    </section>
+
+    <div class="workspace-grid">
+      <div class="workspace-left space-y-6">
+
+    <!-- 入力 STEP 1 -->
+    <section class="card">
+      <div class="card-header pb-0">
+        <p class="text-sm font-semibold flex items-center"><span class="step-num">1</span>判断を書く</p>
+      </div>
+      <div class="card-content space-y-5">
+        <div>
+          <label for="input" class="label">今、決めようとしていること</label>
+          <p class="label-desc">迷っている判断 · これから進めようとしているテーマ</p>
+          <textarea id="input" rows="4" class="textarea" placeholder="例：サービスパッケージの内容を決めたい"></textarea>
+        </div>
+        <div class="border-t border-border pt-5">
+          <label for="shown-info" class="label">手元にある情報 <span class="font-normal text-muted-foreground">（任意）</span></label>
+          <p class="label-desc">データ·事実·自分の準備状況 — 判断の背景として</p>
+          <textarea id="shown-info" rows="3" class="textarea" placeholder="例：学び·ネットワーク·実績など"></textarea>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <button type="button" id="btn-illuminate" class="btn btn-primary">判断を映す</button>
+          <button type="button" id="btn-settings-toggle" class="btn btn-ghost text-xs py-2 px-3">API設定</button>
+          <span id="mode-badge" class="text-xs text-muted-foreground"></span>
+        </div>
+        <p class="text-[11px] text-muted-foreground">Ctrl+Enter で実行</p>
+        <div id="settings" class="hidden rounded-md border border-border bg-background p-4 space-y-3">
+          <p class="text-xs text-muted-foreground">OpenAI互換APIキー。未入力時はデモ推論（オフライン可）。</p>
+          <input type="password" id="api-key" placeholder="sk-..." autocomplete="off" class="input">
+          <input type="text" id="api-model" value="gpt-4o-mini" placeholder="モデル名" class="input">
+        </div>
+      </div>
+    </section>
+
+      </div><!-- /workspace-left -->
+
+      <div class="workspace-right space-y-6">
+
+    <div id="loading" class="hidden card">
+      <div class="card-content py-10 text-center">
+        <p class="text-sm font-semibold text-primary animate-pulse">意思決定文脈を映しています…</p>
+        <p class="text-xs text-muted-foreground mt-2">判断 → 前提 → 見える → 見えない → 矛盾 → 意思決定文脈 → 問い</p>
+      </div>
+    </div>
+
+    <!-- 結果 -->
+    <section id="results" class="hidden space-y-6">
+
+      <!-- 中心画面 — 判断構造 -->
+      <div id="mirror-hero" class="card premise-hero">
+        <div class="card-content pt-6 pb-6 space-y-5">
+          <div id="mirror-stages" class="space-y-5"></div>
+          <p class="aha-quote border-t border-primary/20 pt-4">「そうか……そこだったのか。」</p>
+        </div>
+      </div>
+
+      <!-- STEP 3 — 自分で考える問い -->
+      <div id="reflection-section" class="card">
+        <div class="card-header pb-2">
+          <p class="text-sm font-semibold flex items-center"><span class="step-num">3</span>自分で考えてみてください</p>
+        </div>
+        <div class="card-content pt-0 space-y-2" id="reflection-questions"></div>
+      </div>
+
+      <!-- STEP 4 — 見えにくかったものを選ぶ -->
+      <div id="pick-section" class="card border-primary/30">
+        <div class="card-header pb-2">
+          <p class="text-sm font-semibold flex items-center"><span class="step-num">4</span>この構造では、意識が向きにくかった — どれですか？</p>
+          <p class="text-xs text-muted-foreground">この前提では自然に意識が向きにくいもの（構造の裏返しとして導いた仮説）</p>
+        </div>
+        <div class="card-content pt-0">
+          <div id="premise-picker" class="premise-picker-grid"></div>
+        </div>
+      </div>
+
+      <!-- STEP 5 — 気づきの確認（MVP） -->
+      <div id="pause-section" class="hidden card">
+        <div class="card-header pb-0">
+          <p class="text-sm font-semibold flex items-center"><span class="step-num">5</span>気づきの確認</p>
+        </div>
+        <div class="card-content space-y-4">
+          <label for="pause-note" class="label">気づきを一言</label>
+          <textarea id="pause-note" rows="2" class="textarea min-h-0" placeholder="例：直接対話の重要性を、一度も考えたことがなかった"></textarea>
+          <p class="text-xs text-muted-foreground">今の感覚に、最も近いものは？</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-reaction="premise-found" class="reaction-btn btn btn-primary text-xs py-2">前提に気づいた</button>
+            <button type="button" data-reaction="question-shifted" class="reaction-btn btn btn-secondary text-xs py-2">問いが変わった</button>
+            <button type="button" data-reaction="partial" class="reaction-btn btn btn-ghost text-xs py-2">まだ言葉にならない</button>
+            <button type="button" data-reaction="none" class="reaction-btn btn btn-ghost text-xs py-2">特に変化はなかった</button>
+          </div>
+          <p id="reaction-thanks" class="hidden text-xs text-primary">記録しました。ありがとうございます。</p>
+        </div>
+      </div>
+
+      <!-- STEP 6 — 文脈を書き換える -->
+      <div id="organize-section" class="hidden card organize-section border-primary/40">
+        <div class="card-header">
+          <p class="text-sm font-semibold flex items-center"><span class="step-num">6</span>本人が気づく → 文脈を書き換える</p>
+        </div>
+        <div class="card-content pt-2 space-y-4">
+          <p class="text-sm text-muted-foreground">正解はありません。映し出された文脈に気づき、<strong class="text-foreground">文脈を書き換えて</strong>みてください。</p>
+          <div>
+            <label for="field-assumed" class="label">見えにくかったもの <span class="font-normal text-muted-foreground">（④で選んだ項目）</span></label>
+            <textarea id="field-assumed" rows="2" class="textarea min-h-0 bg-muted/30" readonly tabindex="-1"></textarea>
+          </div>
+          <div class="rewrite-hero rounded-lg p-4 space-y-2">
+            <label for="field-revised" class="label">気づいた前提 · 判断の書き換え</label>
+            <textarea id="field-revised" rows="4" class="textarea" placeholder="例：営業すると信頼を失う、と無意識に決めていた"></textarea>
+          </div>
+          <div>
+            <label for="field-intent" class="label">この判断で本当に実現したいこと</label>
+            <textarea id="field-intent" rows="2" class="textarea min-h-0" placeholder="例：少数の経営者と深く伴走したい"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7 — 意思決定文脈（主役） -->
+      <div id="decision-context-section" class="hidden card border-2 border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]">
+        <div class="card-header">
+          <p class="text-sm font-semibold flex items-center text-primary"><span class="step-num">7</span>意思決定文脈（Decision Context）</p>
+          <p class="text-xs text-muted-foreground mt-1">Decision Context Mirror の成果物 — Judgment を支える文脈が映ります。</p>
+        </div>
+        <div class="card-content pt-2 space-y-4" id="decision-context-body"></div>
+      </div>
+
+      <!-- STEP 8 — その状態でAI（任意） -->
+      <details id="ai-later-section" class="card ai-later-section">
+        <summary class="card-content py-4 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2">
+          <span class="step-num">8</span>
+          <span>その状態でAIを使う <span class="font-normal text-xs">（任意）</span></span>
+        </summary>
+        <div class="card-content pt-0 space-y-4 border-t border-border">
+          <p class="text-sm text-muted-foreground">設計した<strong class="text-foreground">意思決定文脈</strong>を渡した<strong class="text-foreground">その状態で</strong>、必要なら検証を依頼できます。</p>
+          <div>
+            <label for="field-ai-question" class="label">AIへ渡す意思決定文脈</label>
+            <p class="label-desc">AIへ渡すものは質問ではありません。映し出し·書き換えた意思決定文脈です。</p>
+            <textarea id="field-ai-question" rows="3" class="textarea min-h-0"></textarea>
+          </div>
+          <button type="button" id="btn-consult" class="btn btn-secondary w-full sm:w-auto">検証をAIに依頼する</button>
+          <div id="consult-loading" class="hidden text-sm text-primary animate-pulse">検証の観点を整理しています…</div>
+          <div id="consult-output" class="hidden space-y-4"></div>
+        </div>
+      </details>
+
+      <!-- STEP 9 — 意思決定する -->
+      <div id="decide-section" class="hidden card border-primary/30">
+        <div class="card-header pb-0">
+          <p class="text-sm font-semibold flex items-center"><span class="step-num">9</span>意思決定する</p>
+        </div>
+        <div class="card-content space-y-3">
+          <div id="redesigned-summary" class="rounded-md border border-border bg-background p-4 text-sm leading-relaxed space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- 参考 -->
+      <details class="card">
+        <summary class="card-content py-4 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+          参考 — 通常のAIとの違い（鏡 vs 批評家）
+        </summary>
+        <div class="card-content pt-0 space-y-3 text-sm">
+          <p class="text-xs text-muted-foreground">通常のAIは与えられた当たり前をそのまま受け入れ、枠の中で次の一手を提案します。このツールは、<strong class="text-foreground">その当たり前を先に映し出す</strong>鏡です。</p>
+          <div>
+            <p class="text-xs font-semibold text-destructive mb-1">通常AIが受け入れる当たり前</p>
+            <ul id="ai-accepted-list" class="space-y-1 text-muted-foreground"></ul>
+          </div>
+          <div>
+            <p class="text-xs font-semibold mb-1">通常AIが返しがちな出力</p>
+            <p id="contrast-text" class="text-muted-foreground"></p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <footer class="text-center pb-10 space-y-1">
+      <p class="text-xs text-muted-foreground">
+        <a href="decision-knowledge-panels-executive.html" class="text-primary hover:underline">AI時代の意思決定再設計ツール · 4パネル</a>
+        · 辻本光邦 · AI時代の意思決定
+      </p>
+      <p class="text-[10px] text-muted-foreground/70">憲法準拠 · Decision Context Mirror</p>
+    </footer>
+
+      </div><!-- /workspace-right -->
+    </div><!-- /workspace-grid -->
+  </main>
+
+  <script src="js/constitution-inference.js"></script>
+  <script>
+    const REFLECTION_QUESTIONS = [
+      '⑤の矛盾のうち、いちばん立ち止まったのはどれですか？',
+      '⑥の問いに向き合うと、どんな前提が見えてきますか？（まだ言葉にしなくてよい）',
+      'いま判断しようとしていることは、本当に決めるべきことですか？'
+    ];
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    /** 判断文と渡す情報の構造から文脈を読む */
+    function analyzeContext(judgment, shown) {
+      const j = judgment.trim();
+      const s = shown.trim();
+      const all = j + '\n' + s;
+      const ctx = {
+        decisionType: 'general',
+        gaps: [],
+        primaryHint: null,
+        primaryReason: '',
+        supplySide: false,
+        demandSide: false,
+        goalStated: false
+      };
+
+      if (/サービス|パッケージ|ポジション|商品化|提供/.test(j)) ctx.decisionType = 'offering';
+      else if (/売.*落|売上.*減|売上が/.test(all)) ctx.decisionType = 'revenue';
+      else if (/営業.*強|販売.*強|セールス/.test(all)) ctx.decisionType = 'sales';
+      else if (/続け|継続|撤退/.test(all)) ctx.decisionType = 'continue';
+      else if (/投資|設備/.test(all)) ctx.decisionType = 'investment';
+
+      ctx.supplySide = /学|ネットワーク|スキル|ツール|作れる|仲間|専門家|地盤|発信|Linkedin|LinkedIn|ADS|Agent|エージェント|動画/.test(s);
+      ctx.demandSide = /顧客|痛み|課題|ニーズ|予算|買|受注|クライアント|市場|需要/.test(s);
+      ctx.goalStated = /実現|目指|ゴール|ビジョン|どうしたい|残した|なりたい/.test(all);
+
+      if (ctx.decisionType === 'offering' && ctx.supplySide && !ctx.demandSide) {
+        ctx.gaps.push('supply_without_demand');
+        ctx.primaryHint = 'supply_demand_gap';
+        ctx.primaryReason = '決めたいのは「顧客向けの商品」なのに、渡しているのは「自分の準備·能力」だけ — このズレが本命です';
+      } else if (!ctx.goalStated && /決|べき|どう|パッケージ|サービス|聞こう/.test(j)) {
+        ctx.gaps.push('goal_unstated');
+        ctx.primaryHint = 'goal_unstated';
+        ctx.primaryReason = '「何を決めたいか」は書かれているが、「何を実現したいか」が渡されていません — 分析以前の空白です';
+      } else if (ctx.decisionType === 'revenue' && /営業|強化|人数/.test(all)) {
+        ctx.gaps.push('cause_assumed_sales');
+        ctx.primaryHint = 'cause_assumed_sales';
+        ctx.primaryReason = '売上の話なのに、原因が営業側にあると決め打ちしている構造が見えます';
+      } else if (ctx.decisionType === 'sales') {
+        ctx.gaps.push('cause_assumed_sales');
+        ctx.primaryHint = 'cause_assumed_sales';
+        ctx.primaryReason = '「営業強化」という打ち手の前に、原因の特定が省略されています';
+      } else if (ctx.decisionType === 'continue' && !/基準|撤退|見送/.test(all)) {
+        ctx.gaps.push('no_exit_criteria');
+        ctx.primaryHint = 'no_exit_criteria';
+        ctx.primaryReason = '続ける·やめるの判断なのに、撤退·見送りの基準が渡されていません';
+      } else if (ctx.decisionType === 'offering' && ctx.supplySide) {
+        ctx.gaps.push('readiness_equals_product');
+        ctx.primaryHint = 'readiness_equals_product';
+        ctx.primaryReason = '供給側の準備と、いま商品を固定すべきタイミングが同一視されています';
+      } else if (s && /データ|分析|数字|AI/.test(s) && !ctx.goalStated) {
+        ctx.gaps.push('data_without_goal');
+        ctx.primaryHint = 'data_without_goal';
+        ctx.primaryReason = 'データ·スキルは渡されているが、判断のゴールが渡されていません';
+      }
+
+      return ctx;
+    }
+
+    const PRIMARY_HINT_KEYWORDS = {
+      supply_demand_gap: ['準備が整った', 'スキル·ネットワーク', '地盤'],
+      goal_unstated: ['言わなくても伝わる', '実現したい'],
+      cause_assumed_sales: ['原因は営業', '営業人数', '営業力'],
+      no_exit_criteria: ['基準は、すでにある', '続ける', '既定路線'],
+      readiness_equals_product: ['準備が整った', 'いま商品'],
+      data_without_goal: ['客観的な答え', 'データ·スキル']
+    };
+
+    function scorePremise(premise, context) {
+      let score = 0;
+      const hint = context.primaryHint;
+      if (hint && PRIMARY_HINT_KEYWORDS[hint]) {
+        if (PRIMARY_HINT_KEYWORDS[hint].some(k => premise.premise.includes(k))) score += 100;
+      }
+      if (context.gaps.includes('supply_without_demand') && /準備|スキル|ネットワーク|地盤/.test(premise.premise)) score += 40;
+      if (context.gaps.includes('goal_unstated') && /実現|言わなく|伝わ|自明/.test(premise.premise)) score += 40;
+      if (context.gaps.includes('cause_assumed_sales') && /営業|原因/.test(premise.premise)) score += 40;
+      return score;
+    }
+
+    function pickPrimaryPremise(premises, context) {
+      const scored = premises.map(p => ({ ...p, score: scorePremise(p, context) }));
+      scored.sort((a, b) => b.score - a.score);
+      const top = scored[0];
+      return {
+        premise: top,
+        reason: context.primaryReason || 'あなたの文章の構造から、いちばん「当然」として置かれている考え方です',
+        others: scored.slice(1)
+      };
+    }
+
+    /** 通常AIが暗黙に受け入れる前提 */
+    function inferAiAcceptedPremises(judgment, shown, context) {
+      const j = judgment.trim();
+      const s = shown.trim();
+      const accepted = [];
+
+      if (context.decisionType === 'offering' && context.supplySide && !context.demandSide) {
+        accepted.push('自分の能力·ネットワークが、そのまま商品価値になる');
+        accepted.push('パッケージは、持っているものから設計できる');
+        accepted.push('いまが商品を決めるタイミングである');
+      } else if (context.decisionType === 'revenue') {
+        accepted.push('売上減の原因は、打ち手で特定できる');
+        accepted.push('商品·顧客·市場は大きくは変わっていない');
+        accepted.push('分析すれば、正しい対策が見える');
+      } else if (context.decisionType === 'sales') {
+        accepted.push('商品に売る価値がある');
+        accepted.push('成果不足の主因は営業側にある');
+        accepted.push('リソースを増やせば改善する');
+      } else if (context.decisionType === 'continue') {
+        accepted.push('これまでの投資は正当化できる');
+        accepted.push('市場·成長の見通しは入力どおり');
+        accepted.push('継続が合理な方向である');
+      } else if (context.gaps.includes('goal_unstated')) {
+        accepted.push('判断のゴールは、入力から推測できる');
+        accepted.push('与えられた情報で分析すれば足りる');
+      } else {
+        accepted.push('状況認識はおおむね正確である');
+        accepted.push('与えられた情報が世界の全体像である');
+        accepted.push('分析·整理すれば次が見える');
+      }
+
+      if (s && !context.goalStated) {
+        accepted.push('「どうしたいか」を言わなくても、AIは適切に助言できる');
+      }
+
+      return [...new Set(accepted)].slice(0, 5);
+    }
+
+    function buildLenses(premise, all) {
+      const p = premise;
+      let counter = 'その前提が外れると、今の判断の根拠ごと揺らぐ';
+      let cross = '異業種では、同じ前提を置かないことが多い — 業界固有の「当たり前」に囚われていないか';
+      let temporal = '10年前も同じ前提だったか？10年後も成り立つか？一時的要因を永久前提にしていないか';
+      let aiNote = '通常AIはこの前提をそのまま受け入れ、与えられた枠の中で次の一手を提案する';
+      let decideFirst = 'この前提が本当かどうかを、先に確認する';
+      let because = '前提が外れているのに動くと、努力が別方向に流れる';
+
+      if (/商品|価値|品質/.test(p)) {
+        counter = '顧客の評価基準·競合·代替手段が変わり、価値の定義自体がずれている';
+        cross = 'サブスク·広告モデルでは「商品価値」より「継続理由·データ」が主語になる';
+        aiNote = '通常AIは「品質向上·訴求強化」を前提に施策を並べる';
+        decideFirst = '「顧客が今、何に価値を感じているか」を先に決める';
+        because = '価値の定義がずれたまま打ち手を増やしても、売上は戻らない';
+      } else if (/顧客|ニーズ|需要/.test(p)) {
+        counter = '顧客の課題·購買行動·意思決定者が既に変わっている';
+        cross = 'B2B SaaSでは「ニーズ不変」より「ワークフロー変化」が先に来る';
+        aiNote = '通常AIは既存顧客像のままマーケ施策を提案する';
+        decideFirst = '「同じ顧客·同じニーズ」が今も成り立つかを先に決める';
+        because = '顧客像が古いままでは、施策の当たり先が最初からずれる';
+      } else if (/営業|人数|販売/.test(p)) {
+        counter = '原因が訴求·価格·商品定義·チャネルにあるなら、人数以前の論点';
+        cross = 'PLG·セルフサーブ型では「営業人数＝成果」という前提自体がない';
+        aiNote = '通常AIは採用·研修·KPI·ツール導入を提案しがち';
+        decideFirst = '「売上·成果の原因は何か」を先に決める（営業力か、それ以前か）';
+        because = '原因が商品·価格·訴求にあるなら、人数を増やしても成果は変わらない';
+      } else if (/市場|成長|競争|競合/.test(p)) {
+        counter = '市場の反転·新規参入·規制·技術変化で前提が一晩で崩れる';
+        cross = '異業種では同じ市場を「成熟·縮小」として扱い、別の収益源を探す';
+        aiNote = '通常AIは成長前提のまま拡大·投資案を返す';
+        decideFirst = '「市場·競合の前提は今も有効か」を先に決める';
+        because = '市場前提が外れているのに拡大すると、投資だけが先行する';
+      } else if (/続|継続|撤退|投資/.test(p)) {
+        counter = 'サンクコストが「続ける」理由に変換されているかもしれない';
+        cross = 'スタートアップ文化では「早く切る」が当たり前 — 撤退基準が先';
+        aiNote = '通常AIは入力の数字から「継続推奨」を返しやすい';
+        decideFirst = '「続ける／やめる／切り替える」の判断基準を先に決める';
+        because = '基準がないと「続ける」が既定路線になり、サンクコストが理由に変わる';
+      } else if (/売/.test(p)) {
+        counter = '売上減の原因が商品·価格·顧客離反にあるなら、「売る」優先は逆効果';
+        cross = '一部業界では「売らない·選ぶ」ことで単価·LTVを上げる';
+        aiNote = '通常AIは値下げ·広告·営業強化を並べる';
+        decideFirst = '「いま最優先なのは売上数量か、単価·LTVか」を先に決める';
+        because = '優先順位が違うと、同じ「売上対策」でも打つべき手が真逆になる';
+      } else if (/AI|データ|分析/.test(p)) {
+        counter = '渡していない前提·ゴールがあると、AIは別の世界で「客観的」に見える答えを返す';
+        cross = 'データドリブン偏重の業界でも、定性的な前提変更が先のことがある';
+        aiNote = '通常AIは与えられたデータの中で合理性を強化するだけ';
+        decideFirst = '「自分が何を実現したいか」を先に決めてからAIに渡す';
+        because = 'ゴールがないままAIに聞くと、合理に見える別の世界の答えに引っ張られる';
+      } else if (/準備|地盤|ネットワーク|学|スキル/.test(p) || /準備|地盤|ネットワーク|学/.test(all)) {
+        counter = '供給側の準備と、顧客が買う価値は別次元';
+        cross = 'コンサル以外では「ネットワークがある＝売れる」とは限らない';
+        aiNote = '通常AIはスキル·実績一覧から「それっぽいサービス案」を組み立てる';
+        decideFirst = '「誰の、どんな痛みのために提供するか」を先に決める';
+        because = '自分の準備が整っていることと、顧客が買うことは別問題だから';
+      } else if (/呼び名|買い方|ポジション/.test(p)) {
+        counter = '顧客は専門家のラベルではなく、痛みの言葉で買う';
+        cross = '異業種では同じ能力でも、請求項目名がまったく違う';
+        aiNote = '通常AIはポジショニング文·パッケージ案をそのまま組み立てる';
+        decideFirst = '「顧客が予算を出す言葉は何か」を先に決める';
+        because = '自分の呼び名のまま商品化すると、買われ方とずれる';
+      } else if (/正解|一つ|決ま|自明|十分/.test(p)) {
+        counter = '前提が違えば、複数の合理な方向が並存する';
+        cross = '異業種では同じ問いに対し、真逆の合理解を選ぶ';
+        aiNote = '通常AIは一つの推奨に収束させがち';
+        decideFirst = '「まだ固定しない判断」と「今決めるべき判断」を分ける';
+        because = '全部を一度に決めようとすると、試すべき道が閉じてしまう';
+      } else if (/実現|言わなく|伝わ/.test(p)) {
+        counter = '内面が渡っていないと、AIの答えはあなたの意思ではない';
+        cross = '異業種でも、ゴールなしの分析は「平均的な合理」に収束する';
+        aiNote = '通常AIはゴールを聞かずに、入力からそれっぽい提案を返す';
+        decideFirst = '「この判断を通じて何を実現したいか」を先に書く';
+        because = 'ゴールがないままパッケージ·施策を決めると、箱だけ先にできる';
+      } else if (/全体像|足り|情報/.test(p)) {
+        counter = '渡していない情報の方が、前提を決めていることが多い';
+        cross = '異業種では「情報不足」を理由に動かない文化もある';
+        aiNote = '通常AIは渡された情報だけで、それっとく見える答えを返す';
+        decideFirst = '「まだAIに渡していないが、判断を左右する情報は何か」を先に書き出す';
+        because = '見えていない変数が、いちばん大きな前提になっていることがある';
+      }
+
+      return { counter, crossIndustry: cross, temporal, aiContrast: aiNote, decideFirst, because };
+    }
+
+    function inferNormalAi(judgment, shown) {
+      const all = (judgment + '\n' + shown).toLowerCase();
+      if (/売.*落|売上.*減|売上が/.test(all)) return ['値下げ', '新商品', '広告', '営業強化'];
+      if (/営業.*強|販売.*強|セールス/.test(all)) return ['採用', '研修', 'KPI設計', 'CRM導入', 'インセンティブ'];
+      if (/続け|継続|撤退/.test(all)) return ['継続を推奨', '追加投資', 'コスト削減', '成長シナリオ'];
+      if (/投資|設備/.test(all)) return ['ROI試算', '実行計画', 'ベンダー比較', '段階導入'];
+      if (/サービス|パッケージ|ポジション|提供/.test(all)) return ['商品設計案', '価格設定', 'ターゲット定義', 'Go-to-market'];
+      if (/AI|分析/.test(all)) return ['ツール選定', 'プロンプト設計', 'データ分析', '自動化案'];
+      return ['次の一手の提案', '整理と比較', 'リスクと機会の列挙'];
+    }
+
+    function inferHiddenPremises(judgment, shown, context) {
+      const j = judgment.trim();
+      const s = shown.trim();
+      const all = j + '\n' + s;
+      const premises = [];
+      const add = (premise, priority) => {
+        if (premises.some(p => p.premise === premise)) return;
+        const lenses = buildLenses(premise, all);
+        premises.push({ premise, ...lenses, priority: priority || 0 });
+      };
+
+      // 文脈優先 — 本命候補を先に
+      if (context.primaryHint === 'supply_demand_gap') {
+        add('準備が整ったから、いま商品を決められる', 10);
+        add('自分のスキル·ネットワークの説明で、設計の材料になる', 9);
+        add('自分の呼び名が、そのまま顧客の買い方である', 8);
+      }
+      if (context.primaryHint === 'goal_unstated') {
+        add('自分が何を実現したいかは、言わなくても伝わる', 10);
+      }
+      if (context.primaryHint === 'data_without_goal') {
+        add('データ·スキルを渡せば、客観的な答えが得られる', 10);
+      }
+      if (context.primaryHint === 'cause_assumed_sales') {
+        add('原因は営業力である', 10);
+        add('営業人数が成果を左右する', 9);
+      }
+      if (context.primaryHint === 'no_exit_criteria') {
+        add('見送り·撤退を決める基準は、すでにある', 10);
+        add('「続ける」方向が既定路線である', 9);
+      }
+      if (context.primaryHint === 'readiness_equals_product') {
+        add('準備が整ったから、いま商品を決められる', 10);
+      }
+
+      if (/売.*落|売上.*減|売上が/.test(all)) {
+        add('商品価値は変わっていない');
+        add('顧客は以前と同じニーズを持っている');
+        add('市場は縮小していない');
+        add('原因は営業力である');
+        add('ブランドは毀損していない');
+        add('価格は適正である');
+      }
+
+      if (/営業.*強|販売.*強|セールス/.test(all)) {
+        add('商品価値は十分ある');
+        add('顧客は存在する');
+        add('営業人数が成果を左右する');
+        add('価格は適切である');
+        add('競争環境は変わっていない');
+        add('売ることが最優先である');
+      }
+
+      if (/続け|継続|撤退|黒字|赤字|億|投資/.test(all)) {
+        add('これまでの投資は、未来の判断から切り離せない');
+        add('「続ける」方向が既定路線である');
+        add('見送り·撤退を決める基準は、すでにある');
+        add('市場·事業はこれからも成長する');
+      }
+
+      if (/サービス|パッケージ|ポジション|提供|支援/.test(j)) {
+        if (!premises.some(p => p.premise.includes('準備が整った'))) add('準備が整ったから、いま商品を決められる');
+        if (!premises.some(p => p.premise.includes('呼び名'))) add('自分の呼び名が、そのまま顧客の買い方である');
+        if (!premises.some(p => p.premise.includes('スキル'))) add('自分のスキル·ネットワークの説明で、設計の材料になる');
+      }
+
+      if (/AI|分析|データ|ツール/.test(s) && !/実現|ゴール/.test(all)) {
+        add('データ·スキルを渡せば、客観的な答えが得られる');
+      }
+
+      if (/成長|拡大/.test(all)) add('市場はこれからも成長する');
+      if (/競合|他社/.test(all)) add('競合環境は大きく変わらない');
+      if (!/顧客|ユーザー/.test(all) && /売|事業|サービス/.test(all)) {
+        add('顧客の側の変化は、この判断の主題ではない');
+      }
+      if (/べき|すべき|どう|何を/.test(j)) add('正解は一つで、情報が揃えば見える');
+      if (s && !context.goalStated) add('自分が何を実現したいかは、言わなくても伝わる');
+      if (!s.trim() && j) add('手元の情報は少なくても、判断に足りる');
+
+      if (premises.length < 4) {
+        const snippet = j.length > 36 ? j.slice(0, 36) + '…' : j;
+        add(`「${snippet}」という状況の読み方は、これで十分である`);
+      }
+      if (premises.length < 5) add('この判断のゴールは、問われなくても自明である');
+
+      return premises.slice(0, 7);
+    }
+
+    function truncateLine(s, max = 44) {
+      const t = (s || '').trim();
+      return t.length > max ? t.slice(0, max) + '…' : t;
+    }
+
+    /** 憲法準拠 — 判断構造の映し出し */
+    function buildJudgmentStructureInference(judgment, shown, context) {
+      const text = [judgment, shown].filter(Boolean).join('\n');
+      const inferred = ConstitutionInference.runInference(text);
+      return {
+        judgment: judgment.trim(),
+        decision: inferred.decision,
+        premise: inferred.premise,
+        visible: inferred.visible,
+        invisible: inferred.invisible,
+        tensions: inferred.tensions,
+        key_questions: inferred.key_questions,
+        ai_verification_prompts: inferred.ai_verification_prompts,
+        decision_context: inferred.decision_context,
+        context_prompt: inferred.context_prompt,
+        naturallyDim: inferred.invisible.slice(0, 5),
+        blindspots: inferred.invisible.slice(0, 5),
+        premises: [{ premise: inferred.premise }],
+        profile: inferred.profile,
+        ai_version: inferred.ai_version
+      };
+    }
+
+    function renderTensionPairs(tensions) {
+      return (tensions || []).map(t => `
+        <div class="tension-pair mb-3 last:mb-0">
+          <p class="text-sm">· ${escapeHtml(t.a)}</p>
+          <p class="text-center text-xs font-bold text-primary py-1">しかし</p>
+          <p class="text-sm">· ${escapeHtml(t.b)}</p>
+        </div>`).join('');
+    }
+
+    function renderConstitutionFlow(data) {
+      const list = (items) => `<ul class="mirror-output text-sm">${(items || []).map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
+      const arrow = () => '<div class="arrow text-center text-primary text-sm py-1 opacity-60">↓</div>';
+      const ctx = data.decision_context || {};
+      const ctxRow = (label, val) => val ? `<p class="text-sm leading-relaxed"><span class="font-bold text-primary">${escapeHtml(label)}</span> ${escapeHtml(val)}</p>` : '';
+
+      return `
+        <div class="space-y-0">
+          <div class="step rounded-md border border-border bg-background p-3">
+            <p class="stage-label">① 入力された判断</p>
+            <p class="text-sm leading-relaxed whitespace-pre-line">${escapeHtml(data.decision || data.judgment)}</p>
+          </div>${arrow()}
+          <div class="step rounded-md border border-border bg-background p-3">
+            <p class="stage-label">② この文章から読み取れる前提 <span class="font-normal">（仮説）</span></p>
+            <p class="text-sm leading-relaxed">${escapeHtml(data.premise)}</p>
+          </div>${arrow()}
+          <div class="step rounded-md border border-border bg-background p-3">
+            <p class="stage-label">③ その前提によって自然に見えているもの</p>
+            ${list(data.visible)}
+          </div>${arrow()}
+          <div class="step rounded-md border border-border bg-background p-3">
+            <p class="stage-label">④ その前提では見えにくいもの</p>
+            ${list(data.invisible)}
+          </div>${arrow()}
+          <div class="step rounded-md border-2 border-primary/50 bg-primary/5 p-3">
+            <p class="stage-label text-primary">⑤ この構造が生んでいる矛盾（テンション）</p>
+            ${renderTensionPairs(data.tensions)}
+          </div>${arrow()}
+          <div class="step rounded-md border-[3px] border-primary bg-primary/10 p-3 shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]">
+            <p class="stage-label text-primary">⑥ 意思決定文脈（Decision Context）</p>
+            <p class="text-xs text-primary font-semibold mb-2">Decision Context Mirror の成果物 — Judgment を支える文脈</p>
+            <div class="space-y-1">
+              ${ctxRow('· 実現したいこと', ctx.achieve)}
+              ${ctxRow('· 守りたいもの', ctx.protect)}
+              ${ctxRow('· 受け入れている制約', ctx.constraints)}
+              ${ctxRow('· 本当に迷っていること', ctx.uncertain)}
+              ${ctxRow('· 判断基準', ctx.criteria)}
+            </div>
+          </div>${arrow()}
+          <div class="step rounded-md border border-border bg-background p-3">
+            <p class="stage-label">⑦ 文脈から生まれた問い</p>
+            <p class="text-xs text-muted-foreground mb-2">文脈が映されると、問いも自然に生まれます。</p>
+            ${(data.key_questions || []).map((q, i) => `
+              <p class="text-sm leading-relaxed py-2 border-b border-border last:border-0 whitespace-pre-line">
+                <span class="text-primary font-bold">${i + 1}. </span>${escapeHtml(q)}
+              </p>`).join('')}
+          </div>${arrow()}
+          <div class="step rounded-md border border-dashed border-border p-3 text-center">
+            <p class="stage-label">⑧ AIへ相談する</p>
+            <p class="text-xs text-muted-foreground">AIは Decision Context を受け取り、答えを示す。</p>
+          </div>${arrow()}
+          <div class="step rounded-md border-2 border-primary/50 bg-primary/5 p-3 text-center">
+            <p class="stage-label text-primary">⑨ Judgment（意思決定）</p>
+            <p class="text-xs text-foreground font-semibold">主役 — 未来を決めるのは経営者</p>
+          </div>
+        </div>
+        <p class="causal-caption">文章を見る限りの構造です。思い込みの命名は、本人が行います。</p>`;
+    }
+
+    function renderCausalFlow(data) {
+      return renderConstitutionFlow(data);
+    }
+
+    function renderDecisionContextUI(ctx, prompt) {
+      const row = (label, val) => `
+        <p class="text-sm leading-relaxed"><span class="font-bold text-primary">${escapeHtml(label)}</span> ${escapeHtml(val)}</p>`;
+      return `
+        <p class="text-xs text-muted-foreground leading-relaxed">
+          <strong class="text-foreground">Decision Context</strong> は Judgment（意思決定）を支える構造です。Premise から生まれ、問いと AI を経て Judgment へつながります。
+        </p>
+        <p class="text-xs text-muted-foreground">あなたの判断から映し出された文脈です。（仮説 · 今回の判断を見る限り）</p>
+        <div class="space-y-2 rounded-md border border-border bg-background p-4">
+          ${row('· 実現したいこと', ctx.achieve)}
+          ${row('· 守りたいもの', ctx.protect)}
+          ${row('· 受け入れている制約', ctx.constraints)}
+          ${row('· 本当に迷っていること', ctx.uncertain)}
+          ${row('· 判断基準', ctx.criteria)}
+        </div>
+        <div>
+          <label for="field-context-prompt" class="label">AIへ渡す意思決定文脈</label>
+          <p class="label-desc">AIへ渡すものは質問ではありません。映し出し·書き換えた意思決定文脈です。</p>
+          <textarea id="field-context-prompt" rows="8" class="textarea text-sm leading-relaxed" readonly>${escapeHtml(prompt)}</textarea>
+          <button type="button" id="btn-copy-context" class="btn btn-primary mt-2 text-xs">意思決定文脈をコピー</button>
+          <p id="copy-context-toast" class="hidden text-xs text-primary mt-1">コピーしました</p>
+        </div>
+        <p class="text-xs text-muted-foreground leading-relaxed border-t border-border pt-3">
+          JudgmentOSは、Judgment（意思決定）全体を支える OS です。<br>
+          Decision Context Mirror は中核機能。問いの鏡は入口です。
+        </p>`;
+    }
+
+    function updateDecisionContextSection(userPremise) {
+      if (!sessionData) return;
+      const judgment = document.getElementById('input').value.trim();
+      const shown = document.getElementById('shown-info').value.trim();
+      const text = [judgment, shown].filter(Boolean).join('\n');
+      const inferred = ConstitutionInference.runInference(text, userPremise);
+      sessionData.decision_context = inferred.decision_context;
+      sessionData.context_prompt = inferred.context_prompt;
+      const body = document.getElementById('decision-context-body');
+      if (body) {
+        body.innerHTML = renderDecisionContextUI(inferred.decision_context, inferred.context_prompt);
+        const btn = document.getElementById('btn-copy-context');
+        const toast = document.getElementById('copy-context-toast');
+        if (btn) {
+          btn.onclick = async () => {
+            const t = document.getElementById('field-context-prompt')?.value || '';
+            try {
+              await navigator.clipboard.writeText(t);
+            } catch {
+              document.getElementById('field-context-prompt')?.select();
+              document.execCommand('copy');
+            }
+            toast?.classList.remove('hidden');
+            setTimeout(() => toast?.classList.add('hidden'), 2000);
+          };
+        }
+      }
+      const aiQ = document.getElementById('field-ai-question');
+      if (aiQ && !aiQ.dataset.userEdited) {
+        aiQ.value = inferred.context_prompt;
+      }
+    }
+
+    function pickDemoMock(judgmentText, shownText) {
+      const t = judgmentText.trim();
+      const context = analyzeContext(t, shownText);
+      const inference = buildJudgmentStructureInference(t, shownText, context);
+      return {
+        summary: truncateLine(t, 80) || 'いただいた判断',
+        ...inference,
+        aiAccepted: inferAiAcceptedPremises(t, shownText, context),
+        context,
+        normalAi: inferNormalAi(t, shownText),
+        reflectionQuestions: REFLECTION_QUESTIONS
+      };
+    }
+
+    let sessionData = null;
+
+    function renderReflectionQuestions(questions) {
+      const qs = (questions && questions.length) ? questions : REFLECTION_QUESTIONS;
+      return qs.map((q, i) => `
+        <p class="reflection-q">${i + 1}. ${escapeHtml(q)}</p>`).join('');
+    }
+
+    function renderBlindspotPicker(blindspots) {
+      return (blindspots || []).map((b, i) => `
+        <label class="premise-pick premise-row animate-fade-in" data-index="${i}">
+          <input type="radio" name="blindspot-pick" class="premise-check" data-index="${i}" aria-label="盲点: ${escapeHtml(b)}">
+          <div class="premise-pick-text">
+            <p class="premise-pick-title">${escapeHtml(b)}</p>
+          </div>
+        </label>`).join('');
+    }
+
+    function renderSelectedPremiseBlock(item) {
+      return `
+        <div class="rounded-md border border-border bg-background p-4 space-y-3 consult-block">
+          <p class="text-sm font-bold leading-snug">${escapeHtml(item.premise)}</p>
+          <div>
+            <span class="lens-badge lens-badge-5">先に決めてから動く</span>
+            <p class="lens-body font-semibold mt-2">${escapeHtml(item.decideFirst || '')}</p>
+            <p class="text-xs font-semibold text-primary mt-2 mb-1">なぜならば</p>
+            <p class="lens-body text-muted-foreground">${escapeHtml(item.because || '')}</p>
+          </div>
+          <details class="text-sm">
+            <summary class="cursor-pointer text-muted-foreground hover:text-foreground py-1">さらに深掘り（反論·他業界·時間軸）</summary>
+            <div class="mt-2 space-y-2">
+              <div class="lens-block"><span class="lens-badge lens-badge-2">② 前提への反論</span><p class="lens-body mt-2">${escapeHtml(item.counter)}</p></div>
+              <div class="lens-block"><span class="lens-badge lens-badge-3">③ 他業界なら？</span><p class="lens-body mt-2">${escapeHtml(item.crossIndustry)}</p></div>
+              <div class="lens-block"><span class="lens-badge lens-badge-4">④ 時間軸</span><p class="lens-body mt-2">${escapeHtml(item.temporal)}</p></div>
+            </div>
+          </details>
+        </div>`;
+    }
+
+    function getSelectedPremises() {
+      if (!sessionData) return [];
+      const checked = document.querySelector('.premise-check:checked');
+      if (!checked) return [];
+      const i = parseInt(checked.dataset.index, 10);
+      const w = sessionData.blindspots && sessionData.blindspots[i];
+      if (w) return [{ premise: w, decideFirst: '', because: '' }];
+      const p = sessionData.premises[i];
+      return p ? [p] : [];
+    }
+
+    function getSuggestedIndex(data) {
+      const primary = data.primary || pickPrimaryPremise(data.premises, data.context || {});
+      const p = primary.premise || primary;
+      const text = p.premise || p;
+      const idx = data.premises.findIndex(x => x.premise === text);
+      return idx >= 0 ? idx : 0;
+    }
+
+    function buildSuggestedAiQuestion(data) {
+      const prompts = data?.ai_verification_prompts || [];
+      return prompts[0] || '';
+    }
+
+    function updateRedesignedSummary() {
+      const revised = document.getElementById('field-revised').value.trim();
+      const intent = document.getElementById('field-intent').value.trim();
+      const judgment = document.getElementById('input').value.trim();
+      const section = document.getElementById('decide-section');
+      const box = document.getElementById('redesigned-summary');
+
+      if (!revised) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      section.classList.remove('hidden');
+      box.innerHTML = `
+        <p><span class="text-xs font-semibold text-muted-foreground">元の判断</span><br>${escapeHtml(judgment.slice(0, 200) || '—')}</p>
+        <p><span class="text-xs font-semibold text-primary">書き換えた世界観 · 判断</span><br><strong>${escapeHtml(revised)}</strong></p>
+        ${intent ? `<p><span class="text-xs font-semibold text-muted-foreground">実現したいこと</span><br>${escapeHtml(intent)}</p>` : ''}`;
+    }
+
+    function syncOrganizeFields() {
+      const selected = getSelectedPremises();
+      const assumed = document.getElementById('field-assumed');
+      const aiQ = document.getElementById('field-ai-question');
+      if (!assumed || !aiQ) return;
+
+      if (selected.length) {
+        assumed.value = selected[0].premise;
+        if (!aiQ.dataset.userEdited) {
+          aiQ.value = buildSuggestedAiQuestion(sessionData);
+        }
+      } else {
+        assumed.value = '';
+        if (!aiQ.dataset.userEdited) aiQ.value = '';
+      }
+    }
+
+    function onPremiseSelectionChange() {
+      document.querySelectorAll('.premise-pick').forEach(label => {
+        const cb = label.querySelector('.premise-check');
+        label.classList.toggle('selected', cb && cb.checked);
+      });
+
+      const selected = getSelectedPremises();
+      const organize = document.getElementById('organize-section');
+      const pause = document.getElementById('pause-section');
+
+      if (selected.length) {
+        organize.classList.remove('hidden');
+        pause.classList.remove('hidden');
+        document.getElementById('decision-context-section').classList.remove('hidden');
+        syncOrganizeFields();
+        updateDecisionContextSection(document.getElementById('field-revised')?.value.trim());
+        document.getElementById('consult-output').classList.add('hidden');
+        pause.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setTimeout(() => {
+          const revised = document.getElementById('field-revised');
+          if (revised && !revised.value.trim()) revised.focus();
+        }, 400);
+      } else {
+        organize.classList.add('hidden');
+        pause.classList.add('hidden');
+        document.getElementById('decision-context-section').classList.add('hidden');
+      }
+    }
+
+    function buildDemoConsultation(selected, judgment, shown, intent, revised, aiQuestion) {
+      const askAi = aiQuestion.trim() || buildSuggestedAiQuestion(sessionData) || 'この矛盾を説明しうる前提を、検証の観点から整理してください。答えは不要です。';
+
+      return {
+        verificationPrompts: (sessionData?.ai_verification_prompts || [askAi]).slice(0, 3),
+        askAi,
+        note: '答え·解決策·施策は出しません。検証の観点だけを整理します。'
+      };
+    }
+
+    function renderConsultOutput(result) {
+      const prompts = result.verificationPrompts || [result.askAi].filter(Boolean);
+      return `
+        <div class="consult-block space-y-2">
+          <p class="text-xs font-semibold text-primary">検証を依頼する質問</p>
+          <p class="text-sm text-muted-foreground">${escapeHtml(result.note || '')}</p>
+        </div>
+        ${prompts.map((p, i) => `
+        <div class="rounded-md border border-border bg-background p-4 space-y-2">
+          <p class="text-xs font-semibold">検証依頼 ${i + 1}</p>
+          <p class="text-sm leading-relaxed whitespace-pre-line">${escapeHtml(p)}</p>
+        </div>`).join('')}`;
+    }
+
+    async function callConsultAI(judgment, shown, intent, selected, apiKey, model, revised, aiQuestion) {
+      const system = `AI時代の意思決定再設計ツール — AI検証フェーズ（任意·最後）。
+憲法：答え·解決策·施策·成功法則は禁止。診断·性格断定·心理分析は禁止。
+ユーザーの前提仮説を検証する観点だけを返す。
+JSONのみ：{"verificationPrompts":["…","…"],"note":"…"}`;
+
+      const userContent = `【判断】${judgment}
+【手元の情報】${shown || '（未記入）'}
+【気づいた前提】${revised || '（未記入）'}
+【検証依頼】${aiQuestion || '（未記入）'}
+【見えにくかったもの】${selected.map(p => p.premise).join(' / ')}`;
+
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: model || 'gpt-4o-mini',
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'system', content: system }, { role: 'user', content: userContent }],
+          temperature: 0.6
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API error ${res.status}`);
+      }
+      const json = await res.json();
+      return JSON.parse(json.choices[0].message.content);
+    }
+
+    async function consultNextStep() {
+      const selected = getSelectedPremises();
+      if (!selected.length) return;
+
+      const revised = document.getElementById('field-revised').value.trim();
+      if (!revised) {
+        document.getElementById('organize-section').classList.remove('hidden');
+        document.getElementById('field-revised').focus();
+        alert('先に「気づいた前提」を記入してください。');
+        return;
+      }
+
+      const loading = document.getElementById('consult-loading');
+      const output = document.getElementById('consult-output');
+      const btn = document.getElementById('btn-consult');
+      loading.classList.remove('hidden');
+      output.classList.add('hidden');
+      btn.disabled = true;
+
+      const judgment = document.getElementById('input').value.trim();
+      const shown = document.getElementById('shown-info').value.trim();
+      const intent = document.getElementById('field-intent').value.trim();
+      const aiQuestion = document.getElementById('field-ai-question').value.trim();
+      const apiKey = document.getElementById('api-key').value.trim() || sessionStorage.getItem('premise-api-key') || '';
+
+      try {
+        let result;
+        if (apiKey) {
+          result = await callConsultAI(judgment, shown, intent, selected, apiKey, document.getElementById('api-model').value.trim(), revised, aiQuestion);
+        } else {
+          await new Promise(r => setTimeout(r, 400));
+          result = buildDemoConsultation(selected, judgment, shown, intent, revised, aiQuestion);
+        }
+        output.innerHTML = renderConsultOutput(result);
+        output.classList.remove('hidden');
+        document.getElementById('ai-later-section').open = true;
+        output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {
+        alert('相談に失敗: ' + e.message);
+        output.innerHTML = renderConsultOutput(buildDemoConsultation(selected, judgment, shown, intent, revised, aiQuestion));
+        output.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+        btn.disabled = false;
+      }
+    }
+
+    function bindPremisePicker() {
+      document.querySelectorAll('.premise-check').forEach(cb => {
+        cb.addEventListener('change', onPremiseSelectionChange);
+      });
+    }
+
+    function renderResult(data) {
+      sessionData = data;
+
+      document.getElementById('mirror-stages').innerHTML = renderConstitutionFlow(data);
+      document.getElementById('reflection-questions').innerHTML = renderReflectionQuestions(data.reflectionQuestions);
+      document.getElementById('premise-picker').innerHTML = renderBlindspotPicker(data.naturallyDim || data.blindspots);
+      bindPremisePicker();
+
+      const aiQ = document.getElementById('field-ai-question');
+      aiQ.value = data.context_prompt || data.ai_verification_prompts?.[0] || '';
+      delete aiQ.dataset.userEdited;
+
+      updateDecisionContextSection('');
+
+      const aiAccepted = data.aiAccepted || inferAiAcceptedPremises(
+        document.getElementById('input').value.trim(),
+        document.getElementById('shown-info').value.trim(),
+        data.context || {}
+      );
+      document.getElementById('ai-accepted-list').innerHTML = aiAccepted.map(a =>
+        `<li class="text-sm">· ${escapeHtml(a)}</li>`
+      ).join('');
+      document.getElementById('contrast-text').textContent = (data.normalAi || []).join(' · ');
+
+      document.getElementById('organize-section').classList.add('hidden');
+      document.getElementById('pause-section').classList.add('hidden');
+      document.getElementById('decision-context-section').classList.add('hidden');
+      document.getElementById('consult-output').classList.add('hidden');
+      document.getElementById('field-intent').value = '';
+      document.getElementById('field-assumed').value = '';
+      document.getElementById('field-revised').value = '';
+      document.getElementById('decide-section').classList.add('hidden');
+      document.getElementById('redesigned-summary').innerHTML = '';
+      document.getElementById('ai-later-section').open = false;
+
+      document.getElementById('results').classList.remove('hidden');
+      document.getElementById('reaction-thanks').classList.add('hidden');
+      document.querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('ring-active'));
+      document.getElementById('mirror-hero').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function callOpenAI(judgment, shownInfo, apiKey, model) {
+      const system = `あなたは「AI時代の意思決定再設計ツール」の判断構造エンジン。憲法準拠。
+診断·性格断定·心理分析·答え·解決策·判断哲学は禁止。思い込みを命名しない。
+判断→前提→見える→見えない→矛盾→意思決定文脈→問いの構造をJSONで返す。
+フィールド: summary, judgment, premise, visible[], invisible[], tensions[{a,b}], key_questions[], ai_verification_prompts[], naturallyDim[], aiAcceptedPremises[], normalAi[]`;
+
+      const userContent = `【判断】\n${judgment}\n\n【手元の情報（任意）】\n${shownInfo.trim() || '（未記入）'}`;
+
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: model || 'gpt-4o-mini',
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'system', content: system }, { role: 'user', content: userContent }],
+          temperature: 0.5
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API error ${res.status}`);
+      }
+
+      const json = await res.json();
+      const parsed = JSON.parse(json.choices[0].message.content);
+      parsed.judgment = parsed.judgment || judgment;
+      const context = analyzeContext(judgment, shownInfo);
+      parsed.context = context;
+
+      const fallback = buildJudgmentStructureInference(judgment, shownInfo, context);
+
+      parsed.decision = parsed.decision || fallback.decision || judgment;
+      parsed.premise = parsed.premise || fallback.premise;
+      parsed.visible = parsed.visible?.length ? parsed.visible : fallback.visible;
+      parsed.invisible = parsed.invisible?.length ? parsed.invisible : fallback.invisible;
+      parsed.tensions = parsed.tensions?.length ? parsed.tensions : fallback.tensions;
+      parsed.key_questions = parsed.key_questions?.length ? parsed.key_questions : fallback.key_questions;
+      parsed.ai_verification_prompts = parsed.ai_verification_prompts?.length ? parsed.ai_verification_prompts : fallback.ai_verification_prompts;
+      parsed.decision_context = parsed.decision_context || fallback.decision_context;
+      parsed.context_prompt = parsed.context_prompt || fallback.context_prompt;
+
+      if (!parsed.naturallyDim || parsed.naturallyDim.length < 3) {
+        parsed.naturallyDim = fallback.naturallyDim;
+      }
+
+      parsed.blindspots = parsed.naturallyDim;
+      parsed.premises = [{ premise: parsed.premise }];
+      parsed.aiAccepted = parsed.aiAcceptedPremises || inferAiAcceptedPremises(judgment, shownInfo, context);
+      if (!parsed.normalAi) parsed.normalAi = inferNormalAi(judgment, shownInfo);
+      if (!parsed.reflectionQuestions || !parsed.reflectionQuestions.length) parsed.reflectionQuestions = REFLECTION_QUESTIONS;
+      return parsed;
+    }
+
+    async function illuminate() {
+      const text = document.getElementById('input').value.trim();
+      const shown = document.getElementById('shown-info').value.trim();
+      if (!text) { document.getElementById('input').focus(); return; }
+
+      const loading = document.getElementById('loading');
+      const btn = document.getElementById('btn-illuminate');
+      loading.classList.remove('hidden');
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('pause-section').classList.add('hidden');
+      document.getElementById('organize-section').classList.add('hidden');
+      btn.disabled = true;
+
+      const apiKey = document.getElementById('api-key').value.trim() || sessionStorage.getItem('premise-api-key') || '';
+      const model = document.getElementById('api-model').value.trim() || 'gpt-4o-mini';
+
+      try {
+        let data;
+        if (apiKey) {
+          sessionStorage.setItem('premise-api-key', apiKey);
+          document.getElementById('mode-badge').textContent = 'ライブ推論';
+          data = await callOpenAI(text, shown, apiKey, model);
+        } else {
+          document.getElementById('mode-badge').textContent = 'デモ推論';
+          await new Promise(r => setTimeout(r, 550));
+          data = pickDemoMock(text, shown);
+        }
+        renderResult(data);
+      } catch (e) {
+        alert('推論に失敗: ' + e.message + '\nデモ推論に切り替えます。');
+        document.getElementById('mode-badge').textContent = 'デモ推論（フォールバック）';
+        renderResult(pickDemoMock(text, shown));
+      } finally {
+        loading.classList.add('hidden');
+        btn.disabled = false;
+      }
+    }
+
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const log = JSON.parse(localStorage.getItem('premise-mvp-log') || '[]');
+        log.push({
+          at: new Date().toISOString(),
+          reaction: btn.dataset.reaction,
+          note: document.getElementById('pause-note').value.trim(),
+          revised: document.getElementById('field-revised').value.trim(),
+          inputPreview: document.getElementById('input').value.trim().slice(0, 120)
+        });
+        localStorage.setItem('premise-mvp-log', JSON.stringify(log.slice(-50)));
+        document.querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('ring-active'));
+        btn.classList.add('ring-active');
+        document.getElementById('reaction-thanks').classList.remove('hidden');
+      });
+    });
+
+    document.getElementById('btn-illuminate').addEventListener('click', illuminate);
+    document.getElementById('btn-consult').addEventListener('click', consultNextStep);
+    document.getElementById('field-ai-question').addEventListener('input', e => {
+      e.target.dataset.userEdited = e.target.value.trim() ? '1' : '';
+    });
+    document.getElementById('field-revised').addEventListener('input', () => {
+      updateRedesignedSummary();
+      const premise = document.getElementById('field-revised').value.trim();
+      updateDecisionContextSection(premise);
+      const aiQ = document.getElementById('field-ai-question');
+      if (!aiQ.dataset.userEdited && sessionData?.context_prompt) {
+        aiQ.value = sessionData.context_prompt;
+      }
+    });
+    document.getElementById('field-intent').addEventListener('input', updateRedesignedSummary);
+    document.getElementById('btn-settings-toggle').addEventListener('click', () => {
+      document.getElementById('settings').classList.toggle('hidden');
+    });
+    ['input', 'shown-info'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) illuminate();
+      });
+    });
+
+    const savedKey = sessionStorage.getItem('premise-api-key');
+    if (savedKey) document.getElementById('api-key').value = savedKey;
+
+    function applyWideMode(on) {
+      document.body.classList.toggle('layout-wide', on);
+      const btn = document.getElementById('btn-wide');
+      btn.textContent = on ? '標準幅' : '広い表示';
+      btn.classList.toggle('btn-primary', on);
+      btn.classList.toggle('btn-ghost', !on);
+      localStorage.setItem('premise-wide-layout', on ? '1' : '0');
+    }
+
+    document.getElementById('btn-wide').addEventListener('click', () => {
+      applyWideMode(!document.body.classList.contains('layout-wide'));
+    });
+
+    document.getElementById('btn-fullscreen').addEventListener('click', async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (e) {
+        alert('全画面表示に対応していないブラウザです。F11 キーをお試しください。');
+      }
+    });
+
+    if (localStorage.getItem('premise-wide-layout') === '1') applyWideMode(true);
+    if (window.matchMedia('(min-width: 1280px)').matches && localStorage.getItem('premise-wide-layout') === null) {
+      applyWideMode(true);
+    }
+  </script>
+</body>
+</html>

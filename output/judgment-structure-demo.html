@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>JudgmentOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .dark {
+      --background: 224 71% 4%; --foreground: 210 40% 96%; --card: 224 47% 8%;
+      --primary: 38 92% 50%; --primary-fg: 224 71% 4%;
+      --muted: 215 28% 14%; --muted-fg: 215 16% 65%; --border: 215 28% 18%;
+      --radius: 0.625rem;
+    }
+    * { border-color: hsl(var(--border)); box-sizing: border-box; }
+    body { background: hsl(var(--background)); color: hsl(var(--foreground)); min-height: 100vh; font-family: Inter, "Noto Sans JP", sans-serif; }
+    .shell { max-width: 42rem; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
+    .card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 1.125rem 1.25rem; }
+    .btn { font-weight: 600; font-size: 0.875rem; padding: 0.5625rem 1.125rem; border-radius: var(--radius); border: none; cursor: pointer; }
+    .btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-fg)); }
+    .btn-primary:disabled { opacity: 0.5; }
+    .btn-ghost { background: transparent; color: hsl(var(--muted-fg)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; padding: 0.5rem 0.75rem; }
+    .textarea {
+      width: 100%; min-height: 6rem; padding: 0.75rem 1rem;
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.6; resize: vertical;
+    }
+    .flow { display: flex; flex-direction: column; gap: 0; }
+    .step { border-radius: var(--radius); padding: 0.875rem 1rem; border: 1px solid hsl(var(--border)); background: hsl(var(--background)); }
+    .step-label { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.06em; color: hsl(var(--muted-fg)); margin-bottom: 0.35rem; }
+    .step-label em { font-style: normal; color: hsl(var(--primary)); }
+    .step-text { font-size: 0.875rem; line-height: 1.55; margin: 0; white-space: pre-line; }
+    .step-list { margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; line-height: 1.55; }
+    .step-list li { padding-left: 0.875rem; position: relative; }
+    .step-list li::before { content: '·'; position: absolute; left: 0; color: hsl(var(--primary)); font-weight: 700; }
+    .arrow { text-align: center; color: hsl(var(--primary)); font-size: 0.875rem; padding: 0.2rem 0; opacity: 0.55; }
+    .step-tension { border: 2px solid hsl(var(--primary) / 0.5); background: hsl(var(--primary) / 0.06); }
+    .step-questions {
+      border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.08);
+      padding: 1.125rem 1.25rem;
+    }
+    .tension-pair { margin-bottom: 1rem; }
+    .tension-pair:last-child { margin-bottom: 0; }
+    .tension-but { text-align: center; font-size: 0.75rem; font-weight: 700; color: hsl(var(--primary)); padding: 0.35rem 0; }
+    .q-item { font-size: 0.875rem; line-height: 1.6; padding: 0.5rem 0; border-bottom: 1px solid hsl(var(--border)); white-space: pre-line; }
+    .q-item:last-child { border-bottom: none; }
+    .q-num { color: hsl(var(--primary)); font-weight: 700; }
+    .step-premise { border: 2px solid hsl(var(--primary) / 0.35); }
+    .step-context {
+      border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.1);
+      padding: 1.125rem 1.25rem;
+    }
+    .step-context-hero {
+      border: 2px solid hsl(var(--primary) / 0.45);
+      background: hsl(var(--primary) / 0.06);
+      padding: 1.25rem 1.125rem;
+      box-shadow: none;
+    }
+    .step-context-hero .step-label em { font-size: 0.6875rem; }
+    .step-judgment-declare {
+      border: 2px solid hsl(var(--primary) / 0.5); background: hsl(var(--card));
+      padding: 1.125rem 1.25rem;
+    }
+    .step-judgment-final {
+      border: 3px solid hsl(var(--primary));
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.1) 100%);
+      padding: 1.625rem 1.375rem;
+      box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2), 0 8px 32px hsl(var(--primary) / 0.1);
+      text-align: center;
+    }
+    .step-judgment-final .step-label em { font-size: 0.8125rem; color: hsl(var(--primary)); }
+    .judgment-input {
+      width: 100%; min-height: 5.5rem; margin-top: 0.5rem; padding: 0.875rem 1rem;
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.7; resize: vertical;
+    }
+    .judgment-display {
+      font-size: 1.0625rem; line-height: 1.85; font-weight: 600;
+      white-space: pre-line; margin-top: 0.75rem; min-height: 2rem;
+    }
+    .judgment-display.empty { display: none; }
+    .judgment-empty-hint {
+      font-size: 0.8125rem; color: hsl(var(--muted-fg)); margin-top: 0.5rem; line-height: 1.6;
+    }
+    .judgment-empty-hint.hidden { display: none; }
+    .step-ai-optional {
+      border: 1px dashed hsl(var(--border)); padding: 0.875rem 1rem;
+      font-size: 0.75rem; color: hsl(var(--muted-fg)); text-align: center; line-height: 1.65;
+    }
+    .step-questions-secondary {
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+      padding: 0.875rem 1rem;
+    }
+    .step-questions-secondary .step-label em { color: hsl(var(--muted-fg)); font-weight: 600; }
+    .step-ai-note {
+      border: 1px dashed hsl(var(--border)); padding: 0.875rem 1rem;
+      font-size: 0.75rem; color: hsl(var(--muted-fg)); text-align: center; line-height: 1.65;
+    }
+    .context-item { font-size: 0.8125rem; line-height: 1.65; padding: 0.35rem 0; }
+    .context-label { font-weight: 700; color: hsl(var(--primary)); }
+    .context-prompt {
+      width: 100%; min-height: 10rem; margin-top: 0.5rem; padding: 0.75rem 1rem;
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      border-radius: var(--radius); font-size: 0.8125rem; line-height: 1.75; resize: vertical;
+    }
+    .step-ai { border-style: dashed; }
+    .premise-input {
+      width: 100%; min-height: 4rem; margin-top: 0.5rem; padding: 0.75rem 1rem;
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      border-radius: var(--radius); font-size: 0.875rem; line-height: 1.6; resize: vertical;
+    }
+    .ai-prompt {
+      font-size: 0.8125rem; line-height: 1.55; padding: 0.625rem 0.75rem;
+      border-radius: calc(var(--radius) - 2px);
+      background: hsl(var(--muted) / 0.5); border: 1px solid hsl(var(--border));
+      margin-top: 0.5rem;
+    }
+    .closing {
+      font-size: 0.875rem; line-height: 1.8; padding: 1.125rem 1.25rem;
+      border-radius: var(--radius); border: 1px solid hsl(var(--border)); background: hsl(var(--card));
+      white-space: pre-line;
+    }
+    .step-compare {
+      border: 2px solid hsl(var(--primary) / 0.45); background: hsl(var(--card));
+      padding: 1.125rem 1.25rem;
+    }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+    @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-panel {
+      border-radius: calc(var(--radius) - 2px); padding: 0.875rem;
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+      font-size: 0.8125rem; line-height: 1.65;
+    }
+    .compare-panel-left { opacity: 0.92; }
+    .compare-panel-right { border-color: hsl(var(--primary) / 0.55); background: hsl(var(--primary) / 0.06); }
+    .compare-head { font-size: 0.6875rem; font-weight: 700; color: hsl(var(--muted-fg)); margin-bottom: 0.5rem; letter-spacing: 0.04em; }
+    .compare-head-right { color: hsl(var(--primary)); }
+    .compare-bubble {
+      padding: 0.625rem 0.75rem; border-radius: calc(var(--radius) - 2px);
+      background: hsl(var(--muted) / 0.45); border: 1px solid hsl(var(--border));
+      white-space: pre-line; margin: 0.35rem 0;
+    }
+    .compare-bubble-ai { background: hsl(var(--muted) / 0.3); font-size: 0.75rem; color: hsl(var(--muted-fg)); }
+    .compare-bubble-ai-rich { background: hsl(var(--primary) / 0.12); border-color: hsl(var(--primary) / 0.35); color: hsl(var(--foreground)); font-size: 0.8125rem; }
+    .compare-arrow { text-align: center; color: hsl(var(--muted-fg)); font-size: 0.6875rem; padding: 0.25rem 0; }
+    .step-insight {
+      text-align: center; padding: 1.25rem 1rem;
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      background: hsl(var(--card)); font-size: 0.875rem; line-height: 1.85;
+    }
+    .step-purpose {
+      text-align: center; padding: 1.25rem 1rem;
+      border: 2px solid hsl(var(--primary) / 0.4); border-radius: var(--radius);
+      background: hsl(var(--primary) / 0.06); font-size: 0.875rem; line-height: 1.85;
+    }
+    .step-final {
+      text-align: center; padding: 1.5rem 1.25rem;
+      border: 2px solid hsl(var(--primary)); border-radius: var(--radius);
+      background: hsl(var(--primary) / 0.1);
+    }
+    .final-title { font-size: 0.9375rem; font-weight: 700; margin-bottom: 1rem; }
+    .final-xo { display: flex; flex-direction: column; gap: 0.375rem; font-size: 0.875rem; margin-bottom: 1.25rem; }
+    .final-x { color: hsl(var(--muted-fg)); text-decoration: line-through; opacity: 0.7; }
+    .final-o { color: hsl(var(--primary)); font-weight: 700; font-size: 1rem; }
+    .final-quote { font-size: 0.9375rem; line-height: 1.85; font-weight: 600; border-top: 1px solid hsl(var(--primary) / 0.35); padding-top: 1rem; }
+    .step-db {
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      background: hsl(var(--card)); padding: 1.25rem 1.125rem;
+      text-align: left;
+    }
+    .db-intro { font-size: 0.8125rem; line-height: 1.75; color: hsl(var(--muted-fg)); margin-bottom: 1rem; }
+    .db-intro strong { color: hsl(var(--foreground)); }
+    .db-table-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 1rem 0;
+    }
+    @media (max-width: 520px) { .db-table-grid { grid-template-columns: 1fr; } }
+    .db-entity {
+      padding: 0.625rem 0.75rem; border-radius: calc(var(--radius) - 2px);
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+      font-size: 0.75rem; line-height: 1.5;
+    }
+    .db-entity-name { font-weight: 700; color: hsl(var(--primary)); font-size: 0.6875rem; letter-spacing: 0.03em; }
+    .db-entity-desc { color: hsl(var(--muted-fg)); margin-top: 0.2rem; }
+    .db-flow {
+      margin: 1rem 0; padding: 0.875rem; border-radius: var(--radius);
+      background: hsl(var(--muted) / 0.25); border: 1px dashed hsl(var(--border));
+      font-size: 0.75rem; line-height: 1.9; text-align: center; color: hsl(var(--foreground));
+    }
+    .db-flow-line { opacity: 0.55; color: hsl(var(--primary)); }
+    .db-closing {
+      font-size: 0.8125rem; line-height: 1.85; text-align: center;
+      padding-top: 1rem; margin-top: 0.75rem;
+      border-top: 1px solid hsl(var(--border));
+      color: hsl(var(--foreground));
+    }
+    .db-note { font-size: 0.625rem; color: hsl(var(--muted-fg)); margin-top: 0.75rem; text-align: center; }
+    .brand-os { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; color: hsl(var(--primary)); line-height: 1.2; }
+    .brand-os-tagline { font-size: 0.6875rem; color: hsl(var(--foreground)); font-weight: 600; margin-top: 0.2rem; line-height: 1.4; }
+    .brand-core { font-size: 0.625rem; font-weight: 600; color: hsl(var(--muted-fg)); letter-spacing: 0.05em; margin-top: 0.2rem; }
+    .brand-entry { font-size: 0.8125rem; font-weight: 600; color: hsl(var(--primary)); margin-top: 0.15rem; }
+    .brand-stack {
+      font-size: 0.6875rem; line-height: 1.75; padding: 0.875rem 1rem;
+      border-radius: var(--radius); border: 2px solid hsl(var(--primary) / 0.35);
+      background: hsl(var(--primary) / 0.06);
+    }
+    .brand-stack .layer-os { font-weight: 700; color: hsl(var(--foreground)); font-size: 0.75rem; }
+    .brand-stack .layer-core { padding-left: 1rem; color: hsl(var(--muted-fg)); }
+    .brand-stack .layer-entry { padding-left: 2rem; color: hsl(var(--primary)); font-weight: 600; }
+    .judgment-pipeline {
+      font-size: 0.6875rem; line-height: 1.85; text-align: center;
+      padding: 0.875rem 0.75rem; border-radius: var(--radius);
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+    }
+    .judgment-pipeline .pipe-hero {
+      font-weight: 700; color: hsl(var(--primary)); font-size: 0.8125rem;
+      padding: 0.35rem 0; margin-bottom: 0.25rem;
+      border-bottom: 1px solid hsl(var(--primary) / 0.25);
+    }
+    .judgment-pipeline .pipe-arrow { color: hsl(var(--primary)); opacity: 0.6; padding: 0.1rem 0; }
+    .judgment-pipeline .pipe-support { color: hsl(var(--muted-fg)); font-size: 0.625rem; }
+    .judgment-pipeline .pipe-end { font-weight: 700; color: hsl(var(--foreground)); margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px solid hsl(var(--border)); }
+    .brand-why { font-size: 0.75rem; line-height: 1.7; color: hsl(var(--muted-fg)); }
+    .brand-why strong { color: hsl(var(--foreground)); }
+    .flow-hint {
+      font-size: 0.625rem; line-height: 1.7; color: hsl(var(--muted-fg));
+      padding: 0.625rem 0.75rem; border-radius: var(--radius);
+      background: hsl(var(--muted) / 0.15); border: 1px dashed hsl(var(--border));
+    }
+    .brand-en { font-size: 0.625rem; font-weight: 500; color: hsl(var(--muted-fg)); letter-spacing: 0.04em; }
+    .brand-platform { font-size: 0.625rem; color: hsl(var(--muted-fg)); margin-top: 0.25rem; }
+    .badge-preview {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.06em;
+      padding: 0.25rem 0.5rem; border-radius: calc(var(--radius) - 4px);
+      border: 1px solid hsl(var(--primary) / 0.5); color: hsl(var(--primary));
+      background: hsl(var(--primary) / 0.08);
+    }
+    .brand-message { font-size: 0.875rem; line-height: 1.85; }
+    .brand-not { font-size: 0.6875rem; line-height: 1.65; color: hsl(var(--muted-fg)); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid hsl(var(--border)); }
+    .module-tree {
+      font-size: 0.6875rem; line-height: 1.7; color: hsl(var(--muted-fg));
+      padding: 0.75rem 1rem; border-radius: var(--radius);
+      background: hsl(var(--muted) / 0.2); border: 1px solid hsl(var(--border));
+      font-family: ui-monospace, monospace;
+    }
+    .module-tree .active { color: hsl(var(--primary)); font-weight: 700; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .fade-in { animation: fadeIn 0.35s ease-out both; }
+
+    /* —— ブランド体験：世界観画面 —— */
+    .landing {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 2.5rem 1.25rem 3rem;
+      text-align: center;
+    }
+    .landing-inner { max-width: 26rem; width: 100%; }
+    .landing-logo {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em;
+      color: hsl(var(--primary)); margin-bottom: 0.5rem;
+    }
+    .landing-title {
+      font-size: 2rem; font-weight: 700; letter-spacing: -0.02em;
+      line-height: 1.2; margin-bottom: 0.625rem;
+    }
+    .landing-tagline {
+      font-size: 0.9375rem; color: hsl(var(--muted-fg)); font-weight: 500;
+      margin-bottom: 2.5rem; line-height: 1.5;
+    }
+    .landing-mantra {
+      font-size: 0.9375rem; line-height: 2; margin-bottom: 2rem;
+      color: hsl(var(--foreground));
+    }
+    .landing-mantra p { margin: 0; }
+    .landing-promise {
+      font-size: 0.875rem; line-height: 1.9; color: hsl(var(--muted-fg));
+      margin-bottom: 2.5rem;
+    }
+    .landing-promise strong { color: hsl(var(--foreground)); font-weight: 600; }
+    .btn-landing {
+      font-size: 1rem; font-weight: 700; padding: 0.875rem 2rem;
+      letter-spacing: 0.04em;
+    }
+    .landing-not-chat {
+      margin-top: 2.5rem; font-size: 0.6875rem; color: hsl(var(--muted-fg));
+      letter-spacing: 0.02em; opacity: 0.85;
+    }
+    .workspace-header { border-bottom: 1px solid hsl(var(--border)); }
+    .workspace-header .shell { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .brand-outro {
+      text-align: center; padding: 2rem 1.25rem 2.5rem;
+      border: 2px solid hsl(var(--primary)); border-radius: var(--radius);
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.04) 100%);
+    }
+    .brand-outro-mantra {
+      font-size: 0.875rem; line-height: 2; color: hsl(var(--muted-fg));
+      margin-bottom: 1.5rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid hsl(var(--primary) / 0.2);
+    }
+    .brand-outro-final {
+      font-size: 1rem; line-height: 2.1; font-weight: 600;
+    }
+    .brand-outro-final .you { color: hsl(var(--primary)); }
+    .brand-outro-takeaway {
+      font-size: 0.875rem; line-height: 1.9; color: hsl(var(--muted-fg));
+      margin-top: 1.25rem; padding-top: 1.25rem;
+      border-top: 1px solid hsl(var(--primary) / 0.15);
+    }
+    .brand-outro-takeaway strong { color: hsl(var(--foreground)); }
+    details.dev-only { margin-top: 1rem; }
+    details.dev-only summary { font-size: 0.625rem; color: hsl(var(--muted-fg)); cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- 世界観 — OSは入力から始まらない -->
+  <section id="screen-landing" class="landing fade-in" aria-label="JudgmentOS">
+    <div class="landing-inner">
+      <p class="landing-logo">JUDGMENT OS</p>
+      <h1 class="landing-title">JudgmentOS</h1>
+      <p class="landing-tagline">経営者の意思決定を支えるOS</p>
+
+      <div class="landing-mantra" aria-label="JudgmentOSの思想">
+        <p>AIは</p>
+        <p>最適な答えを示すことはできます。</p>
+        <p class="mt-3">しかし</p>
+        <p>どの未来を目指すかは</p>
+        <p>決められません。</p>
+        <p class="mt-3 font-semibold text-[hsl(var(--foreground))]">未来を決めるのは<br>経営者です。</p>
+      </div>
+
+      <p class="landing-promise">
+        JudgmentOSは、<strong>未来を決める前の</strong><br>
+        あなたの意思決定文脈を映します。
+      </p>
+
+      <button type="button" id="btn-enter" class="btn btn-primary btn-landing">映してみる</button>
+
+      <p class="landing-not-chat">これはChatGPTではありません。</p>
+    </div>
+  </section>
+
+  <!-- ワークスペース — 体験してから文脈に出会う -->
+  <div id="screen-workspace" class="hidden">
+  <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
+    <div class="shell flex justify-between items-center gap-3">
+      <p class="brand-os text-sm">JudgmentOS</p>
+      <span class="badge-preview">Preview</span>
+    </div>
+  </header>
+
+  <main class="shell space-y-4 py-4">
+
+    <section class="card space-y-3">
+      <p class="text-sm text-[hsl(var(--muted-fg))] leading-relaxed">
+        今、決めようとしていることを、そのまま書いてください。
+      </p>
+      <label for="input" class="block text-sm font-semibold">どんな判断をしようとしていますか？</label>
+      <textarea id="input" class="textarea" placeholder="判断の状況をそのまま書いてください"></textarea>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" id="btn-run" class="btn btn-primary">判断を映す</button>
+        <button type="button" id="btn-sample" class="btn btn-ghost">デモ用サンプル</button>
+      </div>
+    </section>
+
+    <div id="loading" class="hidden card text-center py-8">
+      <p class="text-sm text-[hsl(var(--primary))] animate-pulse">判断を映しています…</p>
+    </div>
+
+    <section id="output" class="hidden space-y-4 fade-in">
+      <div id="flow" class="flow"></div>
+    </section>
+
+  </main>
+  </div>
+
+  <script src="js/constitution-inference.js"></script>
+  <script src="js/decision-session-client.js"></script>
+  <script>
+    const STORAGE_KEY = 'constitution-mirror-history';
+
+    const DEMO_INPUT = `LinkedInでAI時代の意思決定デザイナーとして発信を開始した。
+営業色を出さずに、潜在クライアントと関係構築する方法を決めたい。`;
+
+    const DEMO_CONTEXT_PROMPT = `私は
+
+AI時代の経営者の意思決定を変えたい。
+
+営業ではなく
+信頼から始まる関係を守りたい。
+
+営業活動には
+時間を使えない。
+
+LinkedInだけで十分か
+直接対話も必要か迷っている。
+
+判断基準は
+長期的な信頼形成である。
+
+この文脈を前提として
+私に助言してください。`;
+
+    const DEMO_CONTEXTUAL_ANSWER = `「あなたが営業を避けたい理由は
+信頼を守りたいからですね。
+
+その前提なら
+
+営業活動ではなく
+
+· 経営者同士の対話設計
+· 紹介が生まれる仕組み
+· 講演
+· 記事
+
+などが戦略になります。」`;
+
+    function buildNaiveQuestion(decision, profile) {
+      if (profile === 'sales_trust') {
+        return 'LinkedInで営業せずに\n顧客を増やす方法を教えてください。';
+      }
+      const line = decision.split('\n').filter(Boolean)[0] || decision;
+      return line.length > 60 ? line.slice(0, 60) + '…を教えてください。' : line + ' — 方法を教えてください。';
+    }
+
+    function buildContextualAnswer(ctx, profile) {
+      if (profile === 'sales_trust') return DEMO_CONTEXTUAL_ANSWER;
+      return `「${ctx.protect}を大切にしたいのですね。
+
+その前提なら、一般論ではなく
+あなたの判断基準（${ctx.criteria}）に沿った
+具体的な選択肢が見えてきます。」`;
+    }
+
+    function demoDisplayPrompt(d) {
+      return d.profile === 'sales_trust' ? DEMO_CONTEXT_PROMPT : d.context_prompt;
+    }
+
+    function renderComparisonSection(contextPrompt, ctx, profile) {
+      const naiveQ = buildNaiveQuestion(currentInput || '', profile);
+      const naiveA = '· 投稿頻度\n· ペルソナ\n· SNS戦略\n· SEO\n\nなど一般論になる。';
+      const richA = buildContextualAnswer(ctx, profile);
+
+      return `
+        <p class="step-label"><em>⑧ AIへ相談する</em> <span class="font-normal text-[0.5625rem]">（任意）</span></p>
+        <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3 text-center">同じ問いでも、渡すものによって答えは変わります。</p>
+        <div class="compare-grid">
+          <div class="compare-panel compare-panel-left">
+            <p class="compare-head">一行の質問だけを渡す</p>
+            <div class="compare-bubble">${escapeHtml(naiveQ)}</div>
+            <p class="compare-arrow">↓ 返ってくる答え</p>
+            <div class="compare-bubble compare-bubble-ai">${escapeHtml(naiveA)}</div>
+          </div>
+          <div class="compare-panel compare-panel-right">
+            <p class="compare-head compare-head-right">判断の構造を渡す</p>
+            <div class="compare-bubble" id="compare-context-prompt">${escapeHtml(contextPrompt)}</div>
+            <p class="compare-arrow">↓ 返ってくる答え</p>
+            <div class="compare-bubble compare-bubble-ai-rich" id="compare-context-answer">${escapeHtml(richA)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderDbPhilosophySection() {
+      const entities = [
+        ['Person', '経営者·利用者の基本情報'],
+        ['DecisionSession', '一回ごとの判断テーマと入力内容'],
+        ['Premise', '今回の判断を支えている前提'],
+        ['Tension', '判断構造の中にある矛盾·緊張'],
+        ['KeyQuestion', '本当に判断すべき問い'],
+        ['DecisionContext', '実現·守る·制約·迷い·判断基準'],
+        ['ContextPrompt', 'AIへ渡す意思決定文脈'],
+        ['AIConversation', '文脈を渡した後の対話'],
+        ['DecisionResult', '最終判断と理由'],
+        ['Reflection', '後日の振り返りと学び']
+      ];
+      const cards = entities.map(([name, desc]) => `
+        <div class="db-entity">
+          <p class="db-entity-name">${escapeHtml(name)}</p>
+          <p class="db-entity-desc">${escapeHtml(desc)}</p>
+        </div>`).join('');
+
+      return `
+        <div class="arrow">↓</div>
+        <div class="step step-db">
+          <p class="final-title text-center">データベースに蓄積したいもの</p>
+          <div class="db-intro">
+            <p>このツールで保存したいのは、<strong>会話ログではありません。</strong></p>
+            <p class="mt-2">保存したいのは、<strong>経営者の新しい判断</strong>です。意思決定文脈は、その途中経過です。</p>
+            <p class="mt-2">一回ごとの判断から、</p>
+            <ul class="step-list mt-1 text-[0.75rem]">
+              <li>何を実現したいのか</li>
+              <li>何を守りたいのか</li>
+              <li>何を制約として受け入れているのか</li>
+              <li>本当は何に迷っているのか</li>
+              <li>何を判断基準としているのか</li>
+            </ul>
+            <p class="mt-2">を蓄積していきます。</p>
+          </div>
+          <p class="step-label mb-1">テーブル設計案（将来）</p>
+          <div class="db-table-grid">${cards}</div>
+          <p class="step-label mb-1 mt-3">紐付けイメージ</p>
+          <div class="db-flow">
+            Person<br>
+            <span class="db-flow-line">↓</span><br>
+            DecisionSession<br>
+            <span class="db-flow-line">↓</span><br>
+            Premise / Tension / KeyQuestion<br>
+            <span class="db-flow-line">↓</span><br>
+            DecisionContext<br>
+            <span class="db-flow-line">↓</span><br>
+            ContextPrompt<br>
+            <span class="db-flow-line">↓</span><br>
+            AIConversation<br>
+            <span class="db-flow-line">↓</span><br>
+            DecisionResult<br>
+            <span class="db-flow-line">↓</span><br>
+            Reflection
+          </div>
+          <p class="db-closing">
+            データベースは、<br>
+            判断を保存するためではありません。<br><br>
+            経営者の意思決定文脈が<br>
+            時間とともにどう変化していくかを<br>
+            映すためにあります。
+          </p>
+          <p class="db-note">Preview: localStorage（バックアップ）。本番: Neon Postgres（<code class="text-[0.6rem]">npm run dev</code>）。<code class="text-[0.6rem]">docs/vercel-neon-setup.md</code></p>
+        </div>`;
+    }
+
+    function renderJudgmentSection() {
+      return `
+        <div class="arrow">↓</div>
+        <div class="step step-judgment-declare">
+          <p class="step-label"><em>⑨ 私はこう判断する</em></p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2 leading-relaxed">
+            意思決定文脈を通して、新しい判断を言葉にしてください。<br>
+            JudgmentOS の最終成果物は、文脈ではなく<strong class="text-[hsl(var(--foreground))]">判断</strong>です。
+          </p>
+          <textarea id="new-judgment" class="judgment-input" placeholder="私は、営業ではなく経営者同士の対話から関係を始めると判断する。"></textarea>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="step step-judgment-final" id="judgment-final-card">
+          <p class="step-label"><em>あなたの新しい判断</em></p>
+          <p id="new-judgment-display" class="judgment-display empty"></p>
+          <p id="judgment-empty-hint" class="judgment-empty-hint">上に書いた判断が、ここに映ります。<br>持ち帰るものは、AIの答えではなく、あなた自身の判断です。</p>
+        </div>`;
+    }
+
+    function bindNewJudgment() {
+      const field = document.getElementById('new-judgment');
+      const display = document.getElementById('new-judgment-display');
+      const hint = document.getElementById('judgment-empty-hint');
+      const card = document.getElementById('judgment-final-card');
+      if (!field || !display) return;
+
+      const update = () => {
+        const val = field.value.trim();
+        if (val) {
+          display.textContent = val;
+          display.classList.remove('empty');
+          hint?.classList.add('hidden');
+        } else {
+          display.textContent = '';
+          display.classList.add('empty');
+          hint?.classList.remove('hidden');
+        }
+        saveRecord(currentInput, currentData, document.getElementById('user-premise')?.value.trim() || '', val);
+      };
+
+      field.addEventListener('input', update);
+      field.addEventListener('blur', () => {
+        update();
+        if (field.value.trim() && card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+
+    function renderDemoClosing() {
+      return `
+        <div class="arrow">↓</div>
+        <div class="brand-outro">
+          <div class="brand-outro-mantra">
+            <p>AIは</p>
+            <p>最適な答えを示すことはできる。</p>
+            <p class="mt-2">しかし</p>
+            <p>どの未来を目指すかは</p>
+            <p>決められない。</p>
+          </div>
+          <div class="brand-outro-final">
+            <p>未来を決めるのは</p>
+            <p>AIではない。</p>
+            <p class="you">あなたです。</p>
+            <p class="mt-4 text-[0.9375rem] font-medium text-[hsl(var(--muted-fg))]">
+              JudgmentOSは<br>
+              その判断を支えるために存在します。
+            </p>
+          </div>
+          <p class="brand-outro-takeaway">
+            画面を閉じるとき、<br>
+            持ち帰るものは<strong>AIの答えではない</strong>。<br>
+            <strong>あなた自身の判断</strong>です。
+          </p>
+        </div>
+        <details class="dev-only">
+          <summary>開発者向け — データ設計</summary>
+          ${renderDbPhilosophySection()}
+        </details>`;
+    }
+
+    let currentData = null;
+    let currentInput = '';
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function renderTensions(tensions) {
+      return tensions.map(t => `
+        <div class="tension-pair">
+          <p>· ${escapeHtml(t.a)}</p>
+          <p class="tension-but">しかし</p>
+          <p>· ${escapeHtml(t.b)}</p>
+        </div>`).join('');
+    }
+
+    function renderContextBlock(ctx, prompt, includePremiseField) {
+      const row = (label, val, id) => `
+        <p class="context-item" id="${id}"><span class="context-label">${label}</span> ${escapeHtml(val)}</p>`;
+      const premiseField = includePremiseField ? `
+        <div class="mt-4 pt-3 border-t border-[hsl(var(--primary)/0.25)]">
+          <p class="step-label"><em>意思決定文脈を書き換える</em></p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-1">見えていなかったものに気づき、構造を書き換えてください。新しい問いが生まれます。</p>
+          <textarea id="user-premise" class="premise-input" placeholder="例：営業すると信頼を失う、と無意識に決めていた"></textarea>
+        </div>` : '';
+      return `
+        <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3">
+          あなたの判断から、こう見えてきました。<span class="opacity-80">（仮説 · 今回の判断を見る限り）</span>
+        </p>
+        ${row('· 実現したいこと', ctx.achieve, 'ctx-achieve')}
+        ${row('· 守りたいもの', ctx.protect, 'ctx-protect')}
+        ${row('· 受け入れている制約', ctx.constraints, 'ctx-constraints')}
+        ${row('· 本当に迷っていること', ctx.uncertain, 'ctx-uncertain')}
+        ${row('· 判断基準', ctx.criteria, 'ctx-criteria')}
+        ${premiseField}
+        <div class="mt-4 pt-3 border-t border-[hsl(var(--border))]">
+          <p class="step-label mb-1"><em>あなたの意思決定文脈</em></p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">これが、AIに渡すべきものです。質問一行だけではありません。</p>
+          <textarea id="context-prompt" class="context-prompt" readonly>${escapeHtml(prompt)}</textarea>
+          <button type="button" id="btn-copy-context" class="btn btn-primary mt-2 text-xs">コピーする</button>
+          <p id="copy-toast" class="hidden text-xs text-[hsl(var(--primary))] mt-1">コピーしました</p>
+        </div>`;
+    }
+
+    function bindContextCopy() {
+      const btn = document.getElementById('btn-copy-context');
+      const toast = document.getElementById('copy-toast');
+      if (!btn) return;
+      btn.onclick = async () => {
+        const text = document.getElementById('context-prompt')?.value || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 2000);
+        } catch {
+          document.getElementById('context-prompt')?.select();
+          document.execCommand('copy');
+          toast.classList.remove('hidden');
+        }
+      };
+    }
+
+    function refreshContext(userPremise) {
+      if (!currentData) return;
+      const inferred = ConstitutionInference.runInference(currentInput, userPremise);
+      currentData.decision_context = inferred.decision_context;
+      currentData.context_prompt = inferred.context_prompt;
+      currentData.key_questions = inferred.key_questions;
+
+      const ctx = inferred.decision_context;
+      const setRow = (id, label, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = `<span class="context-label">${label}</span> ${escapeHtml(val)}`;
+      };
+      setRow('ctx-achieve', '· 実現したいこと', ctx.achieve);
+      setRow('ctx-protect', '· 守りたいもの', ctx.protect);
+      setRow('ctx-constraints', '· 受け入れている制約', ctx.constraints);
+      setRow('ctx-uncertain', '· 本当に迷っていること', ctx.uncertain);
+      setRow('ctx-criteria', '· 判断基準', ctx.criteria);
+
+      const promptEl = document.getElementById('context-prompt');
+      if (promptEl) promptEl.value = inferred.profile === 'sales_trust' && !userPremise
+        ? DEMO_CONTEXT_PROMPT
+        : inferred.context_prompt;
+
+      const comparePrompt = document.getElementById('compare-context-prompt');
+      if (comparePrompt) {
+        comparePrompt.textContent = inferred.profile === 'sales_trust' && !userPremise
+          ? DEMO_CONTEXT_PROMPT
+          : inferred.context_prompt;
+      }
+      const compareAnswer = document.getElementById('compare-context-answer');
+      if (compareAnswer) {
+        compareAnswer.textContent = buildContextualAnswer(ctx, inferred.profile);
+      }
+      const questionsBlock = document.getElementById('questions-block');
+      if (questionsBlock) {
+        questionsBlock.innerHTML = inferred.key_questions.map((q, i) =>
+          `<p class="q-item"><span class="q-num">${i + 1}. </span>${escapeHtml(q)}</p>`
+        ).join('');
+      }
+    }
+
+    function renderFlow(d) {
+      const list = (items) => `<ul class="step-list">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
+      const arrow = () => '<div class="arrow">↓</div>';
+      const displayPrompt = demoDisplayPrompt(d);
+
+      return `
+        <div class="step">
+          <p class="step-label">① 入力された判断</p>
+          <p class="step-text">${escapeHtml(d.decision)}</p>
+        </div>${arrow()}
+        <div class="step">
+          <p class="step-label">② この文章から読み取れる前提 <span class="font-normal text-[0.5625rem]">（仮説）</span></p>
+          <p class="step-text">${escapeHtml(d.premise)}</p>
+        </div>${arrow()}
+        <div class="step">
+          <p class="step-label">③ その前提によって自然に見えているもの</p>
+          ${list(d.visible)}
+        </div>${arrow()}
+        <div class="step">
+          <p class="step-label">④ 見えていなかったもの</p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">この前提では、意識が向きにくかったものです。</p>
+          ${list(d.invisible)}
+        </div>${arrow()}
+        <div class="step step-tension">
+          <p class="step-label"><em>⑤ この構造が生んでいる矛盾（テンション）</em></p>
+          ${renderTensions(d.tensions)}
+        </div>${arrow()}
+        <div class="step step-context-hero">
+          <p class="step-label"><em>⑥ 意思決定文脈</em></p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3">途中経過です。ここから書き換え、新しい判断へつなげます。</p>
+          <div id="context-block">${renderContextBlock(d.decision_context, displayPrompt, true)}</div>
+        </div>${arrow()}
+        <div class="step step-questions-secondary">
+          <p class="step-label">⑦ 新しい問い</p>
+          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">書き換えた文脈から、自然に生まれた問いです。</p>
+          <div id="questions-block">${d.key_questions.map((q, i) => `<p class="q-item"><span class="q-num">${i + 1}. </span>${escapeHtml(q)}</p>`).join('')}</div>
+        </div>${arrow()}
+        <div class="step step-compare step-ai-optional">
+          ${renderComparisonSection(displayPrompt, d.decision_context, d.profile)}
+        </div>
+        ${renderJudgmentSection()}${arrow()}
+        ${renderDemoClosing()}`;
+    }
+
+    function saveRecord(input, data, userPremise, newJudgment) {
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      history.unshift({
+        date: new Date().toISOString(),
+        input,
+        key_questions: data.key_questions,
+        user_premise: userPremise || '',
+        new_judgment: newJudgment || '',
+        decision_context: data.decision_context,
+        context_prompt: data.context_prompt,
+        ai_version: data.ai_version
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 15)));
+
+      if (typeof DecisionSessionClient !== 'undefined') {
+        DecisionSessionClient.persistSession(input, data, userPremise).catch(() => {});
+      }
+    }
+
+    async function run() {
+      const text = document.getElementById('input').value.trim();
+      if (!text) { document.getElementById('input').focus(); return; }
+
+      const btn = document.getElementById('btn-run');
+      const loading = document.getElementById('loading');
+      const output = document.getElementById('output');
+
+      btn.disabled = true;
+      loading.classList.remove('hidden');
+      output.classList.add('hidden');
+
+      await new Promise(r => setTimeout(r, 650));
+
+      currentInput = text;
+      const data = ConstitutionInference.runInference(text);
+      currentData = data;
+
+      document.getElementById('flow').innerHTML = renderFlow(data);
+      saveRecord(text, data, '', '');
+
+      bindContextCopy();
+      bindNewJudgment();
+
+      const premiseField = document.getElementById('user-premise');
+      if (premiseField) {
+        const onPremiseChange = () => {
+          refreshContext(premiseField.value.trim());
+          saveRecord(text, currentData, premiseField.value.trim(), document.getElementById('new-judgment')?.value.trim() || '');
+        };
+        premiseField.addEventListener('input', onPremiseChange);
+        premiseField.addEventListener('blur', onPremiseChange);
+      }
+
+      loading.classList.add('hidden');
+      output.classList.remove('hidden');
+      btn.disabled = false;
+      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('btn-enter').addEventListener('click', () => {
+      document.getElementById('screen-landing').classList.add('hidden');
+      const ws = document.getElementById('screen-workspace');
+      ws.classList.remove('hidden');
+      ws.classList.add('fade-in');
+      document.getElementById('input').focus();
+    });
+
+    document.getElementById('btn-run').addEventListener('click', run);
+    document.getElementById('btn-sample').addEventListener('click', () => {
+      document.getElementById('input').value = DEMO_INPUT;
+      document.getElementById('input').focus();
+    });
+    document.getElementById('input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) run();
+    });
+  </script>
+</body>
+</html>
