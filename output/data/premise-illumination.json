@@ -1,0 +1,63 @@
+{
+  "updatedAt": "2026-07-02",
+  "version": "3.0",
+  "tool": {
+    "id": "premise-illumination",
+    "name": "前提照射思考支援ツール",
+    "shortName": "前提照射",
+    "tagline": "疑っていない前提に、初めて気づく",
+    "purpose": "論理·合理性を支える前提の可視化 — 評価·提案はしない",
+    "category": "思考支援ツール（AI相談ツールではない）",
+    "coreQuestion": "あなたが一度も疑っていないことは何ですか？",
+    "valueLead": "思考を支援するので、疑っていないことがあるでしょう？例えば、これらです。",
+    "challengeLine": "本当にそうでしょうか？",
+    "antiPatterns": [
+      "対策·施策の提案",
+      "正解·最善案の提示",
+      "論理·合理の採点",
+      "自己申告だけの「前提は何ですか？」"
+    ]
+  },
+  "functions": [
+    { "id": "extract", "order": 1, "label": "前提抽出", "description": "文章から暗黙の前提を推論し断言として並べる", "mvp": "P0" },
+    { "id": "counter", "order": 2, "label": "前提への反論", "description": "その前提が誤っているとしたら？", "mvp": "P0" },
+    { "id": "crossIndustry", "order": 3, "label": "他業界なら？", "description": "異業種ではその前提は成立するか", "mvp": "P0" },
+    { "id": "temporal", "order": 4, "label": "時間軸", "description": "10年前でも成り立った？10年後も？", "mvp": "P0" },
+    { "id": "aiContrast", "order": 5, "label": "AIとの比較", "description": "通常AIはこの前提をそのまま受け入れる。あなたは疑うか？", "mvp": "P0" }
+  ],
+  "closingPhilosophy": {
+    "past": "知識を人に接続し、分析を判断に接続し、判断を行動に接続してきた。",
+    "present": "その次の時代は、AIは分析を強くする。",
+    "imperative": "しかし、人は分析の前にある前提を照らさなければならない。"
+  },
+  "cycle": {
+    "phases": [
+      { "id": "input", "label": "入力" },
+      { "id": "extract", "label": "前提抽出", "core": true },
+      { "id": "challenge", "label": "本当にそうか？" },
+      { "id": "lenses", "label": "4レンズ深掘り" },
+      { "id": "normalAi", "label": "通常AIとの対比" },
+      { "id": "pause", "label": "止まる" },
+      { "id": "intent", "label": "どうしたいか（任意）" }
+    ],
+    "successCriterion": "「これは考えたことがなかった」と言える前提を一つでも発見すること"
+  },
+  "exampleOutput": {
+    "input": "営業強化したい",
+    "premises": [
+      "商品価値は十分ある",
+      "顧客は存在する",
+      "営業人数が成果を左右する",
+      "価格は適切である",
+      "競争環境は変わっていない",
+      "売ることが最優先である"
+    ],
+    "normalAiWouldSay": ["採用", "研修", "KPI設計", "CRM導入", "インセンティブ"]
+  },
+  "mvpImplementation": {
+    "file": "premise-illumination.html",
+    "version": "3.0",
+    "features": ["primaryPremiseHero", "contextualInference", "aiAcceptedVsSurfacedSplit"],
+    "launch": "npx --yes serve output -l 8787 → http://localhost:8787/premise-illumination.html"
+  }
+}

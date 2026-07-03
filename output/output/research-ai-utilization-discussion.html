@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>生成AIと研究の判断 — 投影用図解</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { ads: { bg:'#FFF', surface:'#F8FAFC', border:'#E2E8F0', accent:'#3B82F6', 'accent-light':'#2563EB', muted:'#64748B', dim:'#94A3B8', positive:'#10B981', negative:'#EF4444', warning:'#F59E0B', teal:'#0D9488' } }, fontFamily: { sans: ['"Noto Sans JP"','sans-serif'] } } } }
+  </script>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased border-t-4 border-teal-600">
+  <div class="no-print max-w-5xl mx-auto px-5 pt-2 flex justify-between items-center">
+    <a href="decision-knowledge-hub.html" class="text-xs text-teal-700 font-medium flex items-center gap-1"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> ハブへ</a>
+    <span class="text-xs text-ads-dim">研究開発本部 · 2026-06-11 · 投影用</span>
+  </div>
+  <main class="max-w-5xl mx-auto px-5 py-8 md:py-12">
+
+    <!-- HERO -->
+    <section class="min-h-[70vh] flex flex-col justify-center mb-16">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 bg-teal-100 text-teal-800 px-4 py-1.5 rounded-full text-sm font-medium mb-5">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          AI utilization in research discussion
+        </div>
+        <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-3">生成AIと研究の判断</h1>
+        <p class="text-lg text-ads-muted">日立製作所 研究開発本部（国分寺） · 2026年6月11日 · 約120分</p>
+      </div>
+      <div class="bg-slate-900 rounded-2xl p-8 text-center mb-6">
+        <p class="text-xs text-amber-400 font-bold mb-3">本日のゴール</p>
+        <p class="text-xl md:text-2xl font-black text-white leading-snug">研究所の中で<strong class="text-amber-400">継続して語り合える「問い」</strong>を、<br>参加者全員で共有する</p>
+        <p class="text-sm text-slate-400 mt-4">判断と問いの構造に焦点を当て、継続して語り合える問いを共有する。</p>
+      </div>
+      <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-center gap-3">
+        <i data-lucide="link" class="w-5 h-5 text-teal-600 shrink-0"></i>
+        <p class="text-sm text-teal-900"><strong>経営者講演・プログラム概要と同じフレーム</strong> — 対象が「研究判断」に変わるだけ。データは <a href="decision-knowledge-hub.html" class="underline font-medium">ナレッジハブ</a> に蓄積。</p>
+      </div>
+    </section>
+
+    <!-- 4 themes -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-6">議論の4つの問い</h2>
+      <div class="space-y-4">
+        <div class="flex gap-4 bg-white border-2 border-teal-200 rounded-2xl p-5">
+          <span class="w-12 h-12 rounded-xl bg-teal-500 text-white font-black flex items-center justify-center shrink-0">①</span>
+          <div><p class="font-black text-slate-900 mb-1">活用の棚卸し</p><p class="text-sm">生成AIを、研究の<strong>どの場面</strong>に活用しているか</p></div>
+        </div>
+        <div class="flex gap-4 bg-white border-2 border-red-200 rounded-2xl p-5">
+          <span class="w-12 h-12 rounded-xl bg-red-500 text-white font-black flex items-center justify-center shrink-0">②</span>
+          <div><p class="font-black text-slate-900 mb-1">判断の変化と「合理性の強化」</p><p class="text-sm">研究者の判断は<strong>変わっているか</strong>。既存の合理性が<strong>強化されているだけ</strong>か</p></div>
+        </div>
+        <div class="flex gap-4 bg-white border-2 border-orange-200 rounded-2xl p-5">
+          <span class="w-12 h-12 rounded-xl bg-orange-500 text-white font-black flex items-center justify-center shrink-0">③</span>
+          <div><p class="font-black text-slate-900 mb-1">問いの立て方</p><p class="text-sm">研究者は、<strong>どのように問い</strong>を立てているか</p></div>
+        </div>
+        <div class="flex gap-4 bg-white border-2 border-violet-200 rounded-2xl p-5">
+          <span class="w-12 h-12 rounded-xl bg-violet-500 text-white font-black flex items-center justify-center shrink-0">④</span>
+          <div><p class="font-black text-slate-900 mb-1">テーマ選定の暗黙の前提</p><p class="text-sm">研究テーマ選定における<strong>暗黙の前提</strong>と、その影響</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 前提の正体 (shared with executive) -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-2">前提とは（研究現場）</h2>
+      <p class="text-ads-muted mb-6">経営判断と同じ — 守りたいもの・棄損したくないものが動いている</p>
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 text-center">
+          <i data-lucide="shield" class="w-8 h-8 text-violet-600 mx-auto mb-2"></i>
+          <p class="text-sm font-bold text-violet-900">守りたいもの</p>
+          <p class="text-xs text-ads-muted mt-2">研究ライン · 評価 · チームの信頼</p>
+        </div>
+        <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 text-center">
+          <i data-lucide="shield-alert" class="w-8 h-8 text-violet-600 mx-auto mb-2"></i>
+          <p class="text-sm font-bold text-violet-900">棄損したくないもの</p>
+          <p class="text-xs text-ads-muted mt-2">採用実績 · 論文パターン · 予算枠</p>
+        </div>
+        <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 text-center">
+          <i data-lucide="heart-pulse" class="w-8 h-8 text-violet-700 mx-auto mb-2"></i>
+          <p class="text-sm font-bold text-violet-900">生存・防衛本能</p>
+          <p class="text-xs text-ads-muted mt-2">「うちの領域は譲れない」</p>
+        </div>
+      </div>
+      <div class="bg-slate-900 rounded-2xl p-6 text-center">
+        <p class="text-lg font-black text-white">いま、生成AIに任せているのは<span class="text-amber-400">「答え」</span>か<span class="text-amber-400">「問い」</span>か？</p>
+      </div>
+    </section>
+
+    <!-- Hypothesis ② -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-6">②の仮説 — 「当たり前」の補強</h2>
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 md:p-8 mb-6 text-center">
+        <p class="text-base md:text-lg font-black text-slate-900 leading-relaxed">
+          AIは当たり前を「発明」するのではない。<br>
+          <span class="text-red-700">与えられた問い・過去データ・評価枠</span>の内側で、<br>
+          当たり前を<strong>より速く・説得力をもって再生産</strong>し、<strong>固定化しやすい</strong>。
+        </p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border border-ads-border rounded-xl p-4">
+          <p class="text-xs font-bold text-red-600 mb-2">過去データの学習</p>
+          <p class="text-sm text-slate-700">過去の採用・成果・論文パターンが「よい研究」の当たり前に</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-xl p-4">
+          <p class="text-xs font-bold text-red-600 mb-2">問いの枠内での最適化</p>
+          <p class="text-sm text-slate-700">既存ライン・評価指標の内側で案が増える</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-xl p-4">
+          <p class="text-xs font-bold text-red-600 mb-2">人間側のバイアス</p>
+          <p class="text-sm text-slate-700">アンカリング · 検証省略（自動化バイアス）</p>
+        </div>
+      </div>
+      <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+        <p class="text-xs font-bold text-ads-dim mb-3">研究現場での例</p>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="bg-white border px-2 py-1 rounded">文献調査での仮説補強</span>
+          <span class="bg-white border px-2 py-1 rounded">コード生成での設計の再生産</span>
+          <span class="bg-white border px-2 py-1 rounded">ブレストで「うちに合う案」だけ増殖</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- APCD research example -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-6">テーマ選定 — 4層で見る（④）</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-violet-50 border-2 border-violet-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-violet-600">前提</p>
+          <p class="text-xs font-bold text-slate-800 mt-2">10年同じ領域を続けた人を評価する</p>
+        </div>
+        <div class="bg-orange-50 border-2 border-orange-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-orange-600">目的</p>
+          <p class="text-xs font-bold text-slate-800 mt-2">次世代技術の探索</p>
+        </div>
+        <div class="bg-blue-50 border-2 border-blue-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-blue-600">基準</p>
+          <p class="text-xs font-bold text-slate-800 mt-2">論文数 · 特許 · 既存ライン整合</p>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-emerald-600">判断</p>
+          <p class="text-xs font-bold text-slate-800 mt-2">テーマA採用 · B見送り</p>
+        </div>
+      </div>
+      <p class="text-center text-sm font-medium text-slate-700 mt-4">採用／却下の理由 — <strong>技術的根拠</strong>か、<strong>前提との一致</strong>か？</p>
+    </section>
+
+    <!-- Timeline -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-6">本番タイムテーブル（120分）</h2>
+      <div class="space-y-2 text-sm">
+        <div class="flex gap-3 bg-white border rounded-lg px-4 py-2"><span class="font-bold text-teal-700 w-16 shrink-0">0:05</span><span>① 活用の棚卸し</span></div>
+        <div class="flex gap-3 bg-red-50 border border-red-100 rounded-lg px-4 py-2"><span class="font-bold text-red-700 w-16 shrink-0">0:20</span><span>② 判断の変化・合理性の強化（深掘り1件）</span></div>
+        <div class="flex gap-3 bg-white border rounded-lg px-4 py-2"><span class="font-bold text-ads-dim w-16 shrink-0">0:55</span><span>③ 問いの立て方</span></div>
+        <div class="flex gap-3 bg-violet-50 border border-violet-100 rounded-lg px-4 py-2"><span class="font-bold text-violet-700 w-16 shrink-0">1:15</span><span>④ テーマ選定の暗黙の前提</span></div>
+        <div class="flex gap-3 bg-ads-accent/5 border border-ads-accent/20 rounded-lg px-4 py-2"><span class="font-bold text-ads-accent w-16 shrink-0">1:40</span><span>統合（前提→目的→基準→判断）</span></div>
+        <div class="flex gap-3 bg-slate-900 text-white rounded-lg px-4 py-3"><span class="font-bold text-amber-400 w-16 shrink-0">1:55</span><span class="font-bold">継続議論用の問い — 共有</span></div>
+      </div>
+    </section>
+
+    <!-- Carry forward questions -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-black text-slate-900 mb-6">持ち帰りの問い（7+）</h2>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">1. 生成AIに任せているのは「答え」か「問い」か</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">2. 論文は速くなったが、テーマの選び方は変わったか</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">3. 検証中の「問い」は誰が・どんな前提で立てたか</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">4. テーマ選定で言葉にしていない前提は何か</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">5. 採用／却下の理由は技術か前提との一致か</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800">6. 当たり前がAIで補強された場面と、感じない場面</div>
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm font-medium text-slate-800 md:col-span-2">7. 「10年同じこと」vs「失敗しながら新しいこと」— どちらを「よい10年」と評価しているか</div>
+      </div>
+      <p class="text-xs text-ads-dim mt-4 text-center">対話後 → <code>data/sessions.json</code> と <code>data/session-log-template.md</code> に追記</p>
+    </section>
+
+    <!-- Bridge to executive -->
+    <section class="bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-300 rounded-2xl p-6 md:p-8">
+      <h2 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="git-branch" class="w-5 h-5 text-teal-600"></i> 経営者講演・協会構想への接続</h2>
+      <p class="text-sm text-slate-700 mb-4">今日の研究ディスカッションで得た「問い」は、静岡の経営者講演・AI時代の意思決定協会（構想）と<strong>同じ骨格</strong>です。</p>
+      <div class="flex flex-wrap gap-2">
+        <a href="decision-knowledge-hub.html" class="inline-flex items-center gap-1 bg-white border border-teal-200 rounded-full px-4 py-2 text-xs font-bold text-teal-800 hover:border-teal-400">ナレッジハブ</a>
+        <a href="shizuoka-executive-lecture-outline.md" class="inline-flex items-center gap-1 bg-white border border-blue-200 rounded-full px-4 py-2 text-xs font-bold text-blue-800 hover:border-blue-400">経営者講演 構成書</a>
+        <a href="AI時代の意思決定.md" class="inline-flex items-center gap-1 bg-white border border-violet-200 rounded-full px-4 py-2 text-xs font-bold text-violet-800 hover:border-violet-400">プログラム概要</a>
+      </div>
+    </section>
+
+  </main>
+  <footer class="max-w-5xl mx-auto px-5 pb-10 text-center text-xs text-ads-dim">
+    辻本光邦 · インサイトパワーズ · 日立製作所様との長年の取り組みの文脈
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

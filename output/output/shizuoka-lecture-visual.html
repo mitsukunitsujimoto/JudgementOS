@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="AI時代の意思決定をどう変えるか">
+  <meta property="og:description" content="静岡・志太支部 経営者向け講演 — 図解投影用">
+  <meta property="og:type" content="article">
+  <title>AI時代の意思決定をどう変えるか — 講演図解（投影用）</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF', surface: '#F8FAFC', hover: '#F1F5F9', border: '#E2E8F0',
+              accent: '#3B82F6', 'accent-light': '#2563EB', text: '#1E293B',
+              muted: '#64748B', dim: '#94A3B8', positive: '#10B981', negative: '#EF4444', warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl, section { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .bg-clip-text.text-transparent { color: #2563EB !important; -webkit-text-fill-color: #2563EB !important; }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-5xl mx-auto px-5 pt-2 flex justify-between items-center">
+    <span class="text-xs text-ads-dim font-medium">講演図解 — セクションごとにスクロールして投影</span>
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i> PDF
+    </button>
+  </div>
+  <main class="max-w-5xl mx-auto px-5 py-8 md:py-12">
+
+<!-- ============================================================ -->
+<!--  HERO + OPENING QUESTION                                      -->
+<!-- ============================================================ -->
+<section class="min-h-screen flex flex-col justify-center mb-20">
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+      <i data-lucide="presentation" class="w-4 h-4"></i>
+      静岡・志太支部 経営者向け講演
+    </div>
+    <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+      AI時代の<span class="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">意思決定</span>を<br class="hidden md:block">どう変えるか
+    </h1>
+    <p class="text-lg text-ads-muted">〜前提を照らし、判断を引き受ける〜</p>
+  </div>
+
+  <!-- Opening provocative question -->
+  <div class="bg-slate-900 rounded-2xl p-8 md:p-12 text-center mb-8 relative overflow-hidden">
+    <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1">
+      <i data-lucide="pause" class="w-3.5 h-3.5 text-amber-400"></i>
+      <span class="text-[10px] text-amber-400 font-bold tracking-wider">問い — 10秒、考えてください</span>
+    </div>
+    <i data-lucide="zap" class="w-8 h-8 text-amber-400 mx-auto mb-5"></i>
+    <p class="text-2xl md:text-3xl font-black text-white leading-snug mb-3">
+      AIは賢くなる。<br>人は、何を判断すべきか？
+    </p>
+    <p class="text-sm text-slate-400">答えを急がなくていい。今日の問いの入口です。</p>
+  </div>
+
+  <!-- One-page summary -->
+  <div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-8">
+    <p class="text-center text-sm font-bold text-ads-dim uppercase tracking-wider mb-6">今日の流れ</p>
+    <div class="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-blue-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">1</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">AIと<br>不安</p>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-violet-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">2</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">AIの<br>限界</p>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-orange-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">3</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">判断の<br>構造</p>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">4</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">判断の<br>変え方</p>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-amber-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">5</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">私の<br>実験</p>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-full bg-teal-500 text-white font-black text-sm flex items-center justify-center mx-auto mb-2">→</div>
+        <p class="text-[10px] md:text-xs font-bold text-slate-800">明日<br>から</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  PART 1: AIはなぜ経営者を不安にさせるのか                      -->
+<!-- ============================================================ -->
+<section id="part1" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">第一部</span>
+    <span class="text-sm text-ads-dim">スライド 3–7</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-8">AIはなぜ経営者を不安にさせるのか</h2>
+
+  <!-- Hand-raise poll visual -->
+  <div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-8 mb-6">
+    <p class="text-center text-sm font-bold text-ads-muted mb-6">挙手アンケート</p>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="text-lg font-black text-slate-900 mb-4 text-center">AIを使っていますか？</p>
+        <div class="space-y-2">
+          <div class="flex items-center gap-3 bg-white border border-ads-border rounded-xl px-4 py-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0"><i data-lucide="hand" class="w-4 h-4 text-emerald-600"></i></div>
+            <span class="text-sm font-medium text-slate-800">会社で使っている</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white border border-ads-border rounded-xl px-4 py-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-blue-600"></i></div>
+            <span class="text-sm font-medium text-slate-800">個人だけ使っている</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white border border-ads-border rounded-xl px-4 py-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><i data-lucide="minus" class="w-4 h-4 text-slate-500"></i></div>
+            <span class="text-sm font-medium text-slate-800">使っていない</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="text-lg font-black text-slate-900 mb-4 text-center">何に使っていますか？</p>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <span class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3 py-1.5 text-xs"><i data-lucide="search" class="w-3.5 h-3.5 text-blue-500"></i>情報収集</span>
+          <span class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3 py-1.5 text-xs"><i data-lucide="file-text" class="w-3.5 h-3.5 text-violet-500"></i>議事録</span>
+          <span class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3 py-1.5 text-xs"><i data-lucide="file-edit" class="w-3.5 h-3.5 text-orange-500"></i>提案書</span>
+          <span class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3 py-1.5 text-xs"><i data-lucide="code" class="w-3.5 h-3.5 text-emerald-500"></i>開発</span>
+          <span class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3 py-1.5 text-xs"><i data-lucide="mail" class="w-3.5 h-3.5 text-sky-500"></i>営業メール</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Changed vs Not changed -->
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+        <p class="font-black text-emerald-800">変わったもの</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm text-emerald-900"><i data-lucide="zap" class="w-4 h-4"></i>業務の速度</div>
+        <div class="flex items-center gap-2 text-sm text-emerald-900"><i data-lucide="layers" class="w-4 h-4"></i>情報の量</div>
+        <div class="flex items-center gap-2 text-sm text-emerald-900"><i data-lucide="clock" class="w-4 h-4"></i>議事録・メールの時間</div>
+      </div>
+    </div>
+    <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="x-circle" class="w-6 h-6 text-red-600"></i>
+        <p class="font-black text-red-800">変わっていないもの</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm text-red-900"><i data-lucide="git-branch" class="w-4 h-4"></i>経営判断の構造</div>
+        <div class="flex items-center gap-2 text-sm text-red-900"><i data-lucide="eye-off" class="w-4 h-4"></i>暗黙の前提</div>
+        <div class="flex items-center gap-2 text-sm text-red-900"><i data-lucide="shield" class="w-4 h-4"></i>誰が責任を取るか</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Provocative Q -->
+  <div class="bg-slate-900 rounded-2xl p-8 text-center">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <i data-lucide="pause" class="w-4 h-4 text-amber-400"></i>
+      <span class="text-[10px] text-amber-400 font-bold tracking-wider">問い — 30秒、考えてください</span>
+    </div>
+    <p class="text-xl md:text-2xl font-black text-white leading-snug">
+      議事録は10分で終わる。<br>
+      <span class="text-amber-400">来期の投資判断</span>は、10分で決められますか？
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  PART 2: AIは問いに答えるが前提は問わない                       -->
+<!-- ============================================================ -->
+<section id="part2" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-violet-100 text-violet-700 text-xs font-bold px-3 py-1 rounded-full">第二部</span>
+    <span class="text-sm text-ads-dim">スライド 8–13</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-8">AIは問いに答えるが、前提は問わない</h2>
+
+  <!-- Case study storyboard -->
+  <div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-8 mb-6">
+    <p class="text-xs font-bold text-ads-dim uppercase tracking-wider mb-5 text-center">事例：新規事業</p>
+    <div class="flex flex-col md:flex-row items-stretch gap-3 md:gap-0">
+      <div class="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+        <div class="w-10 h-10 rounded-full bg-orange-500 text-white font-black flex items-center justify-center mx-auto mb-2">1</div>
+        <p class="text-xs font-bold text-orange-700 mb-1">経営者の問い</p>
+        <p class="text-sm font-black text-slate-900">「新規事業を創出せよ」</p>
+      </div>
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0"><i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i><i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i></div>
+      <div class="flex-1 bg-violet-50 border border-violet-200 rounded-xl p-4 text-center">
+        <div class="w-10 h-10 rounded-full bg-violet-500 text-white font-black flex items-center justify-center mx-auto mb-2">2</div>
+        <p class="text-xs font-bold text-violet-700 mb-1">組織の暗黙の前提</p>
+        <p class="text-sm font-black text-slate-900">「既存事業を毀損するな」</p>
+      </div>
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0"><i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i><i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i></div>
+      <div class="flex-1 bg-sky-50 border border-sky-200 rounded-xl p-4 text-center">
+        <div class="w-10 h-10 rounded-full bg-sky-500 text-white font-black flex items-center justify-center mx-auto mb-2">3</div>
+        <p class="text-xs font-bold text-sky-700 mb-1">AIの回答</p>
+        <p class="text-sm font-black text-slate-900">大量の案が出る</p>
+      </div>
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0"><i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i><i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i></div>
+      <div class="flex-1 bg-red-50 border-2 border-red-300 rounded-xl p-4 text-center">
+        <div class="w-10 h-10 rounded-full bg-red-500 text-white font-black flex items-center justify-center mx-auto mb-2">4</div>
+        <p class="text-xs font-bold text-red-700 mb-1">結論</p>
+        <p class="text-sm font-black text-red-900">「うちには合わない」</p>
+      </div>
+    </div>
+    <p class="text-center text-sm font-bold text-slate-700 mt-5">AIが悪いのではない。<span class="text-violet-700">前提が変わっていない。</span></p>
+  </div>
+
+  <!-- AI 3 characteristics -->
+  <div class="grid md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white border-2 border-blue-200 rounded-2xl p-5 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="message-circle" class="w-7 h-7 text-blue-600"></i></div>
+      <p class="font-black text-blue-900 mb-1">問いに答える</p>
+      <p class="text-xs text-ads-muted">与えられた問いに膨大な回答を生成</p>
+    </div>
+    <div class="bg-white border-2 border-violet-200 rounded-2xl p-5 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="eye-off" class="w-7 h-7 text-violet-600"></i></div>
+      <p class="font-black text-violet-900 mb-1">前提を問わない</p>
+      <p class="text-xs text-ads-muted">暗黙のルールは検証しない</p>
+    </div>
+    <div class="bg-white border-2 border-red-200 rounded-2xl p-5 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-off" class="w-7 h-7 text-red-600"></i></div>
+      <p class="font-black text-red-900 mb-1">責任を取らない</p>
+      <p class="text-xs text-ads-muted">判断が外れてもAIは責任を負わない</p>
+    </div>
+  </div>
+
+  <!-- Provocative Q -->
+  <div class="bg-slate-900 rounded-2xl p-8 text-center">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <i data-lucide="pause" class="w-4 h-4 text-amber-400"></i>
+      <span class="text-[10px] text-amber-400 font-bold tracking-wider">問い</span>
+    </div>
+    <p class="text-xl md:text-2xl font-black text-white leading-snug">
+      AIに100個案出させて、<br>
+      <span class="text-amber-400">全部却下</span>した経験はありますか？
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  PART 3: 意思決定の構造（APCD + 氷山）                         -->
+<!-- ============================================================ -->
+<section id="part3" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full">第三部</span>
+    <span class="text-sm text-ads-dim">スライド 14–19</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-3">経営者の意思決定は何でできているか</h2>
+  <p class="text-lg text-ads-muted mb-8">4層の構造 — 水面下に「前提」がある</p>
+
+  <!-- 前提の正体 -->
+  <div class="bg-violet-50 border-2 border-violet-300 rounded-2xl p-6 md:p-8 mb-6">
+    <p class="text-center text-xs font-bold text-violet-700 uppercase tracking-wider mb-2">スライド 15 — 前提の正体</p>
+    <p class="text-center text-xl md:text-2xl font-black text-violet-900 mb-6">前提とは、<span class="text-violet-600">何を守りたいか</span></p>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-xl p-5 border border-violet-200 text-center">
+        <div class="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="shield" class="w-6 h-6 text-violet-600"></i></div>
+        <p class="font-black text-slate-900 text-sm mb-1">守りたいもの</p>
+        <p class="text-xs text-ads-muted">既存事業 · 雇用 · 顧客 · 評判</p>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-violet-200 text-center">
+        <div class="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-alert" class="w-6 h-6 text-violet-600"></i></div>
+        <p class="font-black text-slate-900 text-sm mb-1">棄損したくないもの</p>
+        <p class="text-xs text-ads-muted">売上 · シェア · 組織文化 · 信用</p>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-violet-200 text-center">
+        <div class="w-12 h-12 rounded-full bg-violet-200 flex items-center justify-center mx-auto mb-3"><i data-lucide="heart-pulse" class="w-6 h-6 text-violet-700"></i></div>
+        <p class="font-black text-slate-900 text-sm mb-1">生存本能 · 防衛本能</p>
+        <p class="text-xs text-ads-muted">理性の奥で動いている</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      <span class="bg-violet-200 text-violet-900 text-xs font-bold px-3 py-1.5 rounded-full">「うちが潰れない」</span>
+      <span class="bg-violet-200 text-violet-900 text-xs font-bold px-3 py-1.5 rounded-full">「既存事業を毀損するな」</span>
+      <span class="bg-violet-200 text-violet-900 text-xs font-bold px-3 py-1.5 rounded-full">「今のやり方を変えるな」</span>
+    </div>
+    <p class="text-center text-sm text-violet-800 font-medium mt-5">前提は「正しい／間違い」ではない。<strong>守ろうとしているもの</strong>が見える。</p>
+  </div>
+
+  <!-- Iceberg + APCD -->
+  <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <!-- Iceberg -->
+    <div class="bg-gradient-to-b from-sky-100 to-sky-200 border border-sky-300 rounded-2xl p-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1/2 bg-sky-50/80 border-b-2 border-dashed border-sky-400"></div>
+      <p class="text-[10px] font-bold text-sky-600 text-center relative z-10 mb-1">水面（見えている部分）</p>
+      <div class="relative z-10 space-y-2 mb-4">
+        <div class="bg-orange-100 border border-orange-300 rounded-lg px-3 py-2 flex items-center gap-2">
+          <i data-lucide="target" class="w-4 h-4 text-orange-600"></i>
+          <span class="text-sm font-bold text-orange-900">Purpose 目的</span>
+        </div>
+        <div class="bg-blue-100 border border-blue-300 rounded-lg px-3 py-2 flex items-center gap-2">
+          <i data-lucide="scale" class="w-4 h-4 text-blue-600"></i>
+          <span class="text-sm font-bold text-blue-900">Criteria 判断基準</span>
+        </div>
+        <div class="bg-emerald-100 border border-emerald-300 rounded-lg px-3 py-2 flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span class="text-sm font-bold text-emerald-900">Decision 判断</span>
+        </div>
+      </div>
+      <p class="text-[10px] font-bold text-violet-600 text-center relative z-10 mb-1 mt-6">水面下（見えていない部分）</p>
+      <div class="relative z-10 bg-violet-200 border-2 border-violet-400 rounded-xl px-4 py-5 text-center">
+        <i data-lucide="eye-off" class="w-8 h-8 text-violet-700 mx-auto mb-2"></i>
+        <p class="text-lg font-black text-violet-900">Assumptions</p>
+        <p class="text-sm font-bold text-violet-800">前提 — 守りたいもの・棄損したくないもの</p>
+        <p class="text-xs text-violet-700 mt-2">生存本能・防衛本能が動いている</p>
+      </div>
+    </div>
+
+    <!-- APCD vertical flow -->
+    <div class="bg-ads-surface border border-ads-border rounded-2xl p-6 flex flex-col justify-center">
+      <div class="space-y-0">
+        <div class="bg-violet-50 border-2 border-violet-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-violet-500">Assumptions</p>
+          <p class="text-xl font-black text-violet-900">前提</p>
+        </div>
+        <div class="flex justify-center py-1"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+        <div class="bg-orange-50 border-2 border-orange-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-orange-500">Purpose</p>
+          <p class="text-xl font-black text-orange-900">目的</p>
+        </div>
+        <div class="flex justify-center py-1"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+        <div class="bg-blue-50 border-2 border-blue-300 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-blue-500">Criteria</p>
+          <p class="text-xl font-black text-blue-900">判断基準</p>
+        </div>
+        <div class="flex justify-center py-1"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+        <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 text-center">
+          <p class="text-[10px] font-bold text-emerald-500">Decision</p>
+          <p class="text-xl font-black text-emerald-900">判断</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 片岡勝太郎 — 前提を破った -->
+  <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-400 rounded-2xl p-6 md:p-8 mb-6">
+    <p class="text-center text-xs font-bold text-amber-700 uppercase tracking-wider mb-4">スライド 16 — 前提を破った経営者魂</p>
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+      <div class="md:w-32 shrink-0 text-center md:text-left">
+        <div class="inline-flex flex-col items-center md:items-start">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500 flex items-center justify-center mb-2"><i data-lucide="flame" class="w-8 h-8 text-white"></i></div>
+          <p class="text-[10px] font-bold text-amber-600">1970年</p>
+          <p class="text-sm font-black text-slate-900">片岡 勝太郎</p>
+          <p class="text-xs text-ads-muted">アルプスアルパイン創業者</p>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+          東京・大田区に研修センターを創設 — 高度経済成長、イケイケどんどんの時代に
+        </p>
+        <div class="bg-white border border-amber-200 rounded-xl p-5 mb-4">
+          <p class="text-base md:text-lg font-black text-slate-900 leading-relaxed">
+            「<span class="text-amber-700">会社はつぶれやすい</span>。しかし、<span class="text-emerald-700">個人がつぶれるわけにはいかない</span>。<br>
+            人は自分の<span class="text-amber-700">売り物</span>を持たなくてはならない。だから研修センターをつくった。」
+          </p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3 text-sm">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p class="text-[10px] font-bold text-red-600 mb-1">当時の「当たり前」（前提）</p>
+            <p class="text-xs text-slate-800">会社にいれば大丈夫。成長は続く。</p>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+            <p class="text-[10px] font-bold text-emerald-600 mb-1">片岡が破った前提</p>
+            <p class="text-xs text-slate-800">会社はつぶれる。だから個人に理論・実践と売り物を。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-sm font-black text-amber-900 mt-5">驚きの経営者魂 — 前提を照らすのではなく、<span class="text-red-700">前提そのものを書き換えた</span>。</p>
+  </div>
+
+  <!-- Toyota vs Kataoka contrast -->
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white border-2 border-red-200 rounded-2xl p-5 md:p-6">
+      <p class="text-xs font-bold text-red-600 mb-3 flex items-center gap-1"><i data-lucide="lock" class="w-4 h-4"></i> 前提に沿う — トヨタ（2026年）</p>
+      <p class="text-sm font-black text-slate-900 leading-relaxed mb-2">「過去のやり方、過去の方程式に、どうしても沿った考え方をしてしまう」</p>
+      <p class="text-xs text-ads-muted">近健太氏（次期社長）</p>
+    </div>
+    <div class="bg-white border-2 border-amber-400 rounded-2xl p-5 md:p-6">
+      <p class="text-xs font-bold text-amber-700 mb-3 flex items-center gap-1"><i data-lucide="unlock" class="w-4 h-4"></i> 前提を破る — 片岡（1970年）</p>
+      <p class="text-sm font-black text-slate-900 leading-relaxed mb-2">「会社はつぶれやすい。個人がつぶれるわけにはいかない。」</p>
+      <p class="text-xs text-ads-muted">アルプスアルパイン創業者</p>
+    </div>
+  </div>
+
+  <!-- Provocative Q -->
+  <div class="bg-slate-900 rounded-2xl p-8 text-center">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <i data-lucide="pause" class="w-4 h-4 text-amber-400"></i>
+      <span class="text-[10px] text-amber-400 font-bold tracking-wider">問い</span>
+    </div>
+    <p class="text-xl md:text-2xl font-black text-white leading-snug">
+      あなたが守ろうとしているもの——<br>
+      それは<span class="text-amber-400">今も守るべき</span>ものですか？
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  PART 4: AI時代の意思決定をどう変えるか                         -->
+<!-- ============================================================ -->
+<section id="part4" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">第四部</span>
+    <span class="text-sm text-ads-dim">スライド 17–22</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-8">AI時代の意思決定をどう変えるか</h2>
+
+  <!-- Reinforcement loop visual -->
+  <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
+    <p class="text-center text-sm font-bold text-red-800 mb-5">なぜ変われないのか — 既存合理性の強化</p>
+    <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+      <div class="w-36 text-center bg-white rounded-xl p-4 border border-red-100">
+        <i data-lucide="building-2" class="w-8 h-8 text-slate-500 mx-auto mb-2"></i>
+        <p class="text-xs font-bold text-slate-800">暗黙の前提</p>
+      </div>
+      <i data-lucide="arrow-right" class="w-6 h-6 text-red-400 hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-6 h-6 text-red-400 md:hidden"></i>
+      <div class="w-36 text-center bg-white rounded-xl p-4 border border-red-100">
+        <i data-lucide="bot" class="w-8 h-8 text-red-500 mx-auto mb-2"></i>
+        <p class="text-xs font-bold text-slate-800">AIが最適解を生成</p>
+      </div>
+      <i data-lucide="arrow-right" class="w-6 h-6 text-red-400 hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-6 h-6 text-red-400 md:hidden"></i>
+      <div class="w-36 text-center bg-red-100 rounded-xl p-4 border-2 border-red-300">
+        <i data-lucide="refresh-cw" class="w-8 h-8 text-red-700 mx-auto mb-2"></i>
+        <p class="text-xs font-black text-red-900">前提が強化される</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5-step framework with icons -->
+  <div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-8 mb-6">
+    <div class="flex flex-col items-center gap-0 max-w-lg mx-auto">
+      <div class="w-full flex items-center gap-4 bg-violet-50 border-2 border-violet-300 rounded-xl px-5 py-4">
+        <div class="w-12 h-12 rounded-xl bg-violet-500 flex items-center justify-center shrink-0"><i data-lucide="flashlight" class="w-6 h-6 text-white"></i></div>
+        <div><p class="text-[10px] font-bold text-violet-500">STEP 1</p><p class="font-black text-violet-900 text-lg">前提を照らす</p></div>
+      </div>
+      <div class="py-1.5"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+      <div class="w-full flex items-center gap-4 bg-orange-50 border-2 border-orange-300 rounded-xl px-5 py-4">
+        <div class="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center shrink-0"><i data-lucide="message-square-quote" class="w-6 h-6 text-white"></i></div>
+        <div><p class="text-[10px] font-bold text-orange-500">STEP 2</p><p class="font-black text-orange-900 text-lg">問いを見直す</p></div>
+      </div>
+      <div class="py-1.5"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+      <div class="w-full flex items-center gap-4 bg-blue-50 border-2 border-blue-300 rounded-xl px-5 py-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0"><i data-lucide="sliders-horizontal" class="w-6 h-6 text-white"></i></div>
+        <div><p class="text-[10px] font-bold text-blue-500">STEP 3</p><p class="font-black text-blue-900 text-lg">判断基準を見直す</p></div>
+      </div>
+      <div class="py-1.5"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+      <div class="w-full flex items-center gap-4 bg-sky-50 border-2 border-sky-300 rounded-xl px-5 py-4">
+        <div class="w-12 h-12 rounded-xl bg-sky-500 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-white"></i></div>
+        <div><p class="text-[10px] font-bold text-sky-500">STEP 4</p><p class="font-black text-sky-900 text-lg">AIを活用する</p></div>
+      </div>
+      <div class="py-1.5"><i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent"></i></div>
+      <div class="w-full flex items-center gap-4 bg-emerald-50 border-2 border-emerald-400 rounded-xl px-5 py-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0"><i data-lucide="user-check" class="w-6 h-6 text-white"></i></div>
+        <div><p class="text-[10px] font-bold text-emerald-500">STEP 5</p><p class="font-black text-emerald-900 text-lg">判断を引き受ける</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wrong vs Right order -->
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+      <p class="text-xs font-bold text-red-600 mb-3 flex items-center gap-1"><i data-lucide="x-circle" class="w-4 h-4"></i> よくある失敗</p>
+      <div class="flex items-center gap-2 flex-wrap text-sm">
+        <span class="bg-red-200 text-red-900 font-bold px-2 py-1 rounded">AI</span>
+        <i data-lucide="arrow-right" class="w-4 h-4 text-red-400"></i>
+        <span class="bg-white border border-red-200 px-2 py-1 rounded text-slate-700">大量の案</span>
+        <i data-lucide="arrow-right" class="w-4 h-4 text-red-400"></i>
+        <span class="bg-red-200 text-red-900 font-bold px-2 py-1 rounded">合わない</span>
+      </div>
+    </div>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+      <p class="text-xs font-bold text-emerald-600 mb-3 flex items-center gap-1"><i data-lucide="check-circle" class="w-4 h-4"></i> 正しい順番</p>
+      <div class="flex items-center gap-1 flex-wrap text-xs">
+        <span class="bg-violet-200 text-violet-900 font-bold px-2 py-1 rounded">前提</span>
+        <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-500"></i>
+        <span class="bg-orange-200 text-orange-900 font-bold px-2 py-1 rounded">問い</span>
+        <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-500"></i>
+        <span class="bg-blue-200 text-blue-900 font-bold px-2 py-1 rounded">基準</span>
+        <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-500"></i>
+        <span class="bg-sky-200 text-sky-900 font-bold px-2 py-1 rounded">AI</span>
+        <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-500"></i>
+        <span class="bg-emerald-200 text-emerald-900 font-bold px-2 py-1 rounded">判断</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Provocative Q -->
+  <div class="bg-slate-900 rounded-2xl p-8 text-center">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <i data-lucide="pause" class="w-4 h-4 text-amber-400"></i>
+      <span class="text-[10px] text-amber-400 font-bold tracking-wider">問い</span>
+    </div>
+    <p class="text-xl md:text-2xl font-black text-white leading-snug">
+      「AIが言ったから」——<br>
+      それは<span class="text-amber-400">判断</span>ですか？
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  PART 5: 私自身の実験                                          -->
+<!-- ============================================================ -->
+<section id="part5" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">第五部</span>
+    <span class="text-sm text-ads-dim">スライド 23</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-3">私自身の実験</h2>
+  <p class="text-lg text-ads-muted mb-8">動画を作った、ではない。<span class="font-bold text-slate-800">AIエージェント経営の普及</span>に乗り出した。</p>
+
+  <!-- Core experiment -->
+  <div class="bg-ads-surface border-2 border-amber-300 rounded-2xl p-6 md:p-8 mb-6">
+    <p class="text-center text-xs font-bold text-amber-700 uppercase tracking-wider mb-6">実験の本体</p>
+    <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 mb-6">
+      <div class="w-44 text-center p-4">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="user-check" class="w-8 h-8 text-white"></i>
+        </div>
+        <p class="font-black text-emerald-900 text-sm">人間が決めた</p>
+        <p class="text-xs text-emerald-700 mt-1">方向性・使命</p>
+      </div>
+      <div class="flex flex-col items-center md:w-24">
+        <i data-lucide="arrow-right" class="w-7 h-7 text-amber-500 hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-7 h-7 text-amber-500 md:hidden"></i>
+      </div>
+      <div class="w-52 text-center p-5 bg-amber-50 border-2 border-amber-400 rounded-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="bot" class="w-8 h-8 text-white"></i>
+        </div>
+        <p class="font-black text-amber-900 text-lg">AIエージェント<br>経営の普及</p>
+        <p class="text-xs text-amber-700 mt-2">経営者がAIを「使う」ではなく<br>「判断の前提を照らす」経営へ</p>
+      </div>
+      <div class="flex flex-col items-center md:w-24">
+        <i data-lucide="arrow-right" class="w-7 h-7 text-amber-500 hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-7 h-7 text-amber-500 md:hidden"></i>
+      </div>
+      <div class="w-44 text-center p-4">
+        <div class="w-16 h-16 rounded-2xl bg-sky-500 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="zap" class="w-8 h-8 text-white"></i>
+        </div>
+        <p class="font-black text-sky-900 text-sm">AIが加速した</p>
+        <p class="text-xs text-sky-700 mt-1">実行・展開</p>
+      </div>
+    </div>
+    <p class="text-center text-sm font-bold text-slate-700">判断は私が引き受けた。AIは、その実行を加速させた。</p>
+  </div>
+
+  <!-- What human decided vs AI accelerated -->
+  <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-ads-surface border border-ads-border rounded-2xl p-6">
+      <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-1"><i data-lucide="user" class="w-4 h-4"></i> 人間が決めたこと</p>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+          <i data-lucide="compass" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <p class="text-sm font-bold text-slate-800">AIエージェント経営の普及に乗り出す</p>
+            <p class="text-xs text-emerald-700 mt-0.5">30年の意思決定支援の延長線上で、次のライフワークと決めた</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+          <i data-lucide="users" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <p class="text-sm font-bold text-slate-800">AI時代の意思決定協会を創る（構想）</p>
+            <p class="text-xs text-emerald-700 mt-0.5">前提を照らし、判断を引き受ける経営者の共同体</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+          <i data-lucide="target" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <p class="text-sm font-bold text-slate-800">何を残すか・何を教えるか</p>
+            <p class="text-xs text-emerald-700 mt-0.5">判断の前提を見つめる文化を、組織に根付かせる</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-2xl p-6">
+      <p class="text-xs font-bold text-sky-600 uppercase tracking-wider mb-4 flex items-center gap-1"><i data-lucide="bot" class="w-4 h-4"></i> AIが加速したこと（手段の一例）</p>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3 bg-sky-50 rounded-xl p-3 border border-sky-100">
+          <i data-lucide="video" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+          <p class="text-sm text-slate-800">長期顧客向け研修の動画化（決定分析・リスク分析）</p>
+        </div>
+        <div class="flex items-start gap-3 bg-sky-50 rounded-xl p-3 border border-sky-100">
+          <i data-lucide="layout" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+          <p class="text-sm text-slate-800">図解・教材・台本の制作速度</p>
+        </div>
+        <div class="flex items-start gap-3 bg-sky-50 rounded-xl p-3 border border-sky-100">
+          <i data-lucide="network" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+          <p class="text-sm text-slate-800">日立研究所との対話・サービス設計の探索</p>
+        </div>
+      </div>
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3">
+        <p class="text-xs text-amber-800 text-center">動画制作は<span class="font-bold">目的ではなく、実験の一手段</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Association vision + Kataoka lineage -->
+  <div class="bg-gradient-to-r from-violet-50 to-indigo-50 border-2 border-violet-300 rounded-2xl p-6 md:p-8 mb-6">
+    <div class="flex flex-col md:flex-row items-center gap-6 mb-6">
+      <div class="w-20 h-20 rounded-2xl bg-violet-500 flex items-center justify-center shrink-0">
+        <i data-lucide="landmark" class="w-10 h-10 text-white"></i>
+      </div>
+      <div class="text-center md:text-left flex-1">
+        <p class="text-xs font-bold text-violet-600 mb-1">構想中</p>
+        <p class="text-xl md:text-2xl font-black text-violet-900 mb-2">AI時代の意思決定協会</p>
+        <p class="text-sm text-violet-800">「どの前提で判断しているか」を、経営者同士で問い続ける場。</p>
+      </div>
+    </div>
+    <div class="border-t border-violet-200 pt-5">
+      <p class="text-xs font-bold text-amber-700 mb-3 flex items-center gap-1 justify-center md:justify-start"><i data-lucide="link" class="w-4 h-4"></i> 20年+のパートナー — アルプスアルパインとの系譜</p>
+      <div class="flex flex-col md:flex-row items-center gap-4 justify-center text-center md:text-left">
+        <div class="bg-amber-100 border border-amber-300 rounded-xl px-4 py-3">
+          <p class="text-[10px] font-bold text-amber-700">1970年 · 片岡勝太郎</p>
+          <p class="text-xs font-bold text-slate-800">前提を破り、個人の売り物を創る</p>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-violet-400 hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-violet-400 md:hidden"></i>
+        <div class="bg-violet-100 border border-violet-300 rounded-xl px-4 py-3">
+          <p class="text-[10px] font-bold text-violet-700">2020年代 · 辻本</p>
+          <p class="text-xs font-bold text-slate-800">前提を照らし、AI時代の判断を再設計する</p>
+        </div>
+      </div>
+      <p class="text-xs text-violet-700 text-center mt-4">創業者が埋めた種を、AI時代に引き継ぐ。今日の講演は、その第一歩。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  明日から：経営者がやること                                      -->
+<!-- ============================================================ -->
+<section id="action" class="min-h-screen flex flex-col justify-center mb-20 scroll-mt-8">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">アクション</span>
+    <span class="text-sm text-ads-dim">スライド 24</span>
+  </div>
+  <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-2">明日から、何をするか</h2>
+  <p class="text-lg text-ads-muted mb-8">大きな変革は不要。経営者1人で、明日から始められます。</p>
+
+  <!-- Timeline actions -->
+  <div class="space-y-4 mb-8">
+    <!-- Tomorrow -->
+    <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-5 md:p-6 flex gap-5 items-start">
+      <div class="w-16 h-16 rounded-2xl bg-blue-500 flex flex-col items-center justify-center shrink-0 text-white">
+        <i data-lucide="sunrise" class="w-7 h-7 mb-0.5"></i>
+        <span class="text-[10px] font-black">明日</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-blue-600 mb-1">15分 · 机の上で</p>
+        <p class="text-lg font-black text-slate-900 mb-2">直近の経営判断を1つ選ぶ</p>
+        <p class="text-sm text-slate-700 mb-3">来期の投資、人事、新規事業——何でもよい。いま決めようとしている、または決めたばかりの判断を1つ。</p>
+        <div class="bg-white rounded-xl p-4 border border-blue-200">
+          <p class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-1"><i data-lucide="pencil" class="w-3.5 h-3.5"></i> 紙に書く（3行）</p>
+          <p class="text-sm text-slate-800 font-medium">「この判断で、何を当たり前にしているか？」</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- This week -->
+    <div class="bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-300 rounded-2xl p-5 md:p-6 flex gap-5 items-start">
+      <div class="w-16 h-16 rounded-2xl bg-orange-500 flex flex-col items-center justify-center shrink-0 text-white">
+        <i data-lucide="calendar-days" class="w-7 h-7 mb-0.5"></i>
+        <span class="text-[10px] font-black">今週</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-orange-600 mb-1">30分 · 1回だけ</p>
+        <p class="text-lg font-black text-slate-900 mb-2">「問い」を書き直す</p>
+        <p class="text-sm text-slate-700 mb-3">書き出した前提を踏まえ、部下やAIに投げる問いを言い換える。</p>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="bg-white rounded-xl p-3 border border-red-200">
+            <p class="text-[10px] font-bold text-red-500 mb-1">Before</p>
+            <p class="text-xs font-medium text-slate-800">「新規事業を創出せよ」</p>
+          </div>
+          <div class="bg-white rounded-xl p-3 border border-emerald-200">
+            <p class="text-[10px] font-bold text-emerald-500 mb-1">After</p>
+            <p class="text-xs font-medium text-slate-800">「既存を毀損せず、新規を創出せよ」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next week -->
+    <div class="bg-gradient-to-r from-violet-50 to-violet-100 border-2 border-violet-300 rounded-2xl p-5 md:p-6 flex gap-5 items-start">
+      <div class="w-16 h-16 rounded-2xl bg-violet-500 flex flex-col items-center justify-center shrink-0 text-white">
+        <i data-lucide="calendar" class="w-7 h-7 mb-0.5"></i>
+        <span class="text-[10px] font-black">来週</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-violet-600 mb-1">15分 · 1つだけ</p>
+        <p class="text-lg font-black text-slate-900 mb-2">判断基準（MUST）を1つ疑う</p>
+        <p class="text-sm text-slate-700 mb-3">「3年以内黒字」「既存顧客優先」—— MUST と決めている基準を1つ選び、</p>
+        <div class="bg-white rounded-xl p-4 border border-violet-200 flex items-center gap-3">
+          <i data-lucide="help-circle" class="w-8 h-8 text-violet-500 shrink-0"></i>
+          <p class="text-sm font-black text-violet-900">「本当に MUST か？ 誰が、いつ決めた？」</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Habit -->
+    <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-400 rounded-2xl p-5 md:p-6 flex gap-5 items-start">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex flex-col items-center justify-center shrink-0 text-white">
+        <i data-lucide="repeat" class="w-7 h-7 mb-0.5"></i>
+        <span class="text-[10px] font-black">習慣</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-emerald-600 mb-1">判断のたびに</p>
+        <p class="text-lg font-black text-slate-900 mb-2">AIの順番を守る → 名前で引き受ける</p>
+        <div class="flex flex-wrap items-center gap-1 text-xs mb-3">
+          <span class="bg-violet-200 text-violet-900 font-bold px-2 py-1 rounded">前提</span>
+          <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-600"></i>
+          <span class="bg-orange-200 text-orange-900 font-bold px-2 py-1 rounded">問い</span>
+          <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-600"></i>
+          <span class="bg-blue-200 text-blue-900 font-bold px-2 py-1 rounded">基準</span>
+          <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-600"></i>
+          <span class="bg-sky-200 text-sky-900 font-bold px-2 py-1 rounded">AI</span>
+          <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-600"></i>
+          <span class="bg-emerald-300 text-emerald-900 font-bold px-2 py-1 rounded ring-2 ring-emerald-500">私が決めた</span>
+        </div>
+        <p class="text-xs text-emerald-800">「AIが言ったから」ではなく「前提を照らし、私が判断した」と言えるか。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOT to do -->
+  <div class="bg-slate-100 border border-slate-200 rounded-xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-lg bg-slate-300 flex items-center justify-center shrink-0"><i data-lucide="ban" class="w-5 h-5 text-slate-600"></i></div>
+    <div>
+      <p class="text-sm font-black text-slate-800 mb-1">明日からやらなくていいこと</p>
+      <p class="text-sm text-slate-600">全社AI導入計画 · 新ツールの選定 · 社員への一斉研修 — 前提が整う前のAI活用は、既存合理性を強化するだけ。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  CLOSING QUESTION                                             -->
+<!-- ============================================================ -->
+<section id="closing" class="min-h-screen flex flex-col justify-center mb-8 scroll-mt-8">
+  <div class="text-center mb-8">
+    <p class="text-sm font-bold text-ads-dim uppercase tracking-wider mb-4">今日のまとめ（スライド 25）</p>
+    <p class="text-xl md:text-2xl font-black text-slate-900 leading-relaxed mb-2">
+      AIは業務を変えた。<br>判断の構造は変わっていない。
+    </p>
+    <p class="text-lg text-ads-muted">変えるのは、前提を照らす経営者の姿勢。</p>
+  </div>
+
+  <div class="bg-slate-900 rounded-2xl p-10 md:p-14 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-transparent"></div>
+    <div class="relative">
+      <div class="flex items-center justify-center gap-1.5 mb-6">
+        <i data-lucide="pause" class="w-5 h-5 text-amber-400"></i>
+        <span class="text-xs text-amber-400 font-bold tracking-wider">持ち帰りの問い — 30秒、メモしてください</span>
+      </div>
+      <p class="text-2xl md:text-4xl font-black text-white leading-snug mb-4">
+        あなたの会社で、<br>
+        <span class="text-amber-400">AIより先に</span>見直すべき前提は<br>何ですか？
+      </p>
+      <p class="text-sm text-slate-400">答えは急がなくていい。問いを持ち帰ってください。（スライド 26）</p>
+    </div>
+  </div>
+</section>
+
+  </main>
+  <footer class="max-w-5xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">静岡・志太支部 経営者向け講演 — 図解投影用</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

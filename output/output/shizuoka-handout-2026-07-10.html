@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配布資料 v8 — 前提を照らし、問いを設計し、判断を引き受ける（2026-07-10）</title>
+  <style>
+    @page { size: A4 portrait; margin: 14mm 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Yu Gothic UI", "Hiragino Sans", "Meiryo", sans-serif;
+      font-size: 11pt;
+      line-height: 1.65;
+      color: #1a1a2e;
+      background: #e8e8ec;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 12px;
+      padding: 16mm 18mm 18mm;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      page-break-after: always;
+      position: relative;
+    }
+    .page:last-child { page-break-after: auto; }
+    .page-num {
+      position: absolute;
+      bottom: 10mm;
+      right: 18mm;
+      font-size: 8pt;
+      color: #888;
+    }
+    .page-label {
+      position: absolute;
+      top: 10mm;
+      right: 18mm;
+      font-size: 7.5pt;
+      color: #999;
+      letter-spacing: .05em;
+    }
+    h1.doc-title {
+      font-size: 16pt;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .doc-sub {
+      font-size: 11pt;
+      color: #334155;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin: 16px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    h2:first-child { margin-top: 0; }
+    h3 {
+      font-size: 12pt;
+      font-weight: 700;
+      color: #334155;
+      margin: 12px 0 8px;
+    }
+    p { margin-bottom: 7px; }
+    ul { margin: 0 0 8px 1.3em; }
+    li { margin: 3px 0; }
+    .meta {
+      font-size: 9pt;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .meta strong { color: #334155; }
+    .lead {
+      font-size: 10pt;
+      font-weight: 600;
+      line-height: 1.6;
+      padding: 10px 14px;
+      margin: 12px 0;
+      background: #f8fafc;
+      border-left: 3px solid #1e3a5f;
+      color: #0f172a;
+    }
+    .lead.dark {
+      background: #1e293b;
+      color: #f1f5f9;
+      border-left-color: #94a3b8;
+      font-size: 10.5pt;
+    }
+    .quote {
+      font-size: 10pt;
+      line-height: 1.65;
+      padding: 12px 14px;
+      margin: 10px 0;
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .quote.final {
+      background: #1e293b;
+      color: #f8fafc;
+      font-weight: 600;
+      font-size: 10.5pt;
+      line-height: 1.7;
+    }
+    .note-box {
+      font-size: 8.5pt;
+      color: #64748b;
+      padding: 8px 10px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 10.5pt;
+    }
+    th, td {
+      border: 1.5px solid #94a3b8;
+      padding: 10px 12px;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+      text-align: left;
+      color: #334155;
+    }
+    .check-col { width: 28px; text-align: center; }
+    .memo-col { width: 42%; min-height: 52px; }
+    .memo-large { min-height: 56px; }
+    .chain {
+      text-align: center;
+      font-size: 10pt;
+      font-weight: 600;
+      line-height: 2;
+      padding: 12px;
+      margin: 10px 0;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    .chain .arrow { color: #64748b; font-weight: 400; }
+    .chain-ai {
+      text-align: center;
+      font-size: 11pt;
+      font-weight: 600;
+      line-height: 1.85;
+      padding: 14px;
+      margin: 10px 0;
+      background: #eff6ff;
+      border: 2px solid #1e3a5f;
+      border-radius: 4px;
+    }
+    .core-box {
+      font-size: 10.5pt;
+      font-weight: 600;
+      line-height: 1.65;
+      padding: 12px 14px;
+      margin: 12px 0;
+      background: #fef3c7;
+      border-left: 4px solid #d97706;
+      color: #1e293b;
+    }
+    .contrast {
+      font-size: 13pt;
+      font-weight: 700;
+      text-align: center;
+      padding: 12px;
+      margin: 10px 0 14px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      line-height: 1.6;
+    }
+    .apcd {
+      text-align: center;
+      font-size: 9.5pt;
+      line-height: 1.9;
+      padding: 14px;
+      margin: 10px 0;
+      background: #fafafa;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    .apcd .step { font-weight: 700; color: #1e3a5f; }
+    .fill-line {
+      border-bottom: 1.5px solid #64748b;
+      min-height: 14mm;
+      margin: 8px 0 12px;
+    }
+    .fill-line.tall { min-height: 16mm; }
+    .oral-note {
+      font-size: 10pt;
+      color: #64748b;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-left: 3px solid #cbd5e1;
+    }
+    .fill-num { font-weight: 600; color: #475569; margin-right: 6px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 8px 0;
+    }
+    .pillars {
+      font-size: 9pt;
+      line-height: 1.5;
+    }
+    .pillars li { list-style: none; margin-left: 0; padding-left: 0; }
+    .pillars li::before { content: "● "; color: #1e3a5f; }
+    .cta {
+      font-size: 9pt;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      margin-top: 12px;
+    }
+    .cover-rule {
+      width: 48px;
+      height: 3px;
+      background: #1e3a5f;
+      margin: 16px 0;
+    }
+    .cover-theme {
+      font-size: 12pt;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin: 16px 0 8px;
+      line-height: 1.6;
+    }
+    .hero-axis {
+      font-size: 11.5pt;
+      font-weight: 700;
+      line-height: 1.65;
+      padding: 14px 16px;
+      margin: 12px 0;
+      background: #1e293b;
+      color: #f8fafc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .final-q {
+      font-size: 14pt;
+      font-weight: 700;
+      text-align: center;
+      padding: 18px 16px;
+      margin: 16px 0;
+      background: #fef3c7;
+      border: 2px solid #d97706;
+      border-radius: 4px;
+      line-height: 1.7;
+    }
+    .mega-contrast {
+      font-size: 16pt;
+      font-weight: 700;
+      text-align: center;
+      padding: 20px 16px;
+      margin: 14px 0;
+      background: #1e293b;
+      color: #f8fafc;
+      border-radius: 4px;
+      line-height: 1.75;
+    }
+    .mega-punch {
+      font-size: 13pt;
+      font-weight: 700;
+      text-align: center;
+      padding: 16px;
+      margin: 14px 0;
+      background: #eff6ff;
+      border: 2px solid #1e3a5f;
+      border-radius: 4px;
+      line-height: 1.7;
+    }
+    .cascade {
+      font-size: 10.5pt;
+      font-weight: 600;
+      line-height: 2;
+      padding: 14px 16px;
+      margin: 12px 0;
+      background: #f8fafc;
+      border-left: 4px solid #1e3a5f;
+      color: #1e293b;
+    }
+    .cascade .step-label {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .core-chain {
+      text-align: center;
+      font-size: 11pt;
+      font-weight: 700;
+      line-height: 2.1;
+      padding: 18px;
+      margin: 12px 0;
+      background: #1e293b;
+      color: #f8fafc;
+      border-radius: 4px;
+    }
+    .core-chain .arrow { color: #94a3b8; font-weight: 400; }
+    .flow-main {
+      font-size: 10.5pt;
+      font-weight: 600;
+      line-height: 2;
+      padding: 14px;
+      margin: 10px 0;
+      background: #f8fafc;
+      border: 2px solid #1e3a5f;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .apcd-mini {
+      font-size: 10pt;
+      line-height: 2;
+      padding: 12px;
+      margin: 10px 0;
+      background: #fafafa;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      text-align: center;
+    }
+    @media print {
+      body { background: #fff; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+      }
+      .no-print { display: none; }
+    }
+    @media screen {
+      .print-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        background: #1e293b;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 9pt;
+        z-index: 100;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .print-bar button {
+        background: #3b82f6;
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 9pt;
+      }
+      body { padding-top: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-bar no-print">
+  <span>配布資料 A4×8 — 印刷または PDF 保存</span>
+  <button onclick="window.print()">PDF / 印刷（Ctrl+P）</button>
+</div>
+
+<!-- P1 表紙 -->
+<section class="page">
+  <span class="page-label">配布資料</span>
+  <div style="margin-top: 28mm;">
+    <h1 class="doc-title">AI時代の意思決定をどう変えるか</h1>
+    <p class="doc-sub" style="font-weight: 600; color: #1e3a5f; line-height: 1.55;">── 前提を照らし、問いを設計し、判断を引き受ける</p>
+    <div class="cover-rule"></div>
+    <p class="meta">
+      2026年7月10日<br>
+      内外情勢調査会 静岡・志太支部<br><br>
+      <strong>辻本 光邦</strong><br>
+      株式会社インサイトパワーズ
+    </p>
+    <p class="cover-theme">持ち帰ってほしいこと（結論）</p>
+    <div class="hero-axis">
+      AI時代、経営者は<br>
+      「問いを設計する人」である。
+    </div>
+    <p style="font-size: 10.5pt; margin-bottom: 10px;">
+      AIは、<strong>答えを出す力</strong>を飛躍的に高めた。<br>
+      しかし、<strong>何を問うか</strong>を設計するのは — <strong>経営者</strong> — である。
+    </p>
+
+    <p class="cover-theme">今日の流れ</p>
+    <div class="flow-main">
+      AIへ質問する<br>
+      <span class="arrow">↓</span><br>
+      その問いは、本当に正しい？<br>
+      <span class="arrow">↓</span><br>
+      問いを設計する<br>
+      <span class="arrow">↓</span><br>
+      そこで初めて — 前提を照らす<br>
+      <span class="arrow">↓</span><br>
+      判断を引き受ける
+    </div>
+    <p style="font-size: 9.5pt; color: #475569; margin-top: 10px;">
+      <strong>前提を照らす</strong> — 目的ではない。<strong>問いを変えるための手段</strong>である。
+    </p>
+  </div>
+  <div class="note-box" style="position: absolute; bottom: 22mm; left: 18mm; right: 18mm; font-size: 10pt;">
+    講義の要約ではありません。大切な<strong>問い</strong>とメッセージだけを載せています。フレームワークは載せません。説明・事例は<strong>講演で補います</strong>。正解はありません。<strong>記入は任意</strong>です。
+  </div>
+  <span class="page-num">1 / 8</span>
+</section>
+
+<!-- P2 AIは答える。経営者は問う。 -->
+<section class="page">
+  <span class="page-label">P2</span>
+  <div class="mega-contrast">
+    AIは答える。<br><br>
+    経営者は問う。
+  </div>
+  <p style="font-size: 11pt; font-weight: 600; text-align: center; margin: 12px 0 16px;">
+    この講演は、これを伝える講演です。
+  </p>
+  <table style="font-size: 11pt;">
+    <tbody>
+      <tr><th style="width:28%;">AI</th><td>与えられた問いに、<strong>答える</strong></td></tr>
+      <tr><th>経営者</th><td>AIに何を問うか — <strong>問いを設計する</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top: 20px;">講演の問い（第1部）</h2>
+  <table>
+    <thead><tr><th style="width:36px;"></th><th>問い</th><th class="memo-col">あなたのメモ</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>直近で、自分だけが決めなければならない判断 — 一つ</td><td class="memo-large" style="border:none;"></td></tr>
+      <tr><td>Q2</td><td>その判断を、<strong>最後にあなた自身が引き受ける覚悟</strong> — ありますか</td><td class="memo-large" style="border:none;"></td></tr>
+    </tbody>
+  </table>
+  <span class="page-num">2 / 8</span>
+</section>
+
+<!-- P3 経営者がAIによく聞くこと -->
+<section class="page">
+  <span class="page-label">P3</span>
+  <h2>経営者がAIによく聞くこと</h2>
+  <p style="font-size: 9.5pt; margin-bottom: 8px;">当てはまるに ✓</p>
+  <table style="font-size: 10.5pt;">
+    <thead><tr><th style="width:28px;">✓</th><th></th></tr></thead>
+    <tbody>
+      <tr><td class="check-col"></td><td>売上を伸ばすには？</td></tr>
+      <tr><td class="check-col"></td><td>コスト削減方法は？</td></tr>
+      <tr><td class="check-col"></td><td>成功事例は？</td></tr>
+      <tr><td class="check-col"></td><td>次に何をすべき？</td></tr>
+      <tr><td class="check-col"></td><td>投資してよいか？</td></tr>
+    </tbody>
+  </table>
+
+  <div class="mega-punch">
+    AIは答えてくれる。<br><br>
+    しかし、<strong>問いが正しいとは保証してくれない。</strong>
+  </div>
+
+  <h3>AIに聞く前に — 自分へ問う</h3>
+  <div class="cascade">
+    AIへ<br>
+    &nbsp;&nbsp;売上を伸ばす方法は？<br>
+    <span class="step-label">↓ その前に</span><br>
+    &nbsp;&nbsp;なぜ売上なのか？ 利益ではないのか？<br>
+    <span class="step-label">↓ その前に</span><br>
+    &nbsp;&nbsp;何を守ろうとしているのか？
+  </div>
+  <p style="font-size: 10pt; margin-bottom: 8px;">
+    AIに聞いてはいけない — わけではない。<strong>その前に、自分へ問うことがある。</strong>
+  </p>
+
+  <h3>あなたがAIに最近聞いたこと — 一つ</h3>
+  <div class="fill-line tall"></div>
+  <h3>その前に、自分へ問うなら — 何を問うか（メモ）</h3>
+  <div class="fill-line tall"></div>
+  <div class="fill-line tall"></div>
+  <span class="page-num">3 / 8</span>
+</section>
+
+<!-- P4 AIが合理性を強化する -->
+<section class="page">
+  <span class="page-label">P4</span>
+  <h2>AIが合理性を強化する</h2>
+  <p style="font-size: 10.5pt; font-weight: 600; margin-bottom: 10px;">この講演の核</p>
+  <div class="core-chain">
+    AI<br>
+    <span class="arrow">↓</span><br>
+    質問されたことに答える<br>
+    <span class="arrow">↓</span><br>
+    前提は疑わない<br>
+    <span class="arrow">↓</span><br>
+    合理性を強化する
+  </div>
+  <ul style="font-size: 10.5pt; margin: 14px 0;">
+    <li>答えは — もっともらしい</li>
+    <li>問いが — そのまま通る</li>
+    <li><strong>見えない前提が — 強化される</strong></li>
+  </ul>
+  <p style="font-size: 10.5pt;">
+    AIそのものが問題ではない。<strong>与えられた問いの中で</strong> — 最適化する。
+  </p>
+  <span class="page-num">4 / 8</span>
+</section>
+
+<!-- P5 問いを設計する — そこで初めて前提 -->
+<section class="page">
+  <span class="page-label">P5</span>
+  <h2>問いを設計する — そこで初めて「前提」</h2>
+  <p style="font-size: 10.5pt; font-weight: 600; margin-bottom: 8px;">ここで初めて — 「前提」</p>
+  <p class="quote" style="font-size: 12pt; text-align: center; font-weight: 700;">
+    前提とは —<br><strong>当たり前すぎて、疑わなくなった考え方。</strong>
+  </p>
+  <div class="core-box" style="font-size: 10.5pt;">
+    <strong>前提を照らすことは、目的ではない。</strong><br>
+    <strong>問いを変えるために、照らす。</strong>
+  </div>
+  <p style="font-size: 10.5pt; margin-bottom: 10px;">
+    前提は — 組織が長年生き残るために作ってきた<strong>合理性</strong> — である。悪ではない。
+  </p>
+  <h3>当たり前すぎて、疑わなくなった前提 — 一つ</h3>
+  <div class="fill-line tall"></div>
+  <h3>照らしたうえで、AIに問い直すなら — どう問うか</h3>
+  <div class="fill-line tall"></div>
+  <div class="fill-line tall"></div>
+  <span class="page-num">5 / 8</span>
+</section>
+
+<!-- P6 核心の問い — 引き受ける -->
+<section class="page">
+  <span class="page-label">P6</span>
+  <h2>核心の問い — 引き受ける</h2>
+  <p style="font-size: 10pt; font-weight: 600; margin-bottom: 6px;">核心の問い（第4部）★ ここに書く</p>
+  <table>
+    <thead><tr><th style="width:40px;"></th><th>問い</th><th class="memo-col">あなたのメモ</th></tr></thead>
+    <tbody>
+      <tr><td>Q-A</td><td><strong>今、何を守ろうとしていますか</strong></td><td class="memo-large" style="border:none;"></td></tr>
+      <tr><td>Q-B</td><td><strong>意識しなくなった「守るもの」 — 一つ</strong></td><td class="memo-large" style="border:none;"></td></tr>
+      <tr><td>Q-C</td><td>その前提のまま、<strong>本当に問うべき問い</strong>を問えていますか</td><td class="memo-large" style="border:none;"></td></tr>
+    </tbody>
+  </table>
+
+  <div class="quote final" style="font-size: 11pt; margin: 14px 0;">
+    最後に、その判断の責任を負うのは、誰ですか。
+  </div>
+
+  <h3>自己点検 — 直近3か月</h3>
+  <table style="font-size: 9.5pt;">
+    <thead>
+      <tr><th>#</th><th>項目</th><th style="width:32px">はい</th><th style="width:32px">どちら</th><th style="width:32px">いいえ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>AIに問う<strong>前</strong>に、自分へ問った</td><td></td><td></td><td></td></tr>
+      <tr><td>2</td><td>「何をすべきか」ではなく「<strong>何を問うべきか</strong>」を考えた</td><td></td><td></td><td></td></tr>
+      <tr><td>3</td><td>AIの答えの前に、<strong>問いを設計</strong>した</td><td></td><td></td><td></td></tr>
+      <tr><td>4</td><td>「AIがこう言っている」で決めなかった</td><td></td><td></td><td></td></tr>
+      <tr><td>5</td><td>判断の<strong>責任を自分で引き受けた</strong></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <span class="page-num">6 / 8</span>
+</section>
+
+<!-- P7 持ち帰り15分 -->
+<section class="page">
+  <span class="page-label">P7</span>
+  <h2>持ち帰り — 明日15分</h2>
+  <p style="font-size: 9.5pt;">机に向かって15分。<strong>AIは使わない。</strong></p>
+  <table>
+    <thead><tr><th>ステップ</th><th>やること</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>AIに最近聞いた<strong>問い</strong>を1行</td></tr>
+      <tr><td>2</td><td>その<strong>前に自分へ問うこと</strong>を1行</td></tr>
+      <tr><td>3</td><td><strong>問い直すなら</strong> — どう問うか（答えは出さない）</td></tr>
+    </tbody>
+  </table>
+  <h3>メモ</h3>
+  <div class="fill-line tall"></div>
+  <div class="fill-line tall"></div>
+  <div class="fill-line tall"></div>
+  <span class="page-num">7 / 8</span>
+</section>
+
+<!-- P8 最後に残る問い -->
+<section class="page">
+  <span class="page-label">P8</span>
+  <h2>最後に残る問い</h2>
+  <p class="quote" style="font-size: 11pt; font-weight: 600; text-align: center; margin: 20px 0 16px;">
+    AIは、これからも、もっと賢くなるでしょう。
+  </p>
+  <p style="font-size: 11pt; font-weight: 600; text-align: center; margin-bottom: 20px;">
+    だから、最後に残る問いは — 一つです。
+  </p>
+
+  <div class="final-q" style="font-size: 15pt; padding: 22px 18px;">
+    私は、本当に問うべき問いを、<br>問えているだろうか。
+  </div>
+
+  <div class="fill-line tall" style="margin-top: 24px;"></div>
+  <div class="fill-line tall"></div>
+
+  <div class="cta" style="margin-top: 28px;">
+    名刺に<strong>一言</strong> — 「うちの問い：〇〇」— お気軽に。
+  </div>
+
+  <p class="meta" style="margin-top: 24px;">
+    辻本 光邦<br>
+    株式会社インサイトパワーズ<br>
+    https://insightpowers.co.jp
+  </p>
+  <span class="page-num">8 / 8</span>
+</section>
+
+</body>
+</html>

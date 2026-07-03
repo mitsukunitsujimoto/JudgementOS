@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:title" content="AI時代の意思決定再設計ツール">
+  <meta property="og:description" content="情報の二面性 · 前提照らし · AI依頼設計 · 可能性の提示">
+  <title>AI時代の意思決定再設計ツール — 4パネル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: { bg:'#FFF', surface:'#F8FAFC', border:'#E2E8F0', accent:'#3B82F6', 'accent-light':'#2563EB', muted:'#64748B', dim:'#94A3B8' }
+          },
+          fontFamily: { sans: ['"Noto Sans JP"','sans-serif'] },
+          animation: { 'fade-in': 'fadeIn 0.4s ease-out', 'pulse-soft': 'pulseSoft 3s ease-in-out infinite' },
+          keyframes: {
+            fadeIn: { '0%': { opacity:'0', transform:'translateY(8px)' }, '100%': { opacity:'1', transform:'translateY(0)' } },
+            pulseSoft: { '0%,100%': { opacity:'0.6' }, '50%': { opacity:'1' } }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #0f172a; }
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 3px;
+      min-height: calc(100vh - 56px - var(--opening-h, 0px) - var(--flow-h, 0px));
+    }
+    body.has-opening { --opening-h: 7.25rem; --flow-h: 2.25rem; }
+    @media (min-width: 768px) {
+      body.has-opening { --opening-h: 6.5rem; }
+    }
+    body:not(.has-opening) { --flow-h: 2.25rem; }
+    .panel-grid {
+      min-height: calc(100vh - 56px - var(--opening-h, 0px) - var(--flow-h, 0px));
+    }
+    .flow-bar { position: sticky; top: 0; z-index: 20; }
+    @media (max-width: 900px) {
+      .panel-grid { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; }
+    }
+    .panel {
+      position: relative;
+      overflow: hidden;
+      min-height: 280px;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, z-index 0s;
+    }
+    .panel:hover { transform: scale(1.008); z-index: 2; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); }
+    .panel-num {
+      font-size: clamp(4rem, 12vw, 7rem);
+      line-height: 1;
+      font-weight: 900;
+      opacity: 0.12;
+      position: absolute;
+      right: 0.5rem;
+      top: -0.25rem;
+      user-select: none;
+    }
+    .dot-grid {
+      background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .glass { background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); }
+    .glass-light { background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.9); }
+    .tab-active { background: white; color: #0f172a; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+    .flow-line { stroke-dasharray: 8 6; animation: dash 20s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -200; } }
+    #overlay.active { display: flex; }
+    #overlay { display: none; }
+    body.coach-visible { --coach-h: 11.5rem; }
+    body.coach-visible .panel-grid {
+      min-height: calc(100vh - 56px - var(--opening-h, 0px) - var(--flow-h, 0px) - var(--coach-h, 0px));
+    }
+    body.presentation-mode #facilitator-coach,
+    body.presentation-mode #opening-line { display: none !important; }
+    body.presentation-mode.coach-visible { --coach-h: 0px; }
+    #facilitator-coach {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      max-height: 42vh;
+    }
+    #facilitator-coach.visible { transform: translateY(0); }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+      .panel-grid { gap: 8px; }
+      .panel { break-inside: avoid; min-height: 220px; }
+    }
+  </style>
+</head>
+<body class="antialiased text-slate-800 has-opening">
+
+  <!-- Top bar -->
+  <header class="no-print h-14 flex items-center justify-between px-4 md:px-6 bg-slate-900 border-b border-slate-700/80">
+    <div class="flex items-center gap-3 min-w-0">
+      <a href="decision-knowledge-presentation.html" class="text-slate-400 hover:text-white transition-colors shrink-0" title="発表ストーリー">
+        <i data-lucide="book-open" class="w-4 h-4"></i>
+      </a>
+      <a href="decision-knowledge-hub.html" class="text-slate-400 hover:text-white transition-colors shrink-0">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      </a>
+      <div class="min-w-0">
+        <p data-header-title class="text-white font-black text-sm md:text-base truncate">AI時代の意思決定再設計ツール</p>
+        <p data-header-sub class="text-[10px] text-slate-400 truncate">静的/動的 · 前提照らし · AIには可能性だけ依頼</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <a data-session-projection href="#" class="hidden text-[10px] text-teal-400 font-bold hover:underline items-center gap-1">
+        投影用 <i data-lucide="external-link" class="w-3 h-3"></i>
+      </a>
+      <span class="hidden sm:inline text-[10px] text-slate-500">1–4 拡大 · N次へ</span>
+      <button type="button" data-coach-toggle class="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-1.5 rounded-lg hover:bg-emerald-500/25 transition-colors">
+        ガイド
+      </button>
+      <button type="button" data-presentation-toggle class="text-[10px] font-bold text-slate-300 bg-slate-700 px-2.5 py-1.5 rounded-lg hover:bg-slate-600 transition-colors" title="ガイドを隠して投影">
+        投影
+      </button>
+      <button type="button" onclick="document.documentElement.requestFullscreen?.()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-colors">
+        <i data-lucide="maximize" class="w-3.5 h-3.5"></i> 全画面
+      </button>
+    </div>
+  </header>
+
+  <!-- 冒頭（セッション未指定時は汎用 / 指定時は JS で差し替え） -->
+  <section id="opening-line" class="no-print relative px-4 md:px-8 py-3 md:py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-amber-500/30">
+    <div class="max-w-6xl mx-auto flex items-start gap-3 md:gap-4">
+      <div class="hidden sm:flex w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 items-center justify-center shrink-0 mt-1">
+        <i data-lucide="quote" class="w-5 h-5 text-amber-300"></i>
+      </div>
+      <div id="opening-content" class="flex-1 min-w-0 space-y-2">
+        <div>
+          <p class="text-[10px] font-bold tracking-[0.2em] text-teal-400/90 uppercase mb-0.5">情報の二面性 · AIの限界</p>
+          <p class="text-xs md:text-sm text-slate-300 leading-relaxed">
+            情報には<strong class="text-white">静的</strong>（命題的·辞書的）と<strong class="text-white">動的</strong>（操作的·行動指示·因果）がある。
+            汎用AIは<strong class="text-amber-200">可能性を網羅する</strong>のは得意だが、<strong class="text-amber-200">一つを選び責任を取る</strong>のは人の領域。
+            意味を理解して答えているわけではない — 見事な応答に限界が見えにくい。
+          </p>
+        </div>
+        <div class="border-t border-slate-700/80 pt-2">
+          <p class="text-[10px] font-bold tracking-[0.2em] text-amber-400/90 uppercase mb-0.5">このツールの運用</p>
+          <p class="text-sm md:text-base font-black text-white leading-snug md:leading-relaxed">
+            <span class="text-slate-300">①前提を照らす → ②決めたいこと·欲しい成果物を掘り起こす → </span>
+            <span class="text-amber-200">③AIに「最適な可能性の提示」だけを依頼する。</span>
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="hideOpening()" class="shrink-0 text-[10px] text-slate-500 hover:text-slate-300 px-2 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors" title="説明後に隠す">
+        隠す
+      </button>
+    </div>
+  </section>
+
+  <!-- 左→右フロー（ADSサンプル準拠） -->
+  <div class="flow-bar no-print bg-slate-950/95 border-b border-slate-700/80 backdrop-blur-sm">
+    <div class="max-w-6xl mx-auto px-3 py-1.5 flex items-center gap-1 overflow-x-auto text-[9px] md:text-[10px] font-bold whitespace-nowrap">
+      <span class="text-slate-500 shrink-0 hidden sm:inline">左 → 右</span>
+      <span class="text-amber-400 px-2 py-0.5 rounded bg-amber-500/10">PANE 1 二面性</span>
+      <i data-lucide="chevron-right" class="w-3 h-3 text-slate-600 shrink-0"></i>
+      <span class="text-violet-400 px-2 py-0.5 rounded bg-violet-500/10">PANE 2 運用·APCD</span>
+      <i data-lucide="chevron-right" class="w-3 h-3 text-slate-600 shrink-0"></i>
+      <span class="text-sky-400 px-2 py-0.5 rounded bg-sky-500/10">PANE 3 掘り起こし</span>
+      <i data-lucide="chevron-right" class="w-3 h-3 text-slate-600 shrink-0"></i>
+      <span class="text-indigo-300 px-2 py-0.5 rounded bg-indigo-500/10">PANE 4 課題化</span>
+      <span class="text-slate-600 ml-auto shrink-0 hidden md:inline">静/動 → 照らす → 依頼設計 → 蓄積</span>
+      <span data-session-badge class="hidden ml-2 shrink-0 text-[9px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded"></span>
+    </div>
+  </div>
+
+  <div class="panel-grid">
+
+    <!-- Panel 1: 情報の二面性 × AIの限界 -->
+    <section class="panel dot-grid" data-panel="1" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f766e 55%, #134e4a 100%);">
+      <span class="panel-num text-white">01</span>
+      <div class="relative z-10 p-4 md:p-5 h-full flex flex-col text-white">
+        <div class="flex items-center gap-2 mb-1 shrink-0">
+          <span class="w-8 h-8 rounded-lg glass flex items-center justify-center"><i data-lucide="layers-2" class="w-4 h-4"></i></span>
+          <p class="text-xs font-bold tracking-widest text-teal-200/90 uppercase">PANE 1 · 情報の二面性</p>
+        </div>
+        <h2 id="pane1-title" class="text-base md:text-lg font-black leading-tight mb-0.5 shrink-0">静的 vs 動的 — <span class="text-amber-300">AIの限界</span></h2>
+        <p id="pane1-subtitle" class="text-[9px] text-slate-300 mb-1.5 shrink-0">行動指示書として使うと問題が発生する</p>
+
+        <div id="pane1-session-focus" class="hidden shrink-0 mb-1">
+          <div class="glass rounded-lg p-2 border border-amber-400/30">
+            <p class="text-[8px] text-amber-300 font-bold">本日のゴール</p>
+            <p data-session-goal class="text-[10px] font-black leading-snug text-white"></p>
+          </div>
+          <p data-session-meta class="text-[8px] text-teal-200/90 text-center mt-0.5"></p>
+        </div>
+
+        <div id="pane1-default-map" class="flex-1 min-h-0 flex flex-col gap-1 my-0.5 overflow-y-auto">
+          <div class="grid grid-cols-2 gap-1 text-[8px]">
+            <div class="glass rounded-lg p-1.5 border border-teal-400/40">
+              <p class="font-bold text-teal-300 mb-0.5">静的 · 命題的</p>
+              <p class="text-slate-300 leading-snug">これは何か — 辞書的</p>
+              <p class="text-amber-200 font-bold mt-1">→ AI得意</p>
+            </div>
+            <div class="glass rounded-lg p-1.5 border border-amber-400/50 bg-amber-500/10">
+              <p class="font-bold text-amber-300 mb-0.5">動的 · 操作的</p>
+              <p class="text-slate-300 leading-snug">こうすればこうなる — 因果·時間</p>
+              <p class="text-white font-bold mt-1">→ 人が決断</p>
+            </div>
+          </div>
+          <table class="w-full text-[7px] md:text-[8px] glass rounded-lg overflow-hidden">
+            <thead>
+              <tr class="bg-slate-900/50 text-slate-400">
+                <th class="p-1 text-left font-bold"></th>
+                <th class="p-1 text-left font-bold text-teal-300">汎用AI</th>
+                <th class="p-1 text-left font-bold text-amber-300">人間</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-200">
+              <tr class="border-t border-white/10"><td class="p-1 text-slate-400">性質</td><td class="p-1">静的</td><td class="p-1">動的·変化</td></tr>
+              <tr class="border-t border-white/10"><td class="p-1 text-slate-400">出力</td><td class="p-1">可能性を網羅</td><td class="p-1">一つを選択</td></tr>
+              <tr class="border-t border-white/10"><td class="p-1 text-slate-400">関係</td><td class="p-1">相関</td><td class="p-1">因果</td></tr>
+              <tr class="border-t border-white/10"><td class="p-1 text-slate-400">責任</td><td class="p-1">断定を避ける</td><td class="p-1">決断·引き受け</td></tr>
+            </tbody>
+          </table>
+          <p class="text-[7px] text-slate-400 leading-snug">実体験がないAIは統計的相関で文章を作る — なぜそうなるか（因果）は持たない</p>
+        </div>
+
+        <div class="flex flex-wrap gap-1 mt-auto shrink-0">
+          <span class="text-[8px] glass px-1.5 py-0.5 rounded-full">可能性はAI</span>
+          <span class="text-[8px] glass px-1.5 py-0.5 rounded-full">決断は人</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 2: 運用フロー × APCD -->
+    <section class="panel" data-panel="2" style="background: linear-gradient(160deg, #faf5ff 0%, #ede9fe 40%, #fff7ed 100%);">
+      <span class="panel-num text-violet-300">02</span>
+      <div class="relative z-10 p-3 md:p-4 h-full flex flex-col min-h-0" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-2 mb-1 shrink-0">
+          <span class="w-7 h-7 rounded-lg bg-violet-600 text-white flex items-center justify-center"><i data-lucide="workflow" class="w-3.5 h-3.5"></i></span>
+          <p class="text-[10px] font-bold tracking-widest text-violet-600 uppercase">PANE 2 · 運用 · APCD</p>
+        </div>
+
+        <div class="flex gap-1 mb-1.5 text-[7px] font-bold shrink-0">
+          <span class="flex-1 text-center py-1 rounded bg-violet-600 text-white">①照らす</span>
+          <span class="flex-1 text-center py-1 rounded bg-orange-500 text-white">②掘り起こす</span>
+          <span class="flex-1 text-center py-1 rounded bg-slate-800 text-amber-300">③AI依頼</span>
+        </div>
+
+        <div data-apcd-capture class="flex-1 min-h-0 overflow-y-auto space-y-1 mb-1">
+          <div class="grid grid-cols-2 gap-1">
+            <label class="block">
+              <span class="text-[7px] font-bold text-violet-700">A · 前提（覆い隠されていたもの）</span>
+              <textarea data-apcd-a rows="2" placeholder="守りたいもの·当たり前…" class="w-full text-[8px] rounded border border-violet-200 px-1.5 py-1 resize-none bg-white/90"></textarea>
+            </label>
+            <label class="block">
+              <span class="text-[7px] font-bold text-orange-700">P · 決定したいこと·欲しい成果物</span>
+              <textarea data-apcd-p rows="2" placeholder="何を明らかにしたいか…" class="w-full text-[8px] rounded border border-orange-200 px-1.5 py-1 resize-none bg-white/90"></textarea>
+            </label>
+            <label class="block">
+              <span class="text-[7px] font-bold text-blue-700">C · 良しとする基準</span>
+              <textarea data-apcd-c rows="2" placeholder="採用·却下の基準…" class="w-full text-[8px] rounded border border-blue-200 px-1.5 py-1 resize-none bg-white/90"></textarea>
+            </label>
+            <label class="block">
+              <span class="text-[7px] font-bold text-emerald-700">D · 誰が引き受ける</span>
+              <textarea data-apcd-d rows="2" placeholder="最終判断·行動の責任…" class="w-full text-[8px] rounded border border-emerald-200 px-1.5 py-1 resize-none bg-white/90"></textarea>
+            </label>
+          </div>
+          <label class="block">
+            <span class="text-[7px] font-bold text-slate-700">AIへの依頼（可能性の提示のみ — 行動指示書は書かせない）</span>
+            <textarea data-apcd-ai rows="2" placeholder="例：テーマ候補を5案、前提を明示して列挙して…" class="w-full text-[8px] rounded border border-amber-400 bg-amber-50 px-1.5 py-1 resize-none"></textarea>
+          </label>
+        </div>
+
+        <div class="rounded-lg p-1.5 bg-slate-900 text-white text-[7px] leading-snug mb-1 shrink-0">
+          <p class="font-bold text-amber-300 mb-0.5">二重の指示（NiCoCareの教訓）</p>
+          <p><span class="text-teal-300">AI</span>：可能性を網羅 · <span class="text-amber-300">人</span>：状況を絞り、一つを選び、責任を取る — 介護計画で指示書A4約80P・計画数千行はこの構造の極端な例</p>
+        </div>
+        <div id="pane2-hypothesis" class="hidden rounded p-1.5 bg-amber-50 border border-amber-200 shrink-0 text-[7px] text-slate-700">
+          <span class="font-bold text-amber-800">仮説：</span>
+          <span data-session-hypothesis></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 3: 判断とAIの接続 — 問いセット -->
+    <section class="panel" data-panel="3" style="background: linear-gradient(145deg, #f8fafc 0%, #e0f2fe 50%, #ccfbf1 100%);">
+      <span class="panel-num text-slate-200">03</span>
+      <div class="relative z-10 p-4 md:p-5 h-full flex flex-col min-h-0" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-2 mb-2 shrink-0">
+          <span class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center"><i data-lucide="message-square-text" class="w-3.5 h-3.5"></i></span>
+          <p class="text-[10px] font-bold tracking-widest text-slate-600 uppercase">PANE 3 · <span data-pane3-label>APCD 対話の問い</span></p>
+        </div>
+        <p data-pane3-audience class="text-[10px] text-slate-500 mb-2 shrink-0 leading-snug">前提照らし → 目的·成果物の掘り起こし → AI依頼設計</p>
+
+        <div id="pane3-generic" class="contents">
+        <div class="flex p-0.5 bg-slate-200/80 rounded-lg mb-2 shrink-0 overflow-x-auto" role="tablist">
+          <button type="button" id="tab-apcd-flow" class="tab-active text-[9px] font-bold py-1 px-2 rounded-md transition-all shrink-0" onclick="switchApcdTab('flow', this.closest('[data-panel]'))">運用</button>
+          <button type="button" id="tab-apcd-a" class="text-[9px] font-bold py-1 px-2 rounded-md text-slate-600 transition-all shrink-0" onclick="switchApcdTab('a', this.closest('[data-panel]'))">A 前提</button>
+          <button type="button" id="tab-apcd-p" class="text-[9px] font-bold py-1 px-2 rounded-md text-slate-600 transition-all shrink-0" onclick="switchApcdTab('p', this.closest('[data-panel]'))">P 目的</button>
+          <button type="button" id="tab-apcd-c" class="text-[9px] font-bold py-1 px-2 rounded-md text-slate-600 transition-all shrink-0" onclick="switchApcdTab('c', this.closest('[data-panel]'))">C 基準</button>
+          <button type="button" id="tab-apcd-d" class="text-[9px] font-bold py-1 px-2 rounded-md text-slate-600 transition-all shrink-0" onclick="switchApcdTab('d', this.closest('[data-panel]'))">D 判断</button>
+          <button type="button" id="tab-apcd-ai" class="text-[9px] font-bold py-1 px-2 rounded-md text-slate-600 transition-all shrink-0" onclick="switchApcdTab('ai', this.closest('[data-panel]'))">AI依頼</button>
+        </div>
+
+        <div id="apcd-q-flow" class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5 animate-fade-in">
+          <div class="flex gap-1.5 items-start bg-violet-50 border-l-4 border-violet-600 rounded-r-lg p-2 shadow-sm">
+            <span class="text-violet-700 font-black text-[10px] shrink-0">①</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>前提を照らす</strong> — 覆い隠されていた当たり前は何か。AIを使う前からあった前提は</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-orange-50 border-l-4 border-orange-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-orange-600 font-black text-[10px] shrink-0">②</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>掘り起こす</strong> — 何を決定したいか。欲しい成果物は何か（静的な情報か、動的な行動計画か）</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-slate-800 text-white border-l-4 border-amber-400 rounded-r-lg p-2 shadow-sm">
+            <span class="text-amber-400 font-black text-[10px] shrink-0">③</span>
+            <p class="text-[10px] leading-snug"><strong>AI依頼を設計</strong> — 「可能性の提示」だけ依頼する。行動指示書・実行計画の<strong>最終決定</strong>は人が引き受ける</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-red-50 border-l-4 border-red-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-red-600 font-black text-[10px] shrink-0">⚠</span>
+            <p class="text-[10px] text-slate-800 leading-snug">AIの出力を<strong>行動指示書</strong>としてそのまま使っていないか — 相関と因果を混同していないか</p>
+          </div>
+        </div>
+        <div id="apcd-q-a" class="hidden flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-violet-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-violet-600 font-black text-[10px] shrink-0">A1</span>
+            <p class="text-[10px] text-slate-800 leading-snug">この判断で<strong>守りたいもの</strong>は何か — 言葉にしていない当たり前はないか</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-violet-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-violet-600 font-black text-[10px] shrink-0">A2</span>
+            <p class="text-[10px] text-slate-800 leading-snug">AIを使う<strong>前</strong>からあった前提は何か — 覆い隠されていなかったか</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-violet-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-violet-600 font-black text-[10px] shrink-0">A3</span>
+            <p class="text-[10px] text-slate-800 leading-snug">「当たり前が強化された」と感じる場面はあるか — 支持・反証どちらも歓迎</p>
+          </div>
+        </div>
+        <div id="apcd-q-p" class="hidden flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-orange-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-orange-600 font-black text-[10px] shrink-0">P1</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>何を決定したいか</strong> — 判断の目的は言語化されているか</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-orange-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-orange-600 font-black text-[10px] shrink-0">P2</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>欲しい成果物</strong>は何か — 情報の整理か、行動計画か</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-orange-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-orange-600 font-black text-[10px] shrink-0">P3</span>
+            <p class="text-[10px] text-slate-800 leading-snug">思考の<strong>目的と内容</strong> — 何について考え、何を明らかにしたいか</p>
+          </div>
+        </div>
+        <div id="apcd-q-c" class="hidden flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-blue-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-blue-600 font-black text-[10px] shrink-0">C1</span>
+            <p class="text-[10px] text-slate-800 leading-snug">AIの出力を採る／却下するとき、理由は<strong>技術的根拠</strong>か<strong>前提との一致</strong>か</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-blue-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-blue-600 font-black text-[10px] shrink-0">C2</span>
+            <p class="text-[10px] text-slate-800 leading-snug">評価表に書いていない「よい判断像」は何か</p>
+          </div>
+        </div>
+        <div id="apcd-q-d" class="hidden flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-emerald-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-emerald-600 font-black text-[10px] shrink-0">D1</span>
+            <p class="text-[10px] text-slate-800 leading-snug">最終判断とその影響を<strong>誰が名前で引き受ける</strong>か</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 border-emerald-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-emerald-600 font-black text-[10px] shrink-0">D2</span>
+            <p class="text-[10px] text-slate-800 leading-snug">AIの提案をそのまま採用した場合、<strong>責任の所在</strong>はどうなるか</p>
+          </div>
+        </div>
+        <div id="apcd-q-ai" class="hidden flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5">
+          <div class="flex gap-1.5 items-start bg-teal-50 border-l-4 border-teal-600 rounded-r-lg p-2 shadow-sm">
+            <span class="text-teal-700 font-black text-[10px] shrink-0">依頼1</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>静的領域</strong>へ — 選択肢·比較·文献·可能性の列挙を依頼する</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-2 shadow-sm">
+            <span class="text-amber-700 font-black text-[10px] shrink-0">依頼2</span>
+            <p class="text-[10px] text-slate-800 leading-snug"><strong>動的領域は人</strong> — 実行計画·行動指示·最終決定はAIに書かせない</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-slate-800 text-white border-l-4 border-amber-400 rounded-r-lg p-2 shadow-sm">
+            <span class="text-amber-400 font-black text-[10px] shrink-0">設計</span>
+            <p class="text-[10px] leading-snug">プロンプトに埋め込んだ<strong>前提</strong>は何か — AIは意味を理解せず、相関で応答する</p>
+          </div>
+          <div class="flex gap-1.5 items-start bg-slate-800 text-white border-l-4 border-amber-400 rounded-r-lg p-2 shadow-sm">
+            <span class="text-amber-400 font-black text-[10px] shrink-0">検証</span>
+            <p class="text-[10px] leading-snug">出力は<strong>最適な可能性の提示</strong>か — 断定·行動指示になっていないか</p>
+          </div>
+        </div>
+
+        <p class="mt-2 text-[9px] text-slate-500 shrink-0 leading-snug">※ PANE 2 に記入 → 対話後 PANE 4 で課題化（静/動の混同·行動委譲）</p>
+        </div>
+
+        <div id="pane3-session" class="hidden flex-1 min-h-0 flex flex-col">
+          <p class="text-[9px] text-teal-700 font-bold mb-1.5 shrink-0">事前共有資料の4問 · 120分</p>
+          <div data-session-questions class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-0.5"></div>
+          <p data-session-probe class="mt-2 text-[9px] text-red-700 bg-red-50 border border-red-200 rounded-lg p-2 shrink-0 leading-snug hidden"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 4: 課題の可視化 + 蓄積 -->
+    <section class="panel dot-grid" data-panel="4" style="background: linear-gradient(160deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);">
+      <span class="panel-num text-indigo-400/30">04</span>
+      <div class="relative z-10 p-4 md:p-5 h-full flex flex-col min-h-0" data-pane4-root onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between gap-2 mb-1 shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg glass flex items-center justify-center"><i data-lucide="radar" class="w-3.5 h-3.5 text-amber-300"></i></span>
+            <p class="text-[10px] font-bold tracking-widest text-indigo-200 uppercase">PANE 4 · 課題の可視化</p>
+          </div>
+          <button type="button" data-import-toggle class="text-[9px] font-bold text-amber-300 bg-amber-400/20 border border-amber-400/40 px-2 py-1 rounded-lg hover:bg-amber-400/30 transition-colors shrink-0">
+            ＋ 取り込み
+          </button>
+        </div>
+        <p class="text-[9px] text-indigo-200 mb-2 shrink-0">蓄積された洞察から · <strong class="text-amber-200">クライアントの課題</strong>を自動整理</p>
+
+        <div data-client-challenges class="shrink-0 space-y-1 mb-2 max-h-[100px] overflow-y-auto">
+          <p class="text-[9px] text-indigo-300 glass rounded-lg p-2">課題パターンを分析中…</p>
+        </div>
+
+        <p class="text-[8px] font-bold text-indigo-300 mb-1 shrink-0">洞察ストリーム</p>
+        <div data-insights-stream class="flex-1 min-h-0 space-y-1.5 overflow-y-auto max-h-[100px] pr-1 mb-2">
+          <div class="animate-pulse-soft glass rounded-xl p-3">
+            <p class="text-[10px] text-indigo-300">読み込み中…</p>
+          </div>
+        </div>
+
+        <div data-import-panel class="hidden shrink-0 glass rounded-xl p-2.5 mb-2 border border-amber-400/30 space-y-2">
+          <div class="grid grid-cols-2 gap-1.5">
+            <input type="date" data-import-date class="text-[10px] rounded-lg px-2 py-1.5 text-slate-800 border-0 w-full">
+            <select data-import-session class="text-[10px] rounded-lg px-2 py-1.5 text-slate-800 border-0 w-full">
+              <option value="hitachi-rd-2026-06-11">日立 R&D 6/11</option>
+              <option value="hypothesis-exploration">仮説探索</option>
+              <option value="decision-domains">判断領域</option>
+              <option value="program-core">プログラム</option>
+            </select>
+          </div>
+          <input type="text" data-import-theme placeholder="テーマ（例: 採用）" class="text-[10px] rounded-lg px-2 py-1.5 text-slate-800 border-0 w-full">
+          <textarea data-import-text rows="3" placeholder="文字起こし・対話メモを貼り付け…" class="text-[10px] rounded-lg px-2 py-1.5 text-slate-800 border-0 w-full resize-none"></textarea>
+          <label class="flex items-center gap-1 text-[9px] text-indigo-200 cursor-pointer">
+            <i data-lucide="file-up" class="w-3 h-3"></i>
+            <span>.md / .txt</span>
+            <input type="file" data-import-file accept=".md,.txt,text/markdown,text/plain" class="hidden">
+          </label>
+          <div class="flex flex-wrap gap-1">
+            <button type="button" data-import-submit class="text-[9px] font-bold bg-amber-400 text-slate-900 px-2.5 py-1 rounded-lg hover:bg-amber-300">取り込む</button>
+            <button type="button" data-import-download class="text-[9px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg hover:bg-white/30">inbox MD</button>
+            <button type="button" data-import-copy-json class="text-[9px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg hover:bg-white/30">JSONコピー</button>
+          </div>
+          <p data-import-status class="text-[9px] text-emerald-300 hidden"></p>
+        </div>
+
+        <ol class="space-y-0.5 text-[8px] text-indigo-200/90 list-none shrink-0">
+          <li>① PANE 4 に貼り付け → 即表示</li>
+          <li>② inbox MD 保存 → <code class="text-amber-200">node scripts/import-dialogue.mjs --inbox</code></li>
+          <li>③ ブラウザ再読込 → sessions.json 反映</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <!-- ファシリテーターガイド（参加者には読まない · Gで表示切替） -->
+  <aside id="facilitator-coach" class="no-print bg-slate-950 border-t-2 border-emerald-500/60 shadow-2xl flex flex-col" aria-label="ファシリテーターガイド">
+    <div class="flex items-center justify-between gap-2 px-3 py-1.5 bg-emerald-950/80 border-b border-emerald-800/50 shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-[9px] font-black text-emerald-400 uppercase tracking-wider shrink-0">ファシリガイド</span>
+        <span data-coach-step-indicator class="text-[10px] font-bold text-white truncate">読み込み中…</span>
+        <span data-coach-time class="text-[9px] text-emerald-300/80 shrink-0"></span>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <button type="button" data-coach-prev class="text-[10px] font-bold text-slate-300 bg-slate-800 px-2 py-1 rounded hover:bg-slate-700" title="前へ">←</button>
+        <button type="button" data-coach-next class="text-[10px] font-bold text-emerald-300 bg-emerald-700 px-2.5 py-1 rounded hover:bg-emerald-600" title="次へ（N）">次へ →</button>
+        <button type="button" data-coach-pane class="hidden text-[10px] font-bold text-amber-300 bg-amber-900/50 border border-amber-600/50 px-2 py-1 rounded hover:bg-amber-900" title="推奨ペインを開く">ペイン</button>
+        <button type="button" data-coach-collapse class="text-[10px] text-slate-500 px-1" title="閉じる（G）">×</button>
+      </div>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-3 py-2 grid md:grid-cols-3 gap-2 text-[10px] leading-relaxed">
+      <div class="md:col-span-2 bg-slate-900/80 rounded-lg p-2.5 border border-emerald-700/30">
+        <p class="text-[8px] font-bold text-emerald-400 mb-1">次に言うこと（そのまま読んでよい）</p>
+        <p data-coach-say class="text-sm md:text-base font-bold text-white leading-snug"></p>
+      </div>
+      <div class="space-y-1.5">
+        <div class="bg-slate-900/60 rounded-lg p-2 border border-slate-700">
+          <p class="text-[8px] font-bold text-slate-400 mb-0.5">あなたがやること</p>
+          <p data-coach-do class="text-slate-200"></p>
+        </div>
+        <div class="bg-amber-950/50 rounded-lg p-2 border border-amber-700/40">
+          <p class="text-[8px] font-bold text-amber-400 mb-0.5">沈黙·詰まったとき</p>
+          <p data-coach-stuck class="text-amber-100"></p>
+        </div>
+      </div>
+    </div>
+    <div class="px-3 py-1 bg-slate-900/90 border-t border-slate-800 flex flex-wrap gap-2 text-[8px] text-slate-500 shrink-0">
+      <span>G ガイド切替</span><span>·</span><span>N 次のステップ</span><span>·</span><span>1–4 ペイン拡大</span><span>·</span><span class="text-emerald-600">投影ボタンでガイド非表示</span>
+    </div>
+  </aside>
+
+  <!-- Fullscreen overlay -->
+  <div id="overlay" class="no-print fixed inset-0 z-50 bg-slate-950/95 items-center justify-center p-4 md:p-8" onclick="if(event.target===this) closeOverlay()">
+    <button type="button" onclick="closeOverlay()" class="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full bg-white/10">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    <div id="overlay-content" class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"></div>
+  </div>
+
+  <footer class="no-print text-center py-2 text-[10px] text-slate-500 bg-slate-900">
+    AI時代の意思決定再設計ツール · K-T×APCD ·
+    <a href="decision-knowledge-presentation.html" class="text-amber-400 hover:underline">発表ストーリー</a> ·
+    <a href="decision-knowledge-hub.html" class="text-indigo-400 hover:underline">ハブ</a>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+
+    function hideOpening() {
+      const el = document.getElementById('opening-line');
+      if (el) el.remove();
+      document.body.classList.remove('has-opening');
+    }
+
+    const PANEL_CLONE = {};
+    let ACTIVE_SESSION_ID = null;
+    let ACTIVE_SESSION = null;
+    let SESSIONS_DATA = null;
+
+    const QUESTION_COLORS = ['border-teal-500', 'border-red-500', 'border-orange-500', 'border-violet-500'];
+    const QUESTION_NUM_COLORS = ['text-teal-600', 'text-red-600', 'text-orange-600', 'text-violet-600'];
+
+    function getSessionIdFromUrl() {
+      return new URLSearchParams(window.location.search).get('session');
+    }
+
+    function applySessionMode(session) {
+      if (!session) return;
+      ACTIVE_SESSION = session;
+      ACTIVE_SESSION_ID = session.id;
+
+      document.title = `${session.title} — 4パネル`;
+      const ht = document.querySelector('[data-header-title]');
+      const hs = document.querySelector('[data-header-sub]');
+      if (ht) ht.textContent = session.title;
+      if (hs) hs.textContent = session.subtitle || session.date || '';
+
+      const proj = document.querySelector('[data-session-projection]');
+      if (proj && session.files?.projectionHtml) {
+        proj.href = session.files.projectionHtml;
+        proj.classList.remove('hidden');
+        proj.classList.add('inline-flex');
+      }
+
+      const badge = document.querySelector('[data-session-badge]');
+      if (badge) {
+        badge.textContent = `${session.date || ''} · ${session.duration || ''}`;
+        badge.classList.remove('hidden');
+      }
+
+      const opening = document.getElementById('opening-content');
+      if (opening) {
+        opening.innerHTML = `
+          <div>
+            <p class="text-[10px] font-bold tracking-[0.2em] text-teal-400/90 uppercase mb-0.5">再設計ツール · 本日のセッション</p>
+            <p class="text-xs md:text-sm text-slate-300 leading-relaxed">${escapeHtml(session.subtitle || '')}</p>
+          </div>
+          <div class="border-t border-slate-700/80 pt-2">
+            <p class="text-[10px] font-bold tracking-[0.2em] text-amber-400/90 uppercase mb-0.5">検証ゴール</p>
+            <p class="text-sm md:text-base font-black text-white leading-snug">${escapeHtml(session.goal || '')}</p>
+            <p class="text-[10px] text-slate-400 mt-1">前提照らし · 成果物の掘り起こし · AIには可能性の提示だけ依頼</p>
+          </div>`;
+      }
+
+      const p1title = document.getElementById('pane1-title');
+      const p1sub = document.getElementById('pane1-subtitle');
+      if (p1title) p1title.innerHTML = '本日 · <span class="text-amber-300">静/動とAI依頼</span>';
+      if (p1sub) p1sub.textContent = '可能性はAI · 決断は人 — 行動指示書として使わない';
+      document.getElementById('pane1-default-map')?.classList.add('hidden');
+      const focus = document.getElementById('pane1-session-focus');
+      if (focus) {
+        focus.classList.remove('hidden');
+        const g = focus.querySelector('[data-session-goal]');
+        const m = focus.querySelector('[data-session-meta]');
+        if (g) g.textContent = session.goal || '';
+        if (m) m.textContent = [session.date, session.duration, '研究開発本部'].filter(Boolean).join(' · ');
+      }
+
+      const hyp = document.getElementById('pane2-hypothesis');
+      if (hyp && session.hypothesis?.summary) {
+        hyp.classList.remove('hidden');
+        const h = hyp.querySelector('[data-session-hypothesis]');
+        if (h) h.textContent = session.hypothesis.summary;
+      }
+
+      document.getElementById('pane3-generic')?.classList.add('hidden');
+      const p3s = document.getElementById('pane3-session');
+      if (p3s) p3s.classList.remove('hidden');
+      const p3label = document.querySelector('[data-pane3-label]');
+      if (p3label) p3label.textContent = '本日の4問';
+      const aud = document.querySelector('[data-pane3-audience]');
+      if (aud) aud.textContent = '事前共有資料どおり · 挙手・発言は任意';
+
+      const qEl = document.querySelector('[data-session-questions]');
+      if (qEl && session.discussionQuestions) {
+        qEl.innerHTML = session.discussionQuestions.map((q, i) => `
+          <div class="flex gap-1.5 items-start bg-white/95 border-l-4 ${QUESTION_COLORS[i] || 'border-slate-500'} rounded-r-lg p-2 shadow-sm">
+            <span class="${QUESTION_NUM_COLORS[i] || 'text-slate-600'} font-black text-[10px] shrink-0">${q.id || i + 1}</span>
+            <div>
+              <p class="text-[8px] font-bold text-slate-500">${escapeHtml(q.label || '')} · ${escapeHtml(q.time || '')}</p>
+              <p class="text-[10px] text-slate-800 leading-snug">${escapeHtml(q.text || '')}</p>
+            </div>
+          </div>`).join('');
+      }
+
+      const probe = session.discussionQuestions?.find(q => q.probe)?.probe;
+      const probeEl = document.querySelector('[data-session-probe]');
+      if (probeEl && probe) {
+        probeEl.textContent = `② 深掘り：${probe}`;
+        probeEl.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('[data-import-session]').forEach(sel => {
+        sel.value = session.id;
+      });
+
+      initFacilitatorCoach(session);
+    }
+
+    function rebuildPanelClones() {
+      Object.keys(PANEL_CLONE).forEach(k => delete PANEL_CLONE[k]);
+      document.querySelectorAll('.panel').forEach(p => {
+        const n = p.dataset.panel;
+        PANEL_CLONE[n] = p.cloneNode(true);
+        p.onclick = () => openOverlay(n);
+      });
+    }
+
+    async function loadActiveSession() {
+      const sid = getSessionIdFromUrl();
+      if (!sid) return;
+      try {
+        const res = await fetch('data/sessions.json');
+        if (!res.ok) return;
+        const data = await res.json();
+        SESSIONS_DATA = data;
+        const session = data.sessions.find(s => s.id === sid);
+        if (session) applySessionMode(session);
+      } catch { /* generic mode */ }
+    }
+
+    function openOverlay(n) {
+      const el = document.getElementById('overlay-content');
+      const clone = PANEL_CLONE[n].cloneNode(true);
+      clone.classList.remove('panel');
+      clone.style.minHeight = '60vh';
+      clone.style.cursor = 'default';
+      clone.onclick = e => e.stopPropagation();
+      el.innerHTML = '';
+      el.appendChild(clone);
+      document.getElementById('overlay').classList.add('active');
+      if (n === '4') initPane4(clone);
+      else if (n === '2') initApcdCapture(clone);
+      else if (n === '3' && !ACTIVE_SESSION) initApcdTabs(clone);
+      else if (n === '3' && ACTIVE_SESSION) initSessionPane3(clone);
+      lucide.createIcons();
+    }
+
+    function initSessionPane3(root) {
+      /* session pane3 is static; no extra init */
+    }
+    function closeOverlay() {
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.target.matches('textarea, input, select')) return;
+      if (e.key === 'Escape') closeOverlay();
+      if (e.key >= '1' && e.key <= '4' && !e.ctrlKey && !e.metaKey) openOverlay(e.key);
+      if (e.key === 'g' || e.key === 'G') toggleFacilitatorCoach();
+      if (e.key === 'n' || e.key === 'N') facilitatorNext();
+      if (e.key === 'ArrowRight' && e.altKey) facilitatorNext();
+      if (e.key === 'ArrowLeft' && e.altKey) facilitatorPrev();
+    });
+
+    let FACILITATION_STEPS = [];
+    let FACILITATION_STUCK = [];
+    let FACILITATOR_STEP_IDX = 0;
+    const FACILITATOR_STEP_KEY = 'decision-facilitator-step';
+
+    function facilitatorStorageKey() {
+      return `${FACILITATOR_STEP_KEY}-${ACTIVE_SESSION_ID || 'generic'}`;
+    }
+
+    function initFacilitatorCoach(session) {
+      if (SESSIONS_DATA?.facilitationDefaults) {
+        FACILITATION_STUCK = SESSIONS_DATA.facilitationDefaults.stuckUniversal || [];
+      }
+      if (session?.facilitationSteps?.length) {
+        FACILITATION_STEPS = session.facilitationSteps;
+      } else if (SESSIONS_DATA?.facilitationDefaults?.genericSteps) {
+        FACILITATION_STEPS = SESSIONS_DATA.facilitationDefaults.genericSteps;
+      } else {
+        FACILITATION_STEPS = [];
+      }
+      try {
+        const saved = parseInt(localStorage.getItem(facilitatorStorageKey()) || '0', 10);
+        if (!isNaN(saved) && saved < FACILITATION_STEPS.length) FACILITATOR_STEP_IDX = saved;
+      } catch { /* */ }
+      renderFacilitatorStep();
+      bindFacilitatorControls();
+      if (FACILITATION_STEPS.length) setFacilitatorCoachVisible(true);
+    }
+
+    let facilitatorControlsBound = false;
+    function bindFacilitatorControls() {
+      if (facilitatorControlsBound) return;
+      facilitatorControlsBound = true;
+      document.querySelector('[data-coach-toggle]')?.addEventListener('click', toggleFacilitatorCoach);
+      document.querySelector('[data-presentation-toggle]')?.addEventListener('click', togglePresentationMode);
+      document.querySelector('[data-coach-next]')?.addEventListener('click', facilitatorNext);
+      document.querySelector('[data-coach-prev]')?.addEventListener('click', facilitatorPrev);
+      document.querySelector('[data-coach-collapse]')?.addEventListener('click', () => setFacilitatorCoachVisible(false));
+      document.querySelector('[data-coach-pane]')?.addEventListener('click', openRecommendedPane);
+    }
+
+    function setFacilitatorCoachVisible(on) {
+      const coach = document.getElementById('facilitator-coach');
+      if (!coach) return;
+      coach.classList.toggle('visible', on);
+      document.body.classList.toggle('coach-visible', on);
+      const btn = document.querySelector('[data-coach-toggle]');
+      if (btn) btn.classList.toggle('ring-2', on), btn.classList.toggle('ring-emerald-400', on);
+    }
+
+    function toggleFacilitatorCoach() {
+      const coach = document.getElementById('facilitator-coach');
+      if (!coach) return;
+      setFacilitatorCoachVisible(!coach.classList.contains('visible'));
+    }
+
+    function togglePresentationMode() {
+      document.body.classList.toggle('presentation-mode');
+      const on = document.body.classList.contains('presentation-mode');
+      if (on) {
+        setFacilitatorCoachVisible(false);
+        hideOpening();
+      }
+      const btn = document.querySelector('[data-presentation-toggle]');
+      if (btn) btn.textContent = on ? 'ガイド戻す' : '投影';
+    }
+
+    function facilitatorNext() {
+      if (!FACILITATION_STEPS.length) return;
+      FACILITATOR_STEP_IDX = Math.min(FACILITATOR_STEP_IDX + 1, FACILITATION_STEPS.length - 1);
+      localStorage.setItem(facilitatorStorageKey(), String(FACILITATOR_STEP_IDX));
+      renderFacilitatorStep();
+    }
+
+    function facilitatorPrev() {
+      if (!FACILITATION_STEPS.length) return;
+      FACILITATOR_STEP_IDX = Math.max(FACILITATOR_STEP_IDX - 1, 0);
+      localStorage.setItem(facilitatorStorageKey(), String(FACILITATOR_STEP_IDX));
+      renderFacilitatorStep();
+    }
+
+    function renderFacilitatorStep() {
+      const step = FACILITATION_STEPS[FACILITATOR_STEP_IDX];
+      const coach = document.getElementById('facilitator-coach');
+      if (!coach || !step) {
+        if (coach && !FACILITATION_STEPS.length) coach.classList.remove('visible');
+        return;
+      }
+      const n = coach.querySelector('[data-coach-step-indicator]');
+      const t = coach.querySelector('[data-coach-time]');
+      const say = coach.querySelector('[data-coach-say]');
+      const doEl = coach.querySelector('[data-coach-do]');
+      const stuck = coach.querySelector('[data-coach-stuck]');
+      const paneBtn = coach.querySelector('[data-coach-pane]');
+      if (n) n.textContent = `${FACILITATOR_STEP_IDX + 1}/${FACILITATION_STEPS.length} ${step.title}`;
+      if (t) t.textContent = step.time || '';
+      if (say) say.textContent = step.say || '';
+      if (doEl) doEl.textContent = step.do || '';
+      let stuckText = step.stuck || '';
+      if (stuckText === '—') stuckText = FACILITATION_STUCK[0] || '';
+      if (stuck) stuck.textContent = stuckText;
+      if (paneBtn) {
+        if (step.pane) {
+          paneBtn.classList.remove('hidden');
+          paneBtn.textContent = `PANE ${step.pane}`;
+          paneBtn.dataset.pane = step.pane;
+        } else {
+          paneBtn.classList.add('hidden');
+        }
+      }
+      highlightSessionQuestion(step.questionId);
+      if (step.apcdTab && !ACTIVE_SESSION) switchApcdTab(step.apcdTab);
+      const proj = document.querySelector('[data-session-projection]');
+      if (proj && step.projection) {
+        proj.href = step.projection;
+        proj.classList.remove('hidden');
+        proj.classList.add('inline-flex');
+      }
+    }
+
+    function openRecommendedPane() {
+      const btn = document.querySelector('[data-coach-pane]');
+      const pane = btn?.dataset?.pane;
+      if (pane) openOverlay(pane);
+    }
+
+    function highlightSessionQuestion(qid) {
+      document.querySelectorAll('[data-session-questions] > div').forEach(el => {
+        el.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-50');
+      });
+      if (!qid) return;
+      const qEl = document.querySelector('[data-session-questions]');
+      if (!qEl) return;
+      const items = qEl.children;
+      const idx = parseInt(qid, 10) - 1;
+      if (items[idx]) items[idx].classList.add('ring-2', 'ring-amber-400', 'bg-amber-50');
+    }
+
+    function switchApcdTab(which, root) {
+      const scope = root || document.querySelector('[data-panel="3"]') || document;
+      const tabs = { flow: 'tab-apcd-flow', a: 'tab-apcd-a', p: 'tab-apcd-p', c: 'tab-apcd-c', d: 'tab-apcd-d', ai: 'tab-apcd-ai' };
+      const panels = { flow: 'apcd-q-flow', a: 'apcd-q-a', p: 'apcd-q-p', c: 'apcd-q-c', d: 'apcd-q-d', ai: 'apcd-q-ai' };
+      Object.keys(tabs).forEach(k => {
+        scope.querySelector('#' + tabs[k])?.classList.toggle('tab-active', k === which);
+        scope.querySelector('#' + tabs[k])?.classList.toggle('text-slate-600', k !== which);
+        scope.querySelector('#' + panels[k])?.classList.toggle('hidden', k !== which);
+      });
+    }
+
+    function initApcdTabs(root) { /* onclick handles tab switch */ }
+
+    const APCD_STORAGE_KEY = 'decision-redesign-apcd';
+
+    function apcdStorageKey() {
+      return `${APCD_STORAGE_KEY}-${ACTIVE_SESSION_ID || 'default'}`;
+    }
+
+    function initApcdCapture(root) {
+      const scope = root || document;
+      const fields = {
+        a: scope.querySelector('[data-apcd-a]'),
+        p: scope.querySelector('[data-apcd-p]'),
+        c: scope.querySelector('[data-apcd-c]'),
+        d: scope.querySelector('[data-apcd-d]'),
+        ai: scope.querySelector('[data-apcd-ai]')
+      };
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(apcdStorageKey()) || '{}'); } catch { /* */ }
+      Object.entries(fields).forEach(([k, el]) => {
+        if (!el) return;
+        if (saved[k]) el.value = saved[k];
+        el.addEventListener('input', () => {
+          saved[k] = el.value;
+          localStorage.setItem(apcdStorageKey(), JSON.stringify(saved));
+        });
+      });
+    }
+
+    let CHALLENGE_PATTERNS = [];
+
+    function synthesizeClientChallenges(insights) {
+      if (!CHALLENGE_PATTERNS.length) return [];
+      return CHALLENGE_PATTERNS.map(p => {
+        const matched = insights.filter(i => p.themes.includes(i.theme));
+        return { ...p, count: matched.length, samples: matched.slice(0, 2) };
+      }).filter(p => p.count > 0).sort((a, b) => b.count - a.count);
+    }
+
+    function renderClientChallenges(insights, root) {
+      const el = (root || document).querySelector('[data-client-challenges]');
+      if (!el) return;
+      const challenges = synthesizeClientChallenges(insights);
+      if (!challenges.length) {
+        el.innerHTML = `<p class="text-[9px] text-indigo-300 glass rounded-lg p-2 leading-snug">対話を重ねると、<strong class="text-amber-200">静/動の混同</strong>·<strong class="text-amber-200">行動指示のAI委譲</strong>·前提の覆い隠しなどがここに表示されます</p>`;
+        return;
+      }
+      el.innerHTML = challenges.map(c => `
+        <article class="glass rounded-lg p-2 border-l-2 border-amber-400/80">
+          <p class="text-[9px] font-bold text-amber-300">${escapeHtml(c.label)} <span class="text-indigo-300 font-normal">× ${c.count}</span></p>
+          <p class="text-[8px] text-indigo-200 leading-snug mt-0.5">${escapeHtml(c.description)}</p>
+          ${c.samples.length ? `<p class="text-[8px] text-white/70 mt-1 truncate">例: ${escapeHtml(c.samples[0].text)}</p>` : ''}
+        </article>
+      `).join('');
+    }
+
+    function refreshPane4(root) {
+      const items = mergeInsights();
+      renderClientChallenges(items, root);
+      renderInsights(items, root);
+    }
+
+    const LOCAL_INSIGHTS_KEY = 'decision-knowledge-local-insights';
+    const SESSION_TITLES = {
+      'hitachi-rd-2026-06-11': '生成AIと研究の判断',
+      'hypothesis-exploration': '仮説探索サイクル',
+      'decision-domains': '困難な判断の領域',
+      'program-core': 'AI時代の意思決定'
+    };
+
+    const FALLBACK_INSIGHTS = [
+      { sessionTitle: '仮説探索サイクル', theme: '仮説', text: 'AIを用いた判断は前提・既存合理性を強化しやすい — 未検証。対話で更新する', date: '2026-06-05' },
+      { sessionTitle: '困難な判断の領域', theme: '経営', text: '投資・後継者人事 — AIは案を増やすが、採用基準の前提は人が照らす', date: '2026-06-05' },
+      { sessionTitle: '困難な判断の領域', theme: '研究開発', text: 'テーマ選定・リソース配分 — 速度は上がっても問いの前提が言語化されにくい', date: '2026-06-05' }
+    ];
+
+    let remoteInsights = [];
+
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function bulletsToText(block) {
+      return block.split('\n')
+        .map(l => l.replace(/^[-*]\s*/, '').replace(/^>\s*/, '').trim())
+        .filter(line => line && !line.startsWith('|') && line !== '-')
+        .join(' · ');
+    }
+
+    function parseDialogueText(text) {
+      const result = { insights: [], quotes: [] };
+      const section = (heading) => new RegExp(`###\\s*${heading}[^\\n]*\\n+([\\s\\S]*?)(?=\\n###|\\n##|\\n---|$)`, 'i');
+
+      const premise = text.match(section('前提'));
+      if (premise) {
+        const t = bulletsToText(premise[1]);
+        if (t) result.insights.push({ theme: '前提', text: t });
+      }
+      const judgment = text.match(section('判断'));
+      if (judgment) {
+        const t = bulletsToText(judgment[1]);
+        if (t) result.insights.push({ theme: '判断', text: t });
+      }
+      const quoteSec = text.match(section('印象'));
+      if (quoteSec) {
+        const lines = quoteSec[1].split('\n').map(l => l.replace(/^>\s*/, '').trim()).filter(Boolean);
+        if (lines.length) result.insights.push({ theme: '発言', text: lines[0].slice(0, 200) });
+      }
+      const continued = text.match(/##\s*継続議論[^\n]*\n+([\s\S]*?)(?=\n##|\n---|$)/i);
+      if (continued) {
+        const t = bulletsToText(continued[1]);
+        if (t) result.insights.push({ theme: '次の問い', text: t });
+      }
+      if (!result.insights.length) {
+        const plain = text.replace(/^#+\s*.+$/gm, '').replace(/^---+$/gm, '')
+          .split('\n').map(l => l.trim()).filter(l => l.length > 10).join(' ').slice(0, 280);
+        if (plain) result.insights.push({ theme: '対話', text: plain });
+      }
+      return result;
+    }
+
+    function getLocalInsights() {
+      try { return JSON.parse(localStorage.getItem(LOCAL_INSIGHTS_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveLocalInsights(items) {
+      localStorage.setItem(LOCAL_INSIGHTS_KEY, JSON.stringify(items));
+    }
+
+    function renderInsights(items, root) {
+      const el = (root || document).querySelector('[data-insights-stream]');
+      if (!el) return;
+      if (!items.length) {
+        const hint = ACTIVE_SESSION
+          ? '対話中の気づき · 終了時の継続議論用の問いは Pane 3 · ④ 参照'
+          : '対話後、「＋取り込み」からメモを貼り付けてください';
+        el.innerHTML = `<p class="text-xs text-indigo-300 glass rounded-xl p-3">${hint}</p>`;
+        return;
+      }
+      el.innerHTML = items.map(i => `
+        <article class="glass rounded-xl p-3 border-l-2 ${i.local ? 'border-emerald-400/80' : 'border-amber-400/80'} animate-fade-in">
+          <p class="text-[9px] font-bold text-amber-300/90 mb-1">${i.sessionTitle || 'ローカル'}${i.theme ? ' · ' + i.theme : ''}${i.date ? ' · ' + i.date : ''}${i.local ? ' · 未同期' : ''}</p>
+          <p class="text-xs text-white leading-relaxed">${escapeHtml(i.text)}</p>
+        </article>
+      `).join('');
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function mergeInsights() {
+      const local = getLocalInsights()
+        .filter(i => !ACTIVE_SESSION_ID || i.sessionId === ACTIVE_SESSION_ID)
+        .map(i => ({ ...i, local: true }));
+      let remote = remoteInsights.map(i => ({ ...i, local: false }));
+      if (ACTIVE_SESSION_ID && ACTIVE_SESSION) {
+        const sessionInsights = (ACTIVE_SESSION.insights || []).map(i => ({
+          ...i,
+          sessionTitle: ACTIVE_SESSION.title,
+          local: false
+        }));
+        remote = [...sessionInsights, ...remote.filter(i =>
+          !sessionInsights.some(s => s.text === i.text && s.date === i.date)
+        )];
+      }
+      return [...local, ...remote].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    }
+
+    function refreshInsights(root) {
+      refreshPane4(root);
+    }
+
+    async function loadChallengePatterns() {
+      try {
+        const res = await fetch('data/sessions.json');
+        if (!res.ok) return;
+        const data = await res.json();
+        CHALLENGE_PATTERNS = data.clientChallengePatterns || [];
+        SESSIONS_DATA = data;
+      } catch { /* fallback below */ }
+      if (!CHALLENGE_PATTERNS.length) {
+        CHALLENGE_PATTERNS = [
+          { id: 'static-dynamic-confusion', label: '静的/動的の混同', themes: ['前提', '判断'], description: '可能性の列挙を行動計画と誤認' },
+          { id: 'action-instruction', label: '行動指示のAI委譲', themes: ['判断', '対話'], description: '実行計画をAIに書かせ責任が曖昧' },
+          { id: 'hidden-assumption', label: '前提の覆い隠し', themes: ['前提'], description: '守りたいものが言語化されていない' }
+        ];
+      }
+    }
+
+    async function loadInsights(root) {
+      await loadChallengePatterns();
+      try {
+        const res = await fetch('data/sessions.json');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        remoteInsights = data.sessions.flatMap(s => (s.insights || []).map(i => ({ ...i, sessionTitle: s.title })));
+        if (ACTIVE_SESSION_ID) {
+          const s = data.sessions.find(x => x.id === ACTIVE_SESSION_ID);
+          if (s) ACTIVE_SESSION = s;
+        }
+      } catch {
+        remoteInsights = FALLBACK_INSIGHTS;
+      }
+      refreshPane4(root);
+    }
+
+    function showImportStatus(root, msg) {
+      const el = root.querySelector('[data-import-status]');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    function buildInboxMarkdown(text, meta) {
+      return `# セッションログ — ${meta.date}${meta.theme ? ' · ' + meta.theme : ''}
+
+| 項目 | 内容 |
+|------|------|
+| セッションID | \`${meta.sessionId}\` |
+| 日付 | ${meta.date} |
+| テーマ | ${meta.theme || ''} |
+
+---
+
+## 出てきた洞察（事後）
+
+### 前提・守りたいもの
+
+（自動取り込み — 必要なら編集）
+
+### 判断は変わったか / 合理性の強化
+
+-
+
+### 印象に残った発言（匿名可）
+
+>
+
+---
+
+## 原文
+
+${text}
+`;
+    }
+
+    function initPane4(root) {
+      const dateInput = root.querySelector('[data-import-date]');
+      if (dateInput && !dateInput.value) dateInput.value = todayISO();
+
+      const toggle = root.querySelector('[data-import-toggle]');
+      const panel = root.querySelector('[data-import-panel]');
+      if (toggle && panel) {
+        toggle.addEventListener('click', () => {
+          panel.classList.toggle('hidden');
+          toggle.textContent = panel.classList.contains('hidden') ? '＋ 取り込み' : '− 閉じる';
+        });
+      }
+
+      const fileInput = root.querySelector('[data-import-file]');
+      const textArea = root.querySelector('[data-import-text]');
+      if (fileInput && textArea) {
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => { textArea.value = reader.result; };
+          reader.readAsText(file, 'UTF-8');
+        });
+      }
+
+      const submitBtn = root.querySelector('[data-import-submit]');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          const text = textArea?.value?.trim();
+          if (!text) { showImportStatus(root, 'テキストを入力してください'); return; }
+
+          const date = dateInput?.value || todayISO();
+          const sessionId = root.querySelector('[data-import-session]')?.value || 'hypothesis-exploration';
+          const theme = root.querySelector('[data-import-theme]')?.value?.trim() || '対話';
+          const parsed = parseDialogueText(text);
+          const sessionTitle = SESSION_TITLES[sessionId] || sessionId;
+
+          const local = getLocalInsights();
+          parsed.insights.forEach((ins, idx) => {
+            local.unshift({
+              id: Date.now() + '-' + idx,
+              date,
+              sessionId,
+              sessionTitle,
+              theme: ins.theme === '対話' ? theme : ins.theme,
+              text: ins.text,
+              raw: idx === 0 ? text : undefined
+            });
+          });
+          saveLocalInsights(local);
+          refreshPane4(root);
+          if (textArea) textArea.value = '';
+          showImportStatus(root, `✓ ${parsed.insights.length}件を表示（未同期）— inbox MD で永続化`);
+        });
+      }
+
+      const dlBtn = root.querySelector('[data-import-download]');
+      if (dlBtn) {
+        dlBtn.addEventListener('click', () => {
+          const text = textArea?.value?.trim() || '';
+          const date = dateInput?.value || todayISO();
+          const sessionId = root.querySelector('[data-import-session]')?.value || 'hypothesis-exploration';
+          const theme = root.querySelector('[data-import-theme]')?.value?.trim() || '';
+          const md = buildInboxMarkdown(text, { date, sessionId, theme });
+          const slug = theme || 'dialogue';
+          const blob = new Blob([md], { type: 'text/markdown' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${date}-${slug}.md`;
+          a.click();
+          showImportStatus(root, `✓ ${a.download} を保存 → inbox に置いて --inbox を実行`);
+        });
+      }
+
+      const copyBtn = root.querySelector('[data-import-copy-json]');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          const text = textArea?.value?.trim();
+          if (!text) { showImportStatus(root, 'テキストを入力してください'); return; }
+          const date = dateInput?.value || todayISO();
+          const theme = root.querySelector('[data-import-theme]')?.value?.trim() || '対話';
+          const parsed = parseDialogueText(text);
+          const snippets = parsed.insights.map(ins => JSON.stringify({
+            date,
+            theme: ins.theme === '対話' ? theme : ins.theme,
+            text: ins.text
+          }, null, 2)).join(',\n');
+          navigator.clipboard.writeText(snippets).then(() => {
+            showImportStatus(root, '✓ JSONをコピー — sessions.json の insights に貼り付け');
+          });
+        });
+      }
+
+      loadInsights(root);
+    }
+
+    async function bootstrap() {
+      await loadChallengePatterns();
+      await loadActiveSession();
+      if (!FACILITATION_STEPS.length && SESSIONS_DATA) {
+        initFacilitatorCoach(ACTIVE_SESSION);
+      }
+      rebuildPanelClones();
+      initApcdCapture(document);
+      bindFacilitatorControls();
+      document.querySelectorAll('[data-panel="4"]').forEach(p => {
+        const root = p.querySelector('[data-pane4-root]');
+        if (root) initPane4(root);
+      });
+    }
+    bootstrap();
+  </script>
+</body>
+</html>

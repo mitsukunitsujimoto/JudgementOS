@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "outputDirectory": "output",
+  "functions": {
+    "api/**/*.js": {
+      "memory": 256,
+      "maxDuration": 10
+    }
+  }
+}

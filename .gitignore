@@ -1,2 +1,10 @@
 output/*.html
 deploy-history.log
+.vercel
+
+# 環境変数（DATABASE_URL 等）
+.env
+.env*.local
+
+# Node
+node_modules/

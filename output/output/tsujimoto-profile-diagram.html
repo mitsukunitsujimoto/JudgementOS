@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+  <meta name="googlebot" content="noindex, nofollow" />
+  <title>辻本 光邦 — 自己紹介（図解）</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --surface2: #f1f5f9;
+      --ink: #0f172a;
+      --muted: #475569;
+      --dim: #64748b;
+      --line: #e2e8f0;
+      --accent: #2563eb;
+      --accent2: #3b82f6;
+      --good: #10b981;
+      --warn: #f59e0b;
+      --music: #f59e0b;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+      --shadow2: 0 1px 0 rgba(15, 23, 42, .06);
+      --r: 18px;
+      --r2: 14px;
+      --max: 980px;
+    }
+    *{ box-sizing: border-box; }
+    html,body{ height: 100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+      color: var(--muted);
+      background: linear-gradient(180deg, #ffffff 0%, #ffffff 55%, #f8fafc 100%);
+      border-top: 4px solid var(--accent2);
+      line-height: 1.65;
+      text-rendering: optimizeLegibility;
+    }
+    a{ color: inherit; }
+    .wrap{ max-width: var(--max); margin: 0 auto; padding: 20px 18px 64px; }
+    .topbar{
+      display:flex; justify-content:flex-end; gap: 10px; align-items:center;
+      max-width: var(--max); margin: 0 auto; padding: 10px 18px 0;
+    }
+    .btn{
+      appearance:none; border: 1px solid var(--line); background: #fff;
+      color: var(--dim); border-radius: 999px; padding: 8px 12px;
+      font-size: 12px; font-weight: 700; letter-spacing: .01em;
+      display:inline-flex; gap: 8px; align-items:center;
+      box-shadow: var(--shadow2);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease, color .12s ease, background .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); color: var(--accent); border-color: rgba(37,99,235,.35); background: #fbfdff; }
+    .btn:active{ transform: translateY(0); }
+    .badge{
+      display:inline-flex; gap: 8px; align-items:center;
+      background: rgba(59,130,246,.10);
+      color: var(--accent);
+      border: 1px solid rgba(37,99,235,.18);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .hero{
+      text-align:center;
+      padding: 22px 0 8px;
+    }
+    h1{
+      margin: 14px 0 6px;
+      font-size: clamp(34px, 4.2vw, 52px);
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      font-weight: 950;
+    }
+    .yomi{ font-size: 13px; color: var(--dim); margin: 0; }
+    .role{ margin: 6px 0 0; font-size: 14px; color: #334155; font-weight: 800; }
+    .subrole{ margin: 6px 0 0; font-size: 12px; color: var(--dim); font-weight: 700; }
+    .panel{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--r) + 6px);
+      padding: 18px;
+      box-shadow: var(--shadow2);
+    }
+    .panel + .panel{ margin-top: 14px; }
+    .grid{ display:grid; gap: 12px; }
+    .grid-3{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 860px){
+      .grid-3{ grid-template-columns: 1fr; }
+      .grid-2{ grid-template-columns: 1fr; }
+    }
+    .kicker{
+      font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--dim); font-weight: 900;
+      display:flex; align-items:center; gap: 10px;
+      margin: 0 0 10px;
+    }
+    .kicker:before{
+      content:""; width: 22px; height: 10px; border-radius: 999px;
+      background: linear-gradient(90deg, rgba(37,99,235,.9), rgba(59,130,246,.25));
+    }
+    .lead{
+      font-size: clamp(18px, 2.1vw, 24px);
+      font-weight: 950;
+      color: var(--ink);
+      line-height: 1.35;
+      margin: 0 0 10px;
+    }
+    .lead em{ font-style: normal; color: var(--accent); }
+    .p{ margin: 0; color: var(--muted); }
+    .muted{ color: var(--dim); }
+    .card{
+      background:#fff; border:1px solid var(--line); border-radius: var(--r);
+      padding: 14px; box-shadow: var(--shadow2);
+    }
+    .card h3{ margin: 0 0 6px; font-size: 14px; font-weight: 950; color: var(--ink); }
+    .card p{ margin: 0; font-size: 12.5px; color: var(--dim); }
+    .pill{
+      display:inline-flex; align-items:center; gap: 8px;
+      font-size: 11px; font-weight: 900;
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #334155;
+      white-space: nowrap;
+    }
+    .sep{
+      display:flex; align-items:center; gap: 10px;
+      margin: 14px 0 10px;
+      color: var(--dim);
+      font-size: 11px; font-weight: 900;
+    }
+    .sep:before,.sep:after{ content:""; height: 1px; background: rgba(226,232,240,.9); flex: 1; }
+    .num{
+      text-align:center;
+      background:#fff; border:1px solid var(--line); border-radius: var(--r);
+      padding: 12px 10px;
+      box-shadow: var(--shadow2);
+    }
+    .num .big{
+      font-weight: 1000;
+      font-size: 30px;
+      line-height: 1;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .num .big.accent{ color: var(--accent); }
+    .num .big.music{ color: #b45309; }
+    .num .big.good{ color: #059669; }
+    .num .lbl{ margin-top: 6px; font-size: 11px; color: var(--dim); font-weight: 800; }
+    .section{
+      margin-top: 18px;
+      padding-top: 18px;
+    }
+    .section .title{
+      display:flex; align-items:center; gap: 10px;
+      margin: 0 0 12px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -0.01em;
+    }
+    .icon{
+      width: 36px; height: 36px; border-radius: 12px;
+      display:grid; place-items:center;
+      background: rgba(59,130,246,.10);
+      border: 1px solid rgba(37,99,235,.18);
+      flex: 0 0 auto;
+    }
+    .icon svg{ width: 18px; height: 18px; }
+    .icon.emerald{ background: rgba(16,185,129,.10); border-color: rgba(16,185,129,.18); }
+    .icon.purple{ background: rgba(168,85,247,.10); border-color: rgba(168,85,247,.18); }
+    .icon.red{ background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.18); }
+    .icon.amber{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.22); }
+    .icon.indigo{ background: rgba(99,102,241,.10); border-color: rgba(99,102,241,.18); }
+    .timeline{
+      position: relative;
+      padding-left: 18px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute; left: 8px; top: 10px; bottom: 10px;
+      width: 2px; border-radius: 999px;
+      background: linear-gradient(180deg, rgba(59,130,246,.45), rgba(16,185,129,.35));
+    }
+    .titem{
+      position: relative;
+      padding: 12px 12px 12px 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--r);
+      box-shadow: var(--shadow2);
+      margin: 10px 0;
+    }
+    .titem:before{
+      content:"";
+      position:absolute; left: -14px; top: 18px;
+      width: 10px; height: 10px; border-radius: 999px;
+      background: var(--accent2);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px rgba(226,232,240,.9);
+    }
+    .tmeta{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; margin-bottom: 6px; }
+    .tag{
+      font-size: 10.5px; font-weight: 950; color: #1d4ed8;
+      background: rgba(37,99,235,.08);
+      border: 1px solid rgba(37,99,235,.16);
+      padding: 3px 8px; border-radius: 999px;
+    }
+    .tag.gray{ color: #475569; background: rgba(148,163,184,.18); border-color: rgba(148,163,184,.30); }
+    .tag.green{ color: #047857; background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.22); }
+    .tag.purple{ color: #6d28d9; background: rgba(168,85,247,.12); border-color: rgba(168,85,247,.22); }
+    .tag.amber{ color: #92400e; background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.26); }
+    .titem h3{ margin: 0 0 6px; color: var(--ink); font-size: 14px; font-weight: 950; }
+    .titem p{ margin: 0; color: var(--dim); font-size: 12.5px; }
+    blockquote{
+      margin: 0;
+      padding: 16px 16px 14px;
+      border-radius: var(--r);
+      background: #0b1220;
+      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(148,163,184,.20);
+      box-shadow: var(--shadow);
+    }
+    blockquote .q{
+      font-weight: 950;
+      font-size: 16px;
+      line-height: 1.55;
+      margin: 0 0 10px;
+    }
+    blockquote .q strong{ color: #93c5fd; }
+    blockquote .note{
+      margin: 0;
+      color: rgba(148,163,184,.95);
+      font-size: 12.5px;
+      border-top: 1px solid rgba(148,163,184,.18);
+      padding-top: 10px;
+    }
+    .steps{
+      display:grid;
+      gap: 10px;
+    }
+    .step{
+      background:#fff; border:1px solid var(--line); border-radius: var(--r);
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      display:flex; gap: 12px; align-items:flex-start;
+    }
+    .step .n{
+      width: 34px; height: 34px; border-radius: 12px;
+      display:grid; place-items:center;
+      font-weight: 1000;
+      color: #0f172a;
+      background: rgba(59,130,246,.10);
+      border: 1px solid rgba(59,130,246,.20);
+      flex: 0 0 auto;
+    }
+    .step:nth-child(2) .n{ background: rgba(16,185,129,.10); border-color: rgba(16,185,129,.22); }
+    .step:nth-child(3) .n{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.26); }
+    .step h3{ margin: 0 0 6px; color: var(--ink); font-size: 14px; font-weight: 950; }
+    .step p{ margin: 0; color: var(--dim); font-size: 12.5px; }
+    .footer{
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(226,232,240,.85);
+      color: var(--dim);
+      font-size: 12px;
+      display:flex; justify-content:space-between; align-items:flex-end; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mono{ font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Cascadia Mono", monospace; }
+
+    /* print */
+    @media print{
+      .topbar{ display:none !important; }
+      body{ border-top: none !important; background: #fff !important; }
+      .wrap{ padding: 0 0 0; }
+      .panel{ box-shadow: none !important; }
+      blockquote{ box-shadow:none !important; }
+      a{ text-decoration: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar" aria-hidden="false">
+    <button class="btn" type="button" id="btnPrint" title="PDFとして保存（印刷）">
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path>
+        </svg>
+      </span>
+      PDF
+    </button>
+    <button class="btn" type="button" id="btnCopy" title="タイトル＋URLをコピー">
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </span>
+      コピー
+    </button>
+  </div>
+
+  <main class="wrap">
+    <header class="hero">
+      <span class="badge">
+        <span aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
+        自己紹介（図解）
+      </span>
+      <h1>辻本 光邦</h1>
+      <p class="yomi">つじもと みつくに</p>
+      <p class="role">株式会社インサイトパワーズ 代表取締役</p>
+      <p class="subrole">組織における問題解決・意思決定の専門家 ／ 俊友会管弦楽団団長　トランペット奏者</p>
+    </header>
+
+    <!-- One-page summary -->
+    <section class="panel" aria-label="一枚サマリー">
+      <p class="kicker">One-page summary</p>
+      <p class="lead">
+        「本当にやりたいこと」を通じて、<br />
+        <em>人と組織の本質的な変革</em>を支援する
+      </p>
+      <p class="p muted">
+        富士通・ケプナー・トリゴー・日本マイクロソフトを経て2010年に独立。問題解決・意思決定・AI時代の判断変革を軸に、全国で活動。
+      </p>
+
+      <div class="sep">3つのキーワード</div>
+      <div class="grid grid-3" role="list">
+        <div class="card" role="listitem">
+          <div class="pill" style="border-color: rgba(37,99,235,.25); background: rgba(37,99,235,.05);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </span>
+            問題解決・意思決定
+          </div>
+          <h3 style="margin-top:10px;">世界標準メソッドを、現場で使える形へ</h3>
+          <p>世界標準メソッドを日本企業に根付かせた第一人者。</p>
+        </div>
+        <div class="card" role="listitem">
+          <div class="pill" style="border-color: rgba(99,102,241,.25); background: rgba(99,102,241,.06);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M12 2a7 7 0 0 0-4 12c0 1 0 2-1 3h10c-1-1-1-2-1-3a7 7 0 0 0-4-12Z"></path><path d="M9 21h6"></path>
+              </svg>
+            </span>
+            AI × 判断の前提変革
+          </div>
+          <h3 style="margin-top:10px;">AIが強める「前提の固定化」に向き合う</h3>
+          <p>AIが加速させる「前提の固定化」に挑む次のライフワーク。</p>
+        </div>
+        <div class="card" role="listitem">
+          <div class="pill" style="border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>
+              </svg>
+            </span>
+            トランペット
+          </div>
+          <h3 style="margin-top:10px;">言葉ではなく「音」で本音を語る</h3>
+          <p>趣味を超えて、心の声を表現するライフワーク。</p>
+        </div>
+      </div>
+
+      <div class="sep">数字で見る</div>
+      <div class="grid grid-3">
+        <div class="num">
+          <div class="big accent">2010</div>
+          <div class="lbl">インサイトパワーズ創業</div>
+        </div>
+        <div class="num">
+          <div class="big music">55<span style="font-size:16px; font-weight:900;">年</span></div>
+          <div class="lbl">トランペット演奏歴</div>
+        </div>
+        <div class="num">
+          <div class="big good">20<span style="font-size:16px; font-weight:900;">年+</span></div>
+          <div class="lbl">長期支援先との継続</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Career -->
+    <section class="section" id="career">
+      <h2 class="title">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 11h18"></path><path d="M3 7h6"></path><path d="M3 15h10"></path><path d="M16 7l5 5-5 5"></path>
+          </svg>
+        </span>
+        キャリアの歩み（図解）
+      </h2>
+      <div class="panel">
+        <p class="p muted" style="margin-bottom:10px;">
+          「現場の意思決定を強くする」経験を積み上げ、最終的に「人の成長に直接関わる」ために独立。
+        </p>
+        <div class="timeline" role="list">
+          <div class="titem" role="listitem">
+            <div class="tmeta">
+              <span class="tag">キャリアスタート</span>
+              <span class="tag gray">海外営業</span>
+            </div>
+            <h3>富士通株式会社 — 海外営業</h3>
+            <p>アジア各国の政府機関向けに大型通信インフラを担当。契約交渉〜PM〜開発まで一貫して関与し、信頼関係を基盤に提案を継続。</p>
+          </div>
+
+          <div class="titem" role="listitem">
+            <div class="tmeta">
+              <span class="tag purple">約7年＋再入社後も継続</span>
+              <span class="tag gray">講師・コンサル → 日本支社長/パートナー</span>
+            </div>
+            <h3>ケプナー・トリゴー社（米国）</h3>
+            <p>問題解決・意思決定の世界標準メソッドを日本企業の実務へ。米国赴任（2年）を経て日本支社長・パートナーとして基盤拡大。</p>
+            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="pill">メソッド導入</span>
+              <span class="pill">大手支援（ホンダ／日産／日立製作所／富士フイルム 等）</span>
+              <span class="pill">米国赴任 2年</span>
+            </div>
+          </div>
+
+          <div class="titem" role="listitem">
+            <div class="tmeta">
+              <span class="tag green">独立前</span>
+              <span class="tag gray">執行役員</span>
+            </div>
+            <h3>日本マイクロソフト株式会社 — 執行役員</h3>
+            <p>エンタープライズサービス部門のトップとしてビジネスを主導。人材育成への想いが強まり、「もっと直接、人の成長に関わりたい」と確信。</p>
+            <p style="margin-top:10px; color:#065f46; background: rgba(16,185,129,.10); border:1px solid rgba(16,185,129,.20); padding:10px 12px; border-radius: 14px;">
+              <strong style="color:#064e3b;">転機</strong>：組織の成果を追う経験を通じ、「人の本質的な成長に直接関わること」こそ使命だと確信。
+            </p>
+          </div>
+
+          <div class="titem" role="listitem" style="border-width:2px; border-color: rgba(37,99,235,.25); background: rgba(37,99,235,.03);">
+            <div class="tmeta">
+              <span class="tag">2010年〜現在</span>
+              <span class="tag gray">創業・代表取締役</span>
+            </div>
+            <h3>株式会社インサイトパワーズ</h3>
+            <p>1号顧客：日立製作所（リスク管理研修）。アルプスアルパインとは20年以上の長期パートナーシップ。日本を代表する企業と直接契約し、実践プロセスの定着を支援。</p>
+            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="pill">日立製作所</span>
+              <span class="pill">アルプスアルパイン 20年+</span>
+              <span class="pill">全国で研修・公開講座</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Current -->
+    <section class="section" id="work">
+      <h2 class="title">
+        <span class="icon emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 20V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16"></path><path d="M8 6h4"></path><path d="M8 10h4"></path><path d="M8 14h4"></path><path d="M20 20V8a2 2 0 0 0-2-2h-2"></path>
+          </svg>
+        </span>
+        現在の活動（メニュー）
+      </h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="pill" style="border-color: rgba(37,99,235,.25); background: rgba(37,99,235,.05);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle>
+              </svg>
+            </span>
+            研修
+          </div>
+          <h3 style="margin-top:10px;">問題解決・意思決定 研修</h3>
+          <p>世界標準メソッドを土台に、日本の実務・組織文化に適合した形で提供。体系的なプロセスを根付かせ、成果に直結させる。</p>
+        </div>
+        <div class="card">
+          <div class="pill" style="border-color: rgba(168,85,247,.25); background: rgba(168,85,247,.07);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Z"></path>
+                <path d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Z"></path>
+                <path d="M16 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"></path>
+              </svg>
+            </span>
+            コーチング
+          </div>
+          <h3 style="margin-top:10px;">経営者・役員コーチング</h3>
+          <p>トップ層の意思決定の質を高める1対1支援。問題解決の専門知識と実務経験を背景に、判断力と行動力を引き出す。</p>
+        </div>
+        <div class="card">
+          <div class="pill" style="border-color: rgba(6,182,212,.25); background: rgba(6,182,212,.07);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2L12 2Z"></path>
+              </svg>
+            </span>
+            生成AI
+          </div>
+          <h3 style="margin-top:10px;">生成AI × 問題解決・意思決定 研修</h3>
+          <p>AIを使いこなす技術に加え、AIが加速させる「過去の合理性の強化」という構造的問題に向き合う。</p>
+        </div>
+        <div class="card" style="border-width:2px; border-color: rgba(99,102,241,.25); background: rgba(99,102,241,.04);">
+          <div class="pill" style="border-color: rgba(99,102,241,.25); background: rgba(99,102,241,.06);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M12 2a7 7 0 0 0-4 12c0 1 0 2-1 3h10c-1-1-1-2-1-3a7 7 0 0 0-4-12Z"></path><path d="M9 21h6"></path>
+              </svg>
+            </span>
+            開発中（ライフワーク）
+          </div>
+          <h3 style="margin-top:10px;">AI時代の意思決定変革プログラム</h3>
+          <p>「判断の前提を照らし、疑い、自分の名前で引き受ける」人を育てる。AIが普及しても変わらない意思決定の本質に迫る。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Beliefs -->
+    <section class="section" id="beliefs">
+      <h2 class="title">
+        <span class="icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"></path>
+          </svg>
+        </span>
+        想いと信念（核）
+      </h2>
+      <blockquote>
+        <p class="q">
+          AIが現状の合理性を強化するだけなら、意思決定の質は変わらない。<br />
+          <strong>前提を照らし、前提を疑い、前提を見つめる。</strong><br />
+          そこから判断の質が変わる。
+        </p>
+        <p class="note">
+          「AIを使っているか否か」ではなく、「どのような前提のもとで判断しているか」。その問いを扱い続けることが、これからのライフワーク。
+        </p>
+      </blockquote>
+
+      <div class="grid grid-3" style="margin-top:12px;">
+        <div class="card">
+          <h3>一貫した動機</h3>
+          <p>「人の成長に直接関わりたい」。組織の中で経験を積むほど、その確信が強まり独立へ。</p>
+        </div>
+        <div class="card">
+          <h3>長期関係の価値</h3>
+          <p>単発ではなく「根付く変化」。信頼の蓄積が、本質的な変革の土台になる。</p>
+        </div>
+        <div class="card">
+          <h3>本当にやりたいこと</h3>
+          <p>トランペットと同じく、仕事も「本音」で向き合うとき、最も深く相手に届く。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Music -->
+    <section class="section" id="music">
+      <h2 class="title">
+        <span class="icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        </span>
+        トランペットとの歩み（図解）
+      </h2>
+      <div class="panel">
+        <div class="grid grid-2">
+          <div>
+            <p class="lead" style="font-size:20px; margin-bottom:8px;">
+              「言葉が苦手でも、<br />音なら本音を語れる」
+            </p>
+            <p class="p muted">トランペット歴55年。趣味という言葉では収まらない、もうひとつの本業として音楽表現に向き合い続ける。</p>
+            <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="pill" style="border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08);">演奏歴 55年</span>
+              <span class="pill" style="border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08);">指揮（2016年〜）</span>
+              <span class="pill" style="border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08);">国際文化交流コンサート出演</span>
+            </div>
+          </div>
+          <div class="card" style="background: linear-gradient(180deg, rgba(245,158,11,.10), #fff);">
+            <h3>音楽活動の足跡</h3>
+            <div class="timeline" style="margin-top:10px;">
+              <div class="titem" style="margin:8px 0;">
+                <div class="tmeta"><span class="tag amber">〜現在</span></div>
+                <h3 style="font-size:13px;">トランペット歴55年</h3>
+                <p style="font-size:12px;">音楽を通じて心の本音を表現し続ける。</p>
+              </div>
+              <div class="titem" style="margin:8px 0;">
+                <div class="tmeta"><span class="tag amber">2016年〜</span></div>
+                <h3 style="font-size:13px;">俊友会管弦楽団 指揮者（約10年）</h3>
+                <p style="font-size:12px;">奏者としてだけでなく、楽団全体を束ねる。</p>
+              </div>
+              <div class="titem" style="margin:8px 0;">
+                <div class="tmeta"><span class="tag amber">2022年</span></div>
+                <h3 style="font-size:13px;">コンサート開催</h3>
+                <p style="font-size:12px;">これまでの音楽活動の集大成を舞台で発表。</p>
+              </div>
+              <div class="titem" style="margin:8px 0;">
+                <div class="tmeta"><span class="tag amber">近年</span></div>
+                <h3 style="font-size:13px;">国際文化交流コンサート（ソリスト）</h3>
+                <p style="font-size:12px;">カザフスタン共和国／ウズベキスタン共和国で出演。</p>
+              </div>
+              <div class="titem" style="margin:8px 0;">
+                <div class="tmeta"><span class="tag amber">近年</span></div>
+                <h3 style="font-size:13px;">ジャズ共演</h3>
+                <p style="font-size:12px;">Tスクエアとも共演し、ジャンルを越えて挑戦。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="pill" style="border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08);">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M3 21c3 0 4-2 4-5 0-1.5-1.5-3-3-3S1 14.5 1 16c0 2 1 5 2 5Z"></path>
+                <path d="M21 21c-3 0-4-2-4-5 0-1.5 1.5-3 3-3s3 1.5 3 3c0 2-1 5-2 5Z"></path>
+              </svg>
+            </span>
+            コメント
+          </div>
+          <p class="p muted" style="margin-top:10px;">
+            「私は人前での自己表現が得意ではありません。でも、トランペットを吹いているとき、心の本音を語れる気がします。仕事も同じで、本当にやりたいことを通じてこそ、相手に本当のことが届くと思っています。」
+            <span class="muted" style="font-weight:900;">— 辻本 光邦</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future -->
+    <section class="section" id="future">
+      <h2 class="title">
+        <span class="icon indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7"></path><path d="M7 7h10v10"></path>
+          </svg>
+        </span>
+        これからに向けて（3つの柱）
+      </h2>
+      <div class="steps">
+        <div class="step">
+          <div class="n">01</div>
+          <div>
+            <h3>AI時代の「判断変革」をライフワークにする</h3>
+            <p>問われるのは技術の活用より「判断の前提」。前提を自覚し、疑い、自分の名前で引き受ける判断者を育てる。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">02</div>
+          <div>
+            <h3>本質を見抜ける人・組織を増やし続ける</h3>
+            <p>問題の本質を見抜き、自分の判断で動ける人を育て続ける。メソッドと経験を携え、企業・人を支援していく。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">03</div>
+          <div>
+            <h3>トランペットとともに、仲間を成長させ続ける</h3>
+            <p>音楽でも仕事でも「共に舞台に立つ仲間を成長させたい」。社会が求めることを実現しながら、チームと仲間を磨き続ける。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>
+        <div style="font-weight: 950; color: var(--ink);">株式会社インサイトパワーズ</div>
+        <div class="mono"><a href="https://insightpowers.co.jp" target="_blank" rel="noreferrer">https://insightpowers.co.jp</a></div>
+      </div>
+      <div class="muted">作成元: `tsujimoto-profile.md`（自己紹介の図解HTML）</div>
+    </footer>
+  </main>
+
+  <script>
+    (function(){
+      const btnPrint = document.getElementById('btnPrint');
+      const btnCopy = document.getElementById('btnCopy');
+
+      if(btnPrint){
+        btnPrint.addEventListener('click', () => window.print());
+      }
+
+      if(btnCopy){
+        btnCopy.addEventListener('click', async () => {
+          const title = document.title;
+          const url = location.href;
+          const text = `${title}\n${url}`;
+          try{
+            await navigator.clipboard.writeText(text);
+            btnCopy.textContent = 'コピーしました';
+            setTimeout(()=>{ btnCopy.textContent = 'コピー'; }, 1200);
+          }catch(e){
+            // clipboard API が使えない環境向けフォールバック
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btnCopy.textContent = 'コピーしました';
+            setTimeout(()=>{ btnCopy.textContent = 'コピー'; }, 1200);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
+

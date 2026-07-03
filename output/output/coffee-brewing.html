@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="コーヒーの淹れかた">
+  <meta property="og:description" content="ドリップ・フレンチプレス・エスプレッソの違いから、おいしく淹れるステップまで図解で解説します。">
+  <meta property="og:type" content="article">
+  <title>コーヒーの淹れかた</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-amber-500/10 text-amber-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="coffee" class="w-4 h-4"></i>
+    フード・ライフスタイル
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    コーヒーの<span class="bg-gradient-to-r from-amber-700 to-amber-500 bg-clip-text text-transparent">淹れかた</span>
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    「なんとなく作っている」から「ちゃんとわかって淹れる」へ。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  ONE-PAGE SUMMARY                                            -->
+<!-- ============================================================ -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      コーヒーは<span class="text-amber-700">「豆・お湯・時間」</span>の掛け算
+    </p>
+    <p class="text-sm text-ads-muted">
+      この3つを整えるだけで、カフェのような味に近づく
+    </p>
+  </div>
+
+  <!-- コア図解: 豆 → 挽く → 抽出 → カップ -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0 mb-8">
+    <!-- 豆 -->
+    <div class="flex flex-col items-center w-32 p-3">
+      <div class="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="package" class="w-7 h-7 text-amber-700"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">コーヒー豆</div>
+      <div class="text-[11px] text-amber-700/70 mt-0.5">新鮮な豆を選ぶ</div>
+    </div>
+
+    <!-- 矢印 1 -->
+    <div class="flex items-center justify-center md:w-12 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-muted tracking-wider">挽く</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-dim hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-dim md:hidden"></i>
+      </div>
+    </div>
+
+    <!-- 挽いた粉（中央） -->
+    <div class="flex flex-col items-center w-40 p-4 bg-amber-500/5 border-2 border-amber-500/20 rounded-2xl">
+      <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border-2 border-amber-500/30 flex items-center justify-center mb-2.5">
+        <i data-lucide="align-justify" class="w-8 h-8 text-amber-700"></i>
+      </div>
+      <div class="font-bold text-amber-700 text-base">コーヒー粉</div>
+      <div class="text-[11px] text-ads-muted mt-0.5 mb-2">挽き目が味を決める</div>
+      <div class="text-[10px] text-ads-muted bg-white rounded-lg px-2.5 py-1 border border-ads-border/50">細い→濃い／粗い→軽い</div>
+    </div>
+
+    <!-- 矢印 2 -->
+    <div class="flex items-center justify-center md:w-12 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-muted tracking-wider">お湯を注ぐ</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-dim hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-dim md:hidden"></i>
+      </div>
+    </div>
+
+    <!-- カップ -->
+    <div class="flex flex-col items-center w-32 p-3">
+      <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="coffee" class="w-7 h-7 text-emerald-700"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">完成</div>
+      <div class="text-[11px] text-emerald-700/70 mt-0.5">おいしい一杯</div>
+    </div>
+  </div>
+
+  <!-- 重要3要素 -->
+  <div class="flex items-center gap-4 mb-6">
+    <div class="flex-1 border-t border-ads-border/50"></div>
+    <div class="text-[11px] text-ads-dim font-medium">味を決める3つの変数</div>
+    <div class="flex-1 border-t border-ads-border/50"></div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-3 mb-2">
+    <div class="flex items-center gap-2 bg-white border border-ads-border rounded-xl px-4 py-2.5 text-sm text-slate-700">
+      <i data-lucide="thermometer" class="w-4 h-4 text-red-500"></i>
+      <div>
+        <div class="font-bold text-slate-800">お湯の温度</div>
+        <div class="text-[11px] text-ads-muted">85〜93℃が目安</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 bg-white border border-ads-border rounded-xl px-4 py-2.5 text-sm text-slate-700">
+      <i data-lucide="scale" class="w-4 h-4 text-blue-500"></i>
+      <div>
+        <div class="font-bold text-slate-800">粉とお湯の比率</div>
+        <div class="text-[11px] text-ads-muted">1:15〜1:17が基本</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 bg-white border border-ads-border rounded-xl px-4 py-2.5 text-sm text-slate-700">
+      <i data-lucide="timer" class="w-4 h-4 text-amber-500"></i>
+      <div>
+        <div class="font-bold text-slate-800">抽出時間</div>
+        <div class="text-[11px] text-ads-muted">方法により2〜7分</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="text-center text-ads-muted mb-16 md:mb-20">
+  ここから先で、淹れ方の種類とステップをひとつずつ解説していきます。
+</p>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 1: 淹れ方の種類                                      -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 flex-shrink-0">
+      <i data-lucide="layers" class="w-5 h-5 text-amber-700"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">3つの淹れ方を知っておこう</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    コーヒーの抽出方法は大きく3種類に分けられます。大事なのは<strong class="text-slate-900">「どうお湯とコーヒー粉を接触させるか」</strong>という方法の違いです。方法が変わると、味わいもガラリと変わります。
+  </p>
+
+  <!-- 3種類の抽出方式 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <!-- 透過式 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="bg-sky-500/10 border-b border-ads-border px-5 py-4 text-center">
+        <div class="w-12 h-12 rounded-xl bg-sky-500/15 flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="droplets" class="w-6 h-6 text-sky-600"></i>
+        </div>
+        <div class="font-black text-sky-700 text-base">透過式</div>
+        <div class="text-[11px] text-sky-600/70 mt-0.5">お湯を「通す」</div>
+      </div>
+      <div class="p-5">
+        <div class="text-sm font-bold text-slate-800 mb-2">代表: ハンドドリップ</div>
+        <p class="text-sm text-ads-muted leading-relaxed mb-3">お湯をコーヒー粉の層に上から通して抽出。フィルターで粉を濾すため、クリアですっきりした味わいになる。</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[11px] bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-2.5 py-0.5">すっきり</span>
+          <span class="text-[11px] bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-2.5 py-0.5">香り高い</span>
+          <span class="text-[11px] bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-2.5 py-0.5">家庭向き</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浸漬式 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="bg-amber-500/10 border-b border-ads-border px-5 py-4 text-center">
+        <div class="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="flask-conical" class="w-6 h-6 text-amber-700"></i>
+        </div>
+        <div class="font-black text-amber-700 text-base">浸漬式</div>
+        <div class="text-[11px] text-amber-700/60 mt-0.5">お湯に「浸す」</div>
+      </div>
+      <div class="p-5">
+        <div class="text-sm font-bold text-slate-800 mb-2">代表: フレンチプレス</div>
+        <p class="text-sm text-ads-muted leading-relaxed mb-3">コーヒー粉をお湯に一定時間浸して抽出。コーヒーのオイル成分もそのまま残るため、コクが深くまろやかな味わいになる。</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2.5 py-0.5">コク深い</span>
+          <span class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2.5 py-0.5">まろやか</span>
+          <span class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2.5 py-0.5">失敗しにくい</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加圧式 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="bg-red-500/10 border-b border-ads-border px-5 py-4 text-center">
+        <div class="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="zap" class="w-6 h-6 text-red-600"></i>
+        </div>
+        <div class="font-black text-red-700 text-base">加圧式</div>
+        <div class="text-[11px] text-red-600/70 mt-0.5">圧力で「押し出す」</div>
+      </div>
+      <div class="p-5">
+        <div class="text-sm font-bold text-slate-800 mb-2">代表: エスプレッソ</div>
+        <p class="text-sm text-ads-muted leading-relaxed mb-3">高圧（約9気圧）のお湯を短時間で押し通して抽出。少量の濃縮コーヒーが得られ、カフェラテなどのベースになる。</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[11px] bg-red-50 text-red-700 border border-red-200 rounded-full px-2.5 py-0.5">濃厚</span>
+          <span class="text-[11px] bg-red-50 text-red-700 border border-red-200 rounded-full px-2.5 py-0.5">短時間</span>
+          <span class="text-[11px] bg-red-50 text-red-700 border border-red-200 rounded-full px-2.5 py-0.5">専用機が必要</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 比較表 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-ads-border bg-ads-hover">
+      <h3 class="text-sm font-bold text-slate-800">3つの方法を比べてみると</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-ads-border/60">
+            <th class="px-4 py-3 text-left text-xs font-bold text-ads-muted">項目</th>
+            <th class="px-4 py-3 text-center text-xs font-bold text-sky-700">ハンドドリップ</th>
+            <th class="px-4 py-3 text-center text-xs font-bold text-amber-700">フレンチプレス</th>
+            <th class="px-4 py-3 text-center text-xs font-bold text-red-700">エスプレッソ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-ads-border/40">
+          <tr>
+            <td class="px-4 py-3 text-ads-muted text-xs">所要時間</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">5〜7分</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">6〜7分</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">2〜3分</td>
+          </tr>
+          <tr class="bg-ads-surface/50">
+            <td class="px-4 py-3 text-ads-muted text-xs">難易度</td>
+            <td class="px-4 py-3 text-center text-xs">
+              <span class="text-amber-600">★★☆☆☆</span>
+            </td>
+            <td class="px-4 py-3 text-center text-xs">
+              <span class="text-emerald-600">★☆☆☆☆</span>
+            </td>
+            <td class="px-4 py-3 text-center text-xs">
+              <span class="text-red-600">★★★★☆</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-ads-muted text-xs">初期コスト</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">1,000円〜</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">2,000円〜</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">20,000円〜</td>
+          </tr>
+          <tr class="bg-ads-surface/50">
+            <td class="px-4 py-3 text-ads-muted text-xs">味わい</td>
+            <td class="px-4 py-3 text-center text-xs text-sky-700">すっきり・香り高い</td>
+            <td class="px-4 py-3 text-center text-xs text-amber-700">コク・まろやか</td>
+            <td class="px-4 py-3 text-center text-xs text-red-700">濃厚・ビター</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-ads-muted text-xs">おすすめの人</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">まず試したい人</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">安定を求める人</td>
+            <td class="px-4 py-3 text-center text-xs text-slate-700">ラテ好きな人</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="px-4 py-2 border-t border-ads-border/40">
+      <p class="text-[10px] text-ads-dim">出典: <a href="https://coffee-guide.jp/brewing/438/" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">COFFEE GUIDE — コーヒー抽出方法の違いを徹底比較</a></p>
+    </div>
+  </div>
+
+  <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-700"></i>
+      </div>
+      <div>
+        <p class="font-bold text-amber-700 mb-1">迷ったらハンドドリップから</p>
+        <p class="text-ads-muted leading-relaxed text-sm">
+          初めてコーヒーを自分で淹れるなら、<strong class="text-slate-800">ハンドドリップ</strong>が最もバランスが良いです。道具が安価で、コツさえつかめば安定した味が出せます。次のセクションでは、ハンドドリップの手順を詳しく解説します。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 2: ハンドドリップのステップ                           -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-sky-500/10 flex-shrink-0">
+      <i data-lucide="list-ordered" class="w-5 h-5 text-sky-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">ハンドドリップ — 6ステップ</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    ハンドドリップは難しそうに見えますが、手順は6つだけです。最初から完璧を目指さず、まず1回やってみることが大事です。
+  </p>
+
+  <p class="mb-8 leading-relaxed">
+    <strong class="text-slate-900">基本レシピ（1杯分）：コーヒー豆 15g ／ お湯 250ml ／ 温度 85〜93℃</strong>
+  </p>
+
+  <!-- 6ステップフロー -->
+  <div class="space-y-3 mb-8">
+
+    <!-- Step 1 -->
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-sky-500 text-white text-sm font-bold flex items-center justify-center">1</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="package" class="w-4 h-4 text-sky-600"></i>
+          <h3 class="font-bold text-slate-900 text-sm">豆を計量して挽く</h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">スケールで豆を15g量り、グラインダー（コーヒーミル）で<strong class="text-slate-700">中挽き</strong>に挽きます。挽きたての粉は香りが格段に違います。袋入りの粉を使う場合はこの手順は不要です。</p>
+        <div class="mt-2.5 inline-flex items-center gap-1.5 text-[11px] bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-3 py-1">
+          <i data-lucide="info" class="w-3 h-3"></i>
+          挽き目の目安: 粗め→フレンチプレス用、中→ドリップ用、細め→エスプレッソ用
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-sky-500 text-white text-sm font-bold flex items-center justify-center">2</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="thermometer" class="w-4 h-4 text-sky-600"></i>
+          <h3 class="font-bold text-slate-900 text-sm">お湯を適温に調整する</h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">沸騰したお湯をそのまま使うと、コーヒーが「えぐみ」を出してしまいます。ケトルに移して<strong class="text-slate-700">2〜3分待つ</strong>か、温度計で確認して85〜93℃に調整してください。</p>
+        <div class="mt-2.5 flex gap-2 flex-wrap">
+          <div class="inline-flex items-center gap-1.5 text-[11px] bg-red-50 text-red-600 border border-red-200 rounded-full px-3 py-1">
+            <i data-lucide="x" class="w-3 h-3"></i>100℃（沸騰直後）→ えぐみが出る
+          </div>
+          <div class="inline-flex items-center gap-1.5 text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1">
+            <i data-lucide="check" class="w-3 h-3"></i>85〜93℃ → ちょうど良い
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-sky-500 text-white text-sm font-bold flex items-center justify-center">3</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="filter" class="w-4 h-4 text-sky-600"></i>
+          <h3 class="font-bold text-slate-900 text-sm">フィルターをセットして粉を入れる</h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">ドリッパーにペーパーフィルターをセットします。<strong class="text-slate-700">フィルターに少量のお湯を通してから捨てる</strong>と、紙の匂いが取れてコーヒーの味がクリアになります（リンスと呼ばれる手順）。その後、挽いた粉を入れ平らにならします。</p>
+      </div>
+    </div>
+
+    <!-- Step 4 (KEY STEP) -->
+    <div class="flex gap-4 bg-amber-500/5 border-2 border-amber-500/25 rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-amber-500 text-white text-sm font-bold flex items-center justify-center">4</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="hourglass" class="w-4 h-4 text-amber-700"></i>
+          <h3 class="font-bold text-slate-900 text-sm">蒸らし — <span class="text-amber-700">最重要ステップ</span></h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">まず少量のお湯（豆の重量の2〜3倍、30〜45g程度）を粉全体に均一にかけ、<strong class="text-slate-700">30〜40秒そのまま待ちます</strong>。この「蒸らし」が香りと風味を引き出す最も重要な工程です。</p>
+        <div class="mt-3 bg-white border border-amber-200 rounded-lg p-3">
+          <p class="text-[11px] text-amber-800 leading-relaxed">
+            <strong>なぜ蒸らすの？</strong><br>
+            焙煎された豆には炭酸ガスが含まれています。このガスが残ったままだとお湯がコーヒー粉に均一に浸透せず、味が薄くなります。蒸らしでガスを逃がすことで、次の注湯でムラなく抽出できます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-sky-500 text-white text-sm font-bold flex items-center justify-center">5</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="circle" class="w-4 h-4 text-sky-600"></i>
+          <h3 class="font-bold text-slate-900 text-sm">お湯を数回に分けて注ぐ</h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">蒸らし後、残りのお湯を<strong class="text-slate-700">3〜4回に分けて</strong>ゆっくり注ぎます。中心から外側へ、小さな円を描くように注ぐのがコツです。一度に大量に注ぐと雑味が出やすくなります。全部で約3分かけて250mlを注ぎ切ります。</p>
+        <div class="mt-2.5 inline-flex items-center gap-1.5 text-[11px] bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-3 py-1">
+          <i data-lucide="info" class="w-3 h-3"></i>
+          ドリッパーの壁にお湯が当たらないよう注意
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center">6</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i data-lucide="coffee" class="w-4 h-4 text-emerald-600"></i>
+          <h3 class="font-bold text-slate-900 text-sm">ドリッパーを外して完成</h3>
+        </div>
+        <p class="text-sm text-ads-muted leading-relaxed">目標量（250ml）まで抽出できたら、ドリッパーにお湯が残っていても<strong class="text-slate-700">そこでドリッパーを外します</strong>。最後まで落としきると、えぐみや渋みが出てしまいます。カップかサーバーに移してできあがりです。</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 道具一覧 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6">
+    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="shopping-bag" class="w-4 h-4 text-ads-accent"></i>
+      必要な道具（最低限のセット）
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-lg bg-ads-hover border border-ads-border flex items-center justify-center mx-auto mb-1.5">
+          <i data-lucide="filter" class="w-5 h-5 text-ads-muted"></i>
+        </div>
+        <div class="text-xs font-bold text-slate-700">ドリッパー</div>
+        <div class="text-[10px] text-ads-dim">300〜1,000円</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-lg bg-ads-hover border border-ads-border flex items-center justify-center mx-auto mb-1.5">
+          <i data-lucide="archive" class="w-5 h-5 text-ads-muted"></i>
+        </div>
+        <div class="text-xs font-bold text-slate-700">ペーパーフィルター</div>
+        <div class="text-[10px] text-ads-dim">200〜500円（100枚）</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-lg bg-ads-hover border border-ads-border flex items-center justify-center mx-auto mb-1.5">
+          <i data-lucide="droplet" class="w-5 h-5 text-ads-muted"></i>
+        </div>
+        <div class="text-xs font-bold text-slate-700">細口ケトル</div>
+        <div class="text-[10px] text-ads-dim">2,000〜5,000円</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-lg bg-ads-hover border border-ads-border flex items-center justify-center mx-auto mb-1.5">
+          <i data-lucide="scale" class="w-5 h-5 text-ads-muted"></i>
+        </div>
+        <div class="text-xs font-bold text-slate-700">スケール</div>
+        <div class="text-[10px] text-ads-dim">1,000〜3,000円</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 3: 味を左右する4つの要素                             -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/10 flex-shrink-0">
+      <i data-lucide="sliders" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">味を左右する4つのパラメーター</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    「なんか薄い」「苦すぎる」と感じたとき、どこを調整すればいいのか。コーヒーの味は4つの変数で決まります。一度に全部変えず、<strong class="text-slate-900">1つずつ変えて試す</strong>のが上達の近道です。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- 挽き目 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="align-justify" class="w-5 h-5 text-amber-700"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-0.5">挽き目（粉の細かさ）</h3>
+          <p class="text-xs text-ads-muted">味への影響度: 大</p>
+        </div>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center gap-3 bg-white border border-ads-border/50 rounded-lg px-3 py-2">
+          <span class="w-12 text-[11px] font-bold text-red-600 flex-shrink-0">細挽き</span>
+          <div class="flex-1 h-1.5 bg-red-200 rounded-full"><div class="h-1.5 bg-red-400 rounded-full" style="width:90%"></div></div>
+          <span class="text-[11px] text-ads-muted flex-shrink-0">濃い・苦い</span>
+        </div>
+        <div class="flex items-center gap-3 bg-white border border-ads-border/50 rounded-lg px-3 py-2">
+          <span class="w-12 text-[11px] font-bold text-emerald-700 flex-shrink-0">中挽き</span>
+          <div class="flex-1 h-1.5 bg-emerald-200 rounded-full"><div class="h-1.5 bg-emerald-400 rounded-full" style="width:55%"></div></div>
+          <span class="text-[11px] text-emerald-700 flex-shrink-0">バランスよい</span>
+        </div>
+        <div class="flex items-center gap-3 bg-white border border-ads-border/50 rounded-lg px-3 py-2">
+          <span class="w-12 text-[11px] font-bold text-sky-600 flex-shrink-0">粗挽き</span>
+          <div class="flex-1 h-1.5 bg-sky-200 rounded-full"><div class="h-1.5 bg-sky-400 rounded-full" style="width:25%"></div></div>
+          <span class="text-[11px] text-ads-muted flex-shrink-0">薄い・軽い</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- お湯の温度 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="thermometer" class="w-5 h-5 text-red-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-0.5">お湯の温度</h3>
+          <p class="text-xs text-ads-muted">目安: 85〜93℃</p>
+        </div>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center gap-2 bg-white border border-ads-border/50 rounded-lg px-3 py-2.5">
+          <i data-lucide="arrow-up" class="w-3.5 h-3.5 text-red-500 flex-shrink-0"></i>
+          <div>
+            <span class="text-[11px] font-bold text-red-600">高温（95℃以上）</span>
+            <span class="text-[11px] text-ads-muted ml-1">→ えぐみ・苦みが強くなる</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-emerald-50/50 border border-emerald-200/50 rounded-lg px-3 py-2.5">
+          <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0"></i>
+          <div>
+            <span class="text-[11px] font-bold text-emerald-700">適温（85〜93℃）</span>
+            <span class="text-[11px] text-ads-muted ml-1">→ バランスよく抽出できる</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-white border border-ads-border/50 rounded-lg px-3 py-2.5">
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-sky-500 flex-shrink-0"></i>
+          <div>
+            <span class="text-[11px] font-bold text-sky-600">低温（80℃以下）</span>
+            <span class="text-[11px] text-ads-muted ml-1">→ 酸味が残り、旨みが出ない</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 粉とお湯の比率 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="scale" class="w-5 h-5 text-blue-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-0.5">粉とお湯の比率</h3>
+          <p class="text-xs text-ads-muted">基本は 1:15〜1:17</p>
+        </div>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed mb-3">粉15gに対してお湯225〜255mlが目安。比率を変えることで濃さをコントロールできます。</p>
+      <div class="bg-white border border-ads-border/50 rounded-lg p-3 space-y-1.5">
+        <div class="flex justify-between items-center text-[11px]">
+          <span class="text-ads-muted">1:13（濃い）</span>
+          <span class="font-bold text-red-600">豆15g → お湯195ml</span>
+        </div>
+        <div class="flex justify-between items-center text-[11px] bg-emerald-50 rounded px-2 py-1">
+          <span class="text-emerald-700 font-medium">1:16（標準）</span>
+          <span class="font-bold text-emerald-700">豆15g → お湯240ml</span>
+        </div>
+        <div class="flex justify-between items-center text-[11px]">
+          <span class="text-ads-muted">1:18（薄い）</span>
+          <span class="font-bold text-sky-600">豆15g → お湯270ml</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 鮮度 -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-0.5">豆の鮮度</h3>
+          <p class="text-xs text-ads-muted">焙煎後1〜4週間以内が目安</p>
+        </div>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed mb-3">どんなに丁寧に淹れても、豆が古ければ香りも味も出ません。<strong class="text-slate-700">焙煎日の記載があるコーヒー豆</strong>を選ぶのが最も確実な方法です。</p>
+      <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+        <p class="text-[11px] text-emerald-800">「焙煎日：〇月〇日」と書かれた袋を選ぼう</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 4: よくある失敗と対策                                 -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500/10 flex-shrink-0">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">よくある失敗と解決策</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    「なんかうまくいかない…」と感じたとき、たいていの原因はこの3つのどれかです。
+  </p>
+
+  <div class="space-y-4">
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">「味が薄くて水っぽい」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-1">対策:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              <strong class="text-slate-800">豆の量を増やすか、挽き目を細かくする</strong>のが最も効果的です。また、蒸らしが足りていない可能性も。30〜40秒をしっかり待ちましょう。お湯の温度が低すぎる（80℃以下）場合も薄くなる原因になります。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">「苦すぎる・えぐみがある」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-1">対策:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              <strong class="text-slate-800">お湯の温度を少し下げる（93℃→88℃）</strong>のが手っ取り早いです。また、ドリッパーにお湯が残った状態でも規定量になったらドリッパーを外すこと（最後まで落とさない）。挽き目が細すぎる場合も苦みが強くなります。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">「毎回味が違う・安定しない」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-1">対策:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              <strong class="text-slate-800">スケールとタイマーを使う</strong>のが一番の解決策です。「なんとなく」の目分量では毎回結果が変わります。豆の量・お湯の量・抽出時間を毎回同じにするだけで、安定した味が実現できます。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 5: まとめ                                            -->
+<!-- ============================================================ -->
+<section>
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-ads-accent/10 flex-shrink-0">
+      <i data-lucide="check-circle" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">まとめ — 今日から使える3つのポイント</h2>
+  </div>
+
+  <div class="space-y-4 mb-10">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-amber-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-amber-500 leading-none flex-shrink-0 mt-1">01</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">蒸らし30秒を忘れない</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            少量のお湯でコーヒー粉全体を湿らせ、30〜40秒待つ。この1ステップが香りと旨みの引き出し方を大きく変えます。「なんとなく注ぐ」から「蒸らしてから注ぐ」に変えるだけで味が変わります。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-sky-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-sky-500 leading-none flex-shrink-0 mt-1">02</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">スケールで量を測る</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            豆15gにお湯240ml（1:16）が基本。目分量をやめてスケールを使うだけで、毎回安定した味になります。一度好みの比率を見つければ、再現できるのがコーヒーの楽しさです。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-emerald-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-emerald-500 leading-none flex-shrink-0 mt-1">03</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">新鮮な豆を使う</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            道具や技術より、豆の鮮度が味に直結します。スーパーの棚に長く置かれた豆より、焙煎日が記載されたコーヒー豆を選ぶのがコスパ最高の味改善策です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center bg-gradient-to-b from-amber-500/5 to-transparent border border-amber-500/15 rounded-xl p-8 md:p-10">
+    <i data-lucide="coffee" class="w-8 h-8 text-amber-700 mx-auto mb-4"></i>
+    <p class="text-lg font-bold text-slate-900 mb-3">「知ってから淹れる」と、毎日のコーヒーが変わります。</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed">
+      最初から完璧を目指さなくて大丈夫。蒸らし・計量・新鮮な豆の3つだけ意識して、まず1杯試してみてください。そのうちに「もう少し濃くしてみようかな」「温度を変えたらどうなる？」と自分好みを探すのが楽しくなってきます。
+    </p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

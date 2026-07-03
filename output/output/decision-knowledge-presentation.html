@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:title" content="意思決定ナレッジハブ — 4ペインで前提と問いを1画面に">
+  <title>意思決定ナレッジハブ — AI-Driven School 発表</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { ads: { bg:'#FFF', surface:'#F8FAFC', border:'#E2E8F0', accent:'#3B82F6', 'accent-light':'#2563EB', muted:'#64748B', dim:'#94A3B8' } }, fontFamily: { sans: ['"Noto Sans JP"','sans-serif'] } } } }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .section-anchor { scroll-margin-top: 1.5rem; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-700 antialiased border-t-4 border-ads-accent">
+
+  <!-- Hero -->
+  <header class="max-w-4xl mx-auto px-5 pt-10 pb-8 text-center">
+    <p class="text-xs font-bold text-ads-accent tracking-wide mb-4">AI-Driven School · 月次課題 第3回</p>
+    <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-3 leading-tight">AI時代の意思決定</h1>
+    <p class="text-lg md:text-xl text-ads-muted font-medium mb-4">4ペインで「前提と問い」を1画面に収める</p>
+    <p class="text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+      私は<strong class="text-slate-800">AI時代の意思決定</strong>というテーマに取り組んでいます。
+      経営者・役員・事業責任者・研究開発責任者が困難な判断（投資、戦略、人事、研究テーマ、リソース配分など）でAIを用いる際、
+      どのような<strong class="text-slate-800">死角</strong>があるのか、<strong class="text-slate-800">陥りやすい</strong>のかを
+      <strong class="text-slate-800">専門家としての示唆</strong>を提供することが、本ツールを開発する目的です。
+      <strong class="text-slate-800">今月・来月</strong>、このツールで対話を回し、データを保存し、仮説を立て、さらにその仮説を掘り下げます。
+      その<strong class="text-slate-800">作業台</strong>がこのツールです。
+    </p>
+    <div class="flex flex-wrap justify-center gap-3 mt-8">
+      <a href="decision-knowledge-panels.html" class="inline-flex items-center gap-2 bg-ads-accent hover:bg-ads-accent-light text-white font-bold px-6 py-3 rounded-full shadow-lg transition-colors">
+        <i data-lucide="layout-grid" class="w-4 h-4"></i> ツールを開く（4ペイン）
+      </a>
+      <button onclick="window.print()" class="no-print inline-flex items-center gap-2 border border-ads-border text-ads-muted hover:text-ads-accent px-4 py-3 rounded-full text-sm font-medium transition-colors">
+        <i data-lucide="download" class="w-4 h-4"></i> PDF
+      </button>
+    </div>
+  </header>
+
+    <!-- 今日の発表 3部構成 -->
+    <nav class="max-w-4xl mx-auto px-5 mb-8">
+      <p class="text-center text-xs font-bold text-ads-dim mb-3 tracking-wider">今日の発表の進め方</p>
+      <div class="grid sm:grid-cols-3 gap-3 text-center text-sm">
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-3"><p class="font-black text-teal-800">① どんな画面か</p><p class="text-xs text-ads-muted mt-1">Section 1</p></div>
+        <div class="bg-violet-50 border-2 border-violet-400 rounded-xl p-3"><p class="font-black text-violet-800">② 何を解決するか</p><p class="text-xs text-ads-muted mt-1">下の「解決の芯」</p></div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3"><p class="font-black text-amber-800">③ 作ってみた感想</p><p class="text-xs text-ads-muted mt-1">Section 4</p></div>
+      </div>
+    </nav>
+
+    <!-- 解決の芯 -->
+    <section id="section-core-problem" class="section-anchor max-w-4xl mx-auto px-5 mb-12">
+      <div class="bg-gradient-to-br from-violet-50 to-indigo-50 border-2 border-violet-200 rounded-2xl p-6 md:p-8">
+        <p class="text-xs font-bold text-violet-600 tracking-widest mb-2">解決の芯</p>
+        <p class="text-xl md:text-2xl font-black text-slate-900 mb-4 leading-snug">
+          解決するのは「AIの使い方」ではなく、<br>
+          <span class="text-violet-700">対話で得た“前提と問い”が、次の対話に残らない問題</span>
+        </p>
+        <p class="text-sm text-slate-700 leading-relaxed mb-6">
+          AIで図解はどんどん作れる。でも<strong>「あの対話で何が分かったか」</strong>は、ファイルとチャットに散らばり、
+          次の対話のとき<strong>ほぼゼロから</strong>始めがちです。
+          このツールは、その<strong>記憶の置き場</strong>と<strong>1画面での同時参照</strong>を用意します。
+        </p>
+
+        <div class="bg-white/80 border border-violet-200 rounded-xl p-5 mb-6">
+          <p class="text-xs font-bold text-violet-700 mb-2">存在目的 · 使用目的 · 今回のツール — 3層の言い分け</p>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            <strong class="text-slate-800">存在目的（プログラム全体）</strong>は、経営者・役員・事業責任者・研究開発責任者がAIを用いた困難な判断において、
+            <strong class="text-slate-800">死角や陥りやすい点</strong>を専門家として示唆し、
+            APCDで<strong>前提を照らし、判断を人が引き受ける</strong>ための思考の枠を提供することです。
+            <strong class="text-slate-800">使用目的（今回の4ペイン）</strong>は、今月・来月の対話で仮説を立て・掘り下げる際、
+            その枠を外さず、地図・APCD・領域別の問い・過去の洞察を1画面に置き、気づきを <code class="text-xs bg-slate-100 px-1 rounded">sessions.json</code> に残して次へ渡す<strong class="text-slate-800">作業台</strong>であることです。
+            メタ認知はソフトが自動分析するのではなく、<strong class="text-slate-800">枠が見えている状態で対話・準備を続ける</strong>ことで起きます —
+            つまり、メタ認知を<strong>促す・続けさせる</strong>作業台が、いま作ったものです。
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-red-100">
+            <p class="text-xs font-bold text-red-600 mb-3">❌ このツールがないと（今まで）</p>
+            <ul class="text-sm text-slate-700 space-y-2 list-disc list-inside">
+              <li>対話のたびに資料・チャットが<strong>別々</strong>に増える</li>
+              <li>「前提は変わったか？」という<strong>問い</strong>が次に引き継がれない</li>
+              <li>仮説（AIは合理性を強化しやすい等）が<strong>頭の中だけ</strong>で更新されない</li>
+              <li>準備中、<strong>地図・フレーム・領域・過去の気づき</strong>を同時に見られない</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-emerald-100">
+            <p class="text-xs font-bold text-emerald-600 mb-3">✅ このツールがあると（今月・来月）</p>
+            <ul class="text-sm text-slate-700 space-y-2 list-disc list-inside">
+              <li>4ペインで<strong>いま必要な視点だけ</strong>を1画面に並べられる</li>
+              <li>対話後 <code class="text-xs bg-slate-100 px-1 rounded">sessions.json</code> に洞察を1行足す → <strong>次回も残る</strong></li>
+              <li>支持・反証どちらも<strong>問いの更新</strong>として蓄積できる</li>
+              <li>経営判断も研究開発判断も<strong>同じAPCD</strong>で扱える</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="text-xs text-violet-700 font-medium mt-4 text-center">
+          解決しないこと：AIが正しい答えを出すこと · 自動で仮説検証すること · 代わりに判断すること
+        </p>
+      </div>
+    </section>
+
+    <!-- 4 section nav (ADS sample pattern) -->
+  <nav class="max-w-4xl mx-auto px-5 mb-12">
+    <p class="text-center text-xs font-bold text-ads-dim mb-4 tracking-wider">このページで紹介する 4つのこと</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <a href="#section-capture" class="group bg-ads-surface border-2 border-ads-border hover:border-ads-accent rounded-2xl p-4 transition-colors">
+        <p class="text-[10px] font-bold text-ads-accent mb-1">SECTION 1</p>
+        <p class="font-black text-slate-900 text-sm group-hover:text-ads-accent-light">画面のキャプチャ</p>
+        <p class="text-xs text-ads-muted mt-1">何を作ったか</p>
+      </a>
+      <a href="#section-problem" class="group bg-ads-surface border-2 border-ads-border hover:border-teal-500 rounded-2xl p-4 transition-colors">
+        <p class="text-[10px] font-bold text-teal-600 mb-1">SECTION 2</p>
+        <p class="font-black text-slate-900 text-sm">解決する課題</p>
+        <p class="text-xs text-ads-muted mt-1">誰の何を解くか</p>
+      </a>
+      <a href="#section-design" class="group bg-ads-surface border-2 border-ads-border hover:border-violet-500 rounded-2xl p-4 transition-colors">
+        <p class="text-[10px] font-bold text-violet-600 mb-1">SECTION 3</p>
+        <p class="font-black text-slate-900 text-sm">工夫したポイント</p>
+        <p class="text-xs text-ads-muted mt-1">何にこだわったか</p>
+      </a>
+      <a href="#section-struggle" class="group bg-ads-surface border-2 border-ads-border hover:border-amber-500 rounded-2xl p-4 transition-colors">
+        <p class="text-[10px] font-bold text-amber-600 mb-1">SECTION 4</p>
+        <p class="font-black text-slate-900 text-sm">苦戦したポイント</p>
+        <p class="text-xs text-ads-muted mt-1">どこで詰まったか</p>
+      </a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-5 pb-16 space-y-16">
+
+    <!-- SECTION 1 -->
+    <section id="section-capture" class="section-anchor">
+      <p class="text-xs font-bold text-ads-accent tracking-widest mb-2">SECTION 1</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-4">画面のキャプチャ</h2>
+      <p class="text-sm text-ads-muted mb-6 leading-relaxed">
+        起動すると、<strong class="text-slate-800">4つに区切られたワークスペース</strong>が立ち上がります。
+        左から右へ進むほど、情報がだんだん細かくなります（全体 → 構造 → 現場 → 蓄積）。
+      </p>
+
+      <!-- Embedded preview -->
+      <div class="rounded-2xl border-2 border-slate-800 overflow-hidden shadow-2xl mb-6 bg-slate-900">
+        <div class="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+          <span class="text-xs text-slate-400 font-medium">decision-knowledge-panels.html</span>
+          <a href="decision-knowledge-panels.html" target="_blank" rel="noopener" class="text-xs text-amber-400 font-bold hover:underline flex items-center gap-1">
+            別タブで開く <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <iframe src="decision-knowledge-panels.html" title="4ペインツール" class="w-full h-[min(520px,70vh)] border-0 bg-slate-900"></iframe>
+      </div>
+
+      <p class="text-xs text-ads-dim text-center mb-6">起動直後の画面（4ペイン · クリックまたは 1–4 キーで拡大）</p>
+
+      <!-- Pane legend (ADS style) -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4">
+          <p class="text-[10px] font-black text-teal-700 mb-1">PANE 1</p>
+          <p class="font-bold text-slate-900 text-sm mb-1">問いの地図</p>
+          <p class="text-xs text-ads-muted">2つの領域 · 共通の問い</p>
+        </div>
+        <div class="bg-violet-50 border border-violet-200 rounded-xl p-4">
+          <p class="text-[10px] font-black text-violet-700 mb-1">PANE 2</p>
+          <p class="font-bold text-slate-900 text-sm mb-1">共通フレーム</p>
+          <p class="text-xs text-ads-muted">前提→目的→基準→判断</p>
+        </div>
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+          <p class="text-[10px] font-black text-sky-700 mb-1">PANE 3</p>
+          <p class="font-bold text-slate-900 text-sm mb-1">判断とAIの接続</p>
+          <p class="text-xs text-ads-muted">問いセット · 目的·内容·方法</p>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+          <p class="text-[10px] font-black text-indigo-700 mb-1">PANE 4</p>
+          <p class="font-bold text-slate-900 text-sm mb-1">ナレッジストリーム</p>
+          <p class="text-xs text-ads-muted">対話のたびに増える洞察</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-xl p-4 text-center">
+        <p class="text-sm font-bold text-amber-400">左 → 右で「領域 → 構造 → 問いセット → 蓄積」へ視線が一方向に流れる</p>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="section-problem" class="section-anchor">
+      <p class="text-xs font-bold text-teal-600 tracking-widest mb-2">SECTION 2</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-2">解決する課題</h2>
+      <p class="text-base font-bold text-slate-800 mb-6">困難な判断について、同時に知りたい3つを1画面で見られるようにする</p>
+      <p class="text-sm text-ads-muted mb-8 leading-relaxed">
+        新規事業への投資、後継者の人事、研究テーマの選定、リソース配分——
+        AIを用いる場面が増えるほど、次の3つを<strong class="text-slate-800">行ったり来たり</strong>しながら考える必要があります。
+        資料やチャットが分かれていると、<strong class="text-slate-800">問いの更新</strong>が残りません。
+      </p>
+
+      <div class="space-y-4 mb-8">
+        <div class="flex gap-4 bg-white border-2 border-ads-border rounded-2xl p-5">
+          <span class="w-10 h-10 rounded-full bg-teal-100 text-teal-700 font-black flex items-center justify-center shrink-0">1</span>
+          <div>
+            <p class="font-black text-slate-900 mb-1">全体を見る</p>
+            <p class="text-sm text-ads-muted"><strong class="text-slate-700">経営判断と研究開発判断は、同じ構造か？</strong> — 領域は違っても「前提は変わったか？」は共通か。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-white border-2 border-ads-border rounded-2xl p-5">
+          <span class="w-10 h-10 rounded-full bg-violet-100 text-violet-700 font-black flex items-center justify-center shrink-0">2</span>
+          <div>
+            <p class="font-black text-slate-900 mb-1">構造と問いを見る</p>
+            <p class="text-sm text-ads-muted"><strong class="text-slate-700">前提・問い・判断基準は言語化されているか？</strong> — APCDと、領域ごとの困難な判断を同時に参照したい。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-white border-2 border-ads-border rounded-2xl p-5">
+          <span class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-black flex items-center justify-center shrink-0">3</span>
+          <div>
+            <p class="font-black text-slate-900 mb-1">蓄積を見る</p>
+            <p class="text-sm text-ads-muted"><strong class="text-slate-700">対話で出た洞察は、次の仮説更新に渡せるか？</strong> — 支持も反証も、問いとして残したい。</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="font-black text-slate-900 mb-4">3つの視点を 4ペインに割り当てる</h3>
+      <div class="grid sm:grid-cols-2 gap-3 mb-6">
+        <div class="bg-teal-50 border-l-4 border-teal-500 rounded-r-xl p-4">
+          <p class="text-xs font-bold text-teal-800 mb-1">PANE 1 — 全体を見る</p>
+          <p class="text-sm text-slate-700">2領域の地図 · 「前提は変わったか？」</p>
+        </div>
+        <div class="bg-violet-50 border-l-4 border-violet-500 rounded-r-xl p-4">
+          <p class="text-xs font-bold text-violet-800 mb-1">PANE 2 — 構造を見る</p>
+          <p class="text-sm text-slate-700">APCD · AIの3限界 · 5ステップ</p>
+        </div>
+        <div class="bg-sky-50 border-l-4 border-sky-500 rounded-r-xl p-4">
+          <p class="text-xs font-bold text-sky-800 mb-1">PANE 3 — 判断領域</p>
+          <p class="text-sm text-slate-700">投資·人事·テーマ·リソース（タブ切替）</p>
+        </div>
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl p-4">
+          <p class="text-xs font-bold text-indigo-800 mb-1">PANE 4 — 蓄積を見る</p>
+          <p class="text-sm text-slate-700">sessions.json の insights · 次回の対話へ</p>
+        </div>
+      </div>
+      <p class="text-sm text-slate-600 bg-ads-surface border border-ads-border rounded-xl p-4">
+        <strong class="text-slate-900">3つを1画面で見られる</strong>ことが存在理由です。逆に言えば、<strong class="text-slate-900">同時に見たい視点が定まらない仕事には、この型は要りません</strong>。
+      </p>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="section-design" class="section-anchor">
+      <p class="text-xs font-bold text-violet-600 tracking-widest mb-2">SECTION 3</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-2">工夫したポイント</h2>
+      <p class="text-base font-bold text-slate-800 mb-8">機能を増やすのではなく、<span class="text-violet-700">迷いを減らす</span>方向に寄せ切った</p>
+
+      <div class="space-y-6">
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-violet-600 mb-2">工夫①</p>
+          <h3 class="font-black text-lg text-slate-900 mb-3">左 → 右の一方向で情報が細かくなる</h3>
+          <p class="text-sm text-ads-muted mb-4">地図 → フレーム → 現場 → 蓄積。Pane 4 に「別現場へのナビ」を入れない — 蓄積に集中させる。</p>
+          <div class="flex flex-wrap gap-2 text-xs font-bold">
+            <span class="px-3 py-1.5 bg-teal-100 text-teal-800 rounded-lg">PANE 1 地図</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim self-center"></i>
+            <span class="px-3 py-1.5 bg-violet-100 text-violet-800 rounded-lg">PANE 2 構造</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim self-center"></i>
+            <span class="px-3 py-1.5 bg-sky-100 text-sky-800 rounded-lg">PANE 3 現場</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim self-center"></i>
+            <span class="px-3 py-1.5 bg-indigo-100 text-indigo-800 rounded-lg">PANE 4 蓄積</span>
+          </div>
+          <p class="text-xs text-teal-700 font-medium mt-4">効果：いま「全体を見ているのか、問いを見ているのか」が、画面の位置で自然に分かる。</p>
+        </article>
+
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-violet-600 mb-2">工夫②</p>
+          <h3 class="font-black text-lg text-slate-900 mb-3">図解と「前提・問い」を分離した</h3>
+          <p class="text-sm text-ads-muted mb-3">HTML図解は<strong class="text-slate-700">出口（投影）</strong>。sessions.json は<strong class="text-slate-700">入口兼貯蔵</strong>。同じ情報を複数ファイルにコピーしない。</p>
+          <p class="text-xs text-teal-700 font-medium">効果：Cursorで図解を増やしても、問いと洞察は1か所に残る。</p>
+        </article>
+
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-violet-600 mb-2">工夫③</p>
+          <h3 class="font-black text-lg text-slate-900 mb-3">現場ビューは「タブ2つ」だけに削った</h3>
+          <p class="text-sm text-ads-muted mb-3">経営判断と研究開発判断の2タブだけ。投資·人事·テーマ·リソース以外の機能は Pane 3 に置かない。</p>
+          <p class="text-xs text-teal-700 font-medium">効果：「いまどちらの判断領域を見ているか」が一瞬で分かる。</p>
+        </article>
+
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-violet-600 mb-2">工夫④</p>
+          <h3 class="font-black text-lg text-slate-900 mb-3">仮説は正解として売らず、問いの更新を商品にする</h3>
+          <p class="text-sm text-ads-muted mb-3">「AIは前提を強化しやすい」は未検証の仮説。Pane 4 には支持も反証も <code class="text-xs bg-slate-100 px-1 rounded">insights</code> として流し込む設計。</p>
+          <p class="text-xs text-teal-700 font-medium">効果：仮説は正解として売らず、継続対話で問いを更新する姿勢と一致する。</p>
+        </article>
+      </div>
+
+      <p class="text-sm text-center text-ads-muted mt-8 px-4">4つの工夫に共通すること — <strong class="text-slate-800">便利機能を1つ足すより、迷いを1つ消す</strong></p>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="section-struggle" class="section-anchor">
+      <p class="text-xs font-bold text-amber-600 tracking-widest mb-2">SECTION 4</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-2">苦戦したポイント</h2>
+      <p class="text-base font-bold text-slate-800 mb-8">コードよりも、「何を作らないか」を決めるところ</p>
+
+      <h2 class="text-2xl font-black text-slate-900 mb-2">作ってみた感想</h2>
+      <p class="text-base font-bold text-slate-800 mb-8">面倒だったこと · もっとやりたかったこと</p>
+
+      <div class="space-y-6">
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-amber-700 mb-2">面倒・詰まった</p>
+          <ul class="text-sm text-slate-700 space-y-2 list-disc list-inside">
+            <li><strong>「何を解決するか」</strong>が最初は腹に落ちなかった — 図解ツールなのか、ナレッジツールなのか</li>
+            <li>AIに任せると機能を足す方向に進み、4ペインの「引き算」に戻すのに時間がかかった</li>
+            <li>JSONの手更新 — 自動化はこれから（今月・来月の探索対象）</li>
+          </ul>
+        </article>
+        <article class="bg-white border border-ads-border rounded-2xl p-6">
+          <p class="text-xs font-bold text-teal-700 mb-2">もっとやりたかった</p>
+          <ul class="text-sm text-slate-700 space-y-2 list-disc list-inside">
+            <li>対話後、Cursorの会話から insights へ半自動で流し込む</li>
+            <li>shadcn/ui 版（hub-ui）で見た目と操作感をさらに洗練する</li>
+            <li>仮説が支持/反証されたとき、Pane 4 で時系列に見えるダッシュボード</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="space-y-6 mt-8">
+        <article class="bg-amber-50/50 border border-amber-200 rounded-2xl p-6">
+          <p class="text-xs font-bold text-amber-700 mb-2">苦戦①</p>
+          <h3 class="font-black text-slate-900 mb-2">汎用AI研修ツールにするか、意思決定に絞るか</h3>
+          <p class="text-sm text-ads-muted leading-relaxed mb-3">「プロンプト集」「図解ジェネレーター」として見せた方が広く受け取られそうでした。</p>
+          <p class="text-sm font-bold text-slate-800">結論：本体は<strong class="text-amber-800">AI時代の意思決定</strong>。困難な判断の前提と問いの蓄積に絞った。</p>
+        </article>
+
+        <article class="bg-amber-50/50 border border-amber-200 rounded-2xl p-6">
+          <p class="text-xs font-bold text-amber-700 mb-2">苦戦②</p>
+          <h3 class="font-black text-slate-900 mb-2">ペインの数 — 3か、4か</h3>
+          <p class="text-sm text-ads-muted mb-3">3ペインだと「蓄積」が入らない。5ペインだと左→右の流れが弱まる。</p>
+          <div class="flex flex-wrap gap-2 text-xs mb-3">
+            <span class="px-2 py-1 bg-white border rounded">3ペイン → 蓄積がない</span>
+            <span class="px-2 py-1 bg-amber-200 text-amber-900 font-bold rounded">4ペイン ✓</span>
+            <span class="px-2 py-1 bg-white border rounded">5ペイン → 流れが散る</span>
+          </div>
+          <p class="text-sm font-bold text-slate-800">結論：<strong class="text-amber-800">地図 / フレーム / 現場 / 蓄積</strong>の4固定。</p>
+        </article>
+
+        <article class="bg-amber-50/50 border border-amber-200 rounded-2xl p-6">
+          <p class="text-xs font-bold text-amber-700 mb-2">苦戦③</p>
+          <h3 class="font-black text-slate-900 mb-2">AIは「機能を足す」方向に進む</h3>
+          <p class="text-sm text-ads-muted mb-3">Cursorに任せると、ダッシュボード・クイックリンク・セッションカードを次々追加し、スクロール型の1ページに戻りがちでした。</p>
+          <p class="text-sm font-bold text-slate-800">結論：<strong class="text-amber-800">4ペイン固定 + 発表ストーリーは別ページ</strong>（このページ）に分離。ツールは「見る」、ストーリーは「語る」。</p>
+        </article>
+      </div>
+
+      <p class="text-sm text-slate-600 bg-ads-surface border border-ads-border rounded-xl p-5 mt-8 leading-relaxed">
+        みんなが使えるツールを狙うほど、どの判断にも噛み合いません。<strong class="text-slate-900">AI時代の意思決定というテーマを1つに絞る勇気</strong>と、絞るために考え抜く根気。コードを書く時間より、決めきれずに立ち止まる時間のほうが長かったのが正直なところです。
+      </p>
+    </section>
+
+    <!-- CTA -->
+    <section class="text-center pt-4 border-t border-ads-border">
+      <a href="decision-knowledge-panels.html" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-4 rounded-full transition-colors">
+        <i data-lucide="play" class="w-5 h-5"></i> 4ペインツールを起動
+      </a>
+      <p class="text-xs text-ads-dim mt-4">
+        <a href="decision-knowledge-hub.html" class="text-ads-accent hover:underline">統合ハブ</a> ·
+        <a href="https://ads-personal-workspace-example.surge.sh/" class="text-ads-accent hover:underline" target="_blank" rel="noopener">ADSサンプル（参考）</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="text-center py-8 text-xs text-ads-dim border-t border-ads-border">
+    AI-Driven School 発表 · 辻本光邦 · AI時代の意思決定
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

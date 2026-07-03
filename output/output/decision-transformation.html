@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="AI時代の意思決定変革プログラム — 概要と効果">
+  <meta property="og:description" content="判断の「前提」を問い直す。AI時代に必要な意思決定変革プログラムの全体像を図解します。">
+  <meta property="og:type" content="article">
+  <title>AI時代の意思決定変革プログラム — 概要と効果</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="brain" class="w-4 h-4"></i>
+    リーダーシップ・意思決定
+  </div>
+  <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4">
+    <span class="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">AI時代の</span><br>
+    意思決定変革プログラム
+  </h1>
+  <p class="text-base text-ads-muted max-w-xl mx-auto leading-relaxed">
+    問題はテクノロジーの活用ではない。<strong class="text-slate-700">判断の「前提」そのもの</strong>だ。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  ONE-PAGE SUMMARY                                            -->
+<!-- ============================================================ -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+
+  <div class="text-center mb-8">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      AIではなく、<span class="text-indigo-700">「前提を引き受け直す」</span>ことが<br class="hidden md:block">意思決定の質を変える
+    </p>
+    <p class="text-sm text-ads-muted">
+      正しい判断を増やすのではなく、判断の前提を自覚し、自分の名前で引き受けるプログラム
+    </p>
+  </div>
+
+  <!-- コア図解: 前提の問題 -->
+  <div class="flex flex-col md:flex-row items-stretch justify-center gap-3 mb-8">
+
+    <!-- 前提が古いまま -->
+    <div class="flex-1 bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 rounded-full bg-red-500/15 flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <span class="text-xs font-bold text-red-600">前提が更新されないまま</span>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 bg-white border border-red-100 rounded-lg px-3 py-2">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+          <span class="text-xs text-ads-muted">AIに問いを投げる</span>
+        </div>
+        <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-red-400"></i></div>
+        <div class="flex items-center gap-2 bg-red-50 border border-red-200/50 rounded-lg px-3 py-2">
+          <i data-lucide="trending-down" class="w-3.5 h-3.5 text-red-500 flex-shrink-0"></i>
+          <span class="text-xs text-red-700">過去の合理性が強化される</span>
+        </div>
+        <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-red-400"></i></div>
+        <div class="flex items-center gap-2 bg-red-50 border border-red-200/50 rounded-lg px-3 py-2">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-red-500 flex-shrink-0"></i>
+          <span class="text-xs text-red-700">「変わらない合理的な判断」が固定される</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 矢印 -->
+    <div class="flex items-center justify-center px-2">
+      <div class="hidden md:flex flex-col items-center gap-1">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-indigo-400"></i>
+        <span class="text-[9px] text-indigo-500 font-medium">このプログラム</span>
+      </div>
+      <div class="md:hidden flex flex-col items-center gap-1">
+        <i data-lucide="arrow-down" class="w-6 h-6 text-indigo-400"></i>
+        <span class="text-[9px] text-indigo-500 font-medium">このプログラム</span>
+      </div>
+    </div>
+
+    <!-- 前提を引き受け直す -->
+    <div class="flex-1 bg-indigo-500/5 border-2 border-indigo-500/25 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 rounded-full bg-indigo-500/15 flex items-center justify-center">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-600"></i>
+        </div>
+        <span class="text-xs font-bold text-indigo-700">前提を照らし直す</span>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 bg-white border border-indigo-100 rounded-lg px-3 py-2">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-indigo-500 flex-shrink-0"></i>
+          <span class="text-xs text-ads-muted">判断の前提を言語化する</span>
+        </div>
+        <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-indigo-400"></i></div>
+        <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-200/50 rounded-lg px-3 py-2">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-600 flex-shrink-0"></i>
+          <span class="text-xs text-indigo-700">自分の名前で判断を引き受ける</span>
+        </div>
+        <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-indigo-400"></i></div>
+        <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-200/50 rounded-lg px-3 py-2">
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-indigo-600 flex-shrink-0"></i>
+          <span class="text-xs text-indigo-700">未来に向けて判断の質が変わる</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3つの核心 -->
+  <div class="flex items-center gap-4 mb-5">
+    <div class="flex-1 border-t border-ads-border/50"></div>
+    <div class="text-[11px] text-ads-dim font-medium">このプログラムが扱う3つのこと</div>
+    <div class="flex-1 border-t border-ads-border/50"></div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-2">
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i>
+      判断の前提を自覚する
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="pen-line" class="w-3.5 h-3.5 text-indigo-500"></i>
+      前提を言葉にする
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="hand" class="w-3.5 h-3.5 text-indigo-500"></i>
+      判断を引き受け続ける
+    </div>
+  </div>
+
+</div>
+
+<p class="text-center text-ads-muted mb-16 md:mb-20">
+  ここから先で、このプログラムの背景・目的・構成をひとつずつ解説します。
+</p>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 1: なぜ今このプログラムが必要か                         -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500/10 flex-shrink-0">
+      <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">すでに起きている構造的な問題</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    AIが急速に普及する中で、多くの組織ではある見えない問題が進行しています。それは、<strong class="text-slate-900">AIが進展しているにもかかわらず、判断の「前提」は変わっていない</strong>という構造です。
+  </p>
+
+  <!-- トヨタの引用 -->
+  <div class="bg-slate-900 rounded-xl p-6 md:p-8 mb-8">
+    <div class="flex items-start gap-3 mb-4">
+      <i data-lucide="quote" class="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5"></i>
+      <div>
+        <p class="text-white text-base font-medium leading-relaxed">
+          「トヨタを外から見ると、過去のやり方、過去の方程式にどうしても頼ってしまう。それが改善に重要で、新しいことという意味で少し違ったやり方が必要ではないか」
+        </p>
+        <p class="text-slate-400 text-sm mt-3">— トヨタ自動車 新社長</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-700 pt-4">
+      <p class="text-slate-400 text-sm leading-relaxed">
+        問題はテクノロジーの活用ではない。<strong class="text-indigo-300">問題はその前提である。</strong><br>
+        この言葉が、このプログラムの出発点となった。
+      </p>
+    </div>
+  </div>
+
+  <!-- AIと判断のずれ -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden mb-8">
+    <div class="bg-slate-800/5 border-b border-ads-border px-6 py-4">
+      <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+        <i data-lucide="cpu" class="w-4 h-4 text-slate-600"></i>
+        AIと意思決定の「ズレ」
+      </h3>
+    </div>
+    <div class="divide-y divide-ads-border/40">
+      <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-ads-border/40">
+        <div class="p-5">
+          <div class="text-xs font-bold text-emerald-700 mb-3 flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i>AIができること</div>
+          <ul class="space-y-2 text-sm text-ads-muted">
+            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0"></i>判断を支援する</li>
+            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0"></i>問いに答える</li>
+            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0"></i>膨大な情報を処理する</li>
+            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0"></i>答えを示す</li>
+          </ul>
+        </div>
+        <div class="p-5">
+          <div class="text-xs font-bold text-red-600 mb-3 flex items-center gap-1.5"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i>AIにできないこと</div>
+          <ul class="space-y-2 text-sm text-ads-muted">
+            <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0"></i><strong class="text-slate-700">判断の前提を更新する</strong></li>
+            <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0"></i><strong class="text-slate-700">問いの前提を疑う</strong></li>
+            <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0"></i>責任を引き受ける</li>
+            <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0"></i>決断の重さを背負う</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 危険な構造 -->
+  <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-5 mb-6">
+    <h3 class="text-sm font-bold text-red-700 mb-4 flex items-center gap-2">
+      <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+      「歪んだ前提 × AI」が生む危険な構造
+    </h3>
+    <div class="flex flex-col md:flex-row items-center gap-2 md:gap-0">
+      <div class="flex-1 bg-white border border-red-100 rounded-lg p-3 text-center">
+        <div class="text-[11px] font-bold text-slate-700 mb-1">歪んだ前提</div>
+        <p class="text-[10px] text-ads-muted">過去の成功体験・思い込み</p>
+      </div>
+      <div class="flex items-center px-2">
+        <i data-lucide="plus" class="w-4 h-4 text-red-400 hidden md:block"></i>
+        <i data-lucide="plus" class="w-4 h-4 text-red-400 md:hidden"></i>
+      </div>
+      <div class="flex-1 bg-white border border-red-100 rounded-lg p-3 text-center">
+        <div class="text-[11px] font-bold text-slate-700 mb-1">AIの活用</div>
+        <p class="text-[10px] text-ads-muted">問いを投げ、答えを得る</p>
+      </div>
+      <div class="flex items-center px-2">
+        <i data-lucide="arrow-right" class="w-4 h-4 text-red-500 hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-4 h-4 text-red-500 md:hidden"></i>
+      </div>
+      <div class="flex-1 bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+        <div class="text-[11px] font-bold text-red-700 mb-1">歪みが加速</div>
+        <p class="text-[10px] text-red-600/70">AIが歪みを強化する手段になる</p>
+      </div>
+    </div>
+    <p class="text-xs text-red-700 mt-4 bg-white border border-red-100 rounded-lg p-3 leading-relaxed">
+      前提を扱わない限り、意思決定の質は変わらない。変わらないまま、<strong>責任だけが重くなる。</strong>
+    </p>
+  </div>
+
+  <div class="bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-indigo-600"></i>
+      </div>
+      <div>
+        <p class="font-bold text-indigo-700 mb-1">この構造の中で決断しているあなたへ</p>
+        <p class="text-ads-muted leading-relaxed text-sm">
+          AI時代に問われているのは「どのAIを使うか」ではなく、<strong class="text-slate-800">「どのような前提のもとで判断しているか」</strong>を自覚しているかどうかです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 2: プログラムの目的                                   -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-500/10 flex-shrink-0">
+      <i data-lucide="compass" class="w-5 h-5 text-indigo-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">このプログラムの目的</h2>
+  </div>
+
+  <!-- 目的 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 md:p-8 mb-8">
+    <div class="text-center mb-8">
+      <div class="text-xs font-bold text-ads-dim tracking-widest uppercase mb-3">このプログラムの目的は</div>
+      <p class="text-lg md:text-xl font-black text-slate-900 leading-relaxed mb-2">
+        「正しい判断を増やすこと」<span class="text-ads-muted font-normal">ではない</span>
+      </p>
+    </div>
+    <div class="space-y-4">
+      <div class="flex items-start gap-4 bg-white border border-indigo-200/50 rounded-xl p-4">
+        <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="layers" class="w-4 h-4 text-indigo-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">判断の前提を引き受け直すこと</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">自分がどのような前提のもとで判断しているかを自覚し、その前提を言語化する。人は自らの前提を疑うことが苦手であり、だからこそ前提そのものを照らす時間が必要になる。</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 bg-white border border-indigo-200/50 rounded-xl p-4">
+        <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="pen-line" class="w-4 h-4 text-indigo-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">自分の名前で判断を引き受けること</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">たとえその判断が間違っていたとしても、「自分の名前で引き受ける」こと。AIが答えを示しても、決断の重さを背負うのは常に人間である。</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 bg-white border border-indigo-200/50 rounded-xl p-4">
+        <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">判断を引き受け続ける時間と関係性をつくること</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">判断を委ねる場でも、正解を渡す場でもない。参加者一人ひとりが自分の判断と向き合い続けるための時間と関係性を設計する場である。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 扱わないこと -->
+  <div class="bg-slate-800 rounded-xl p-6 mb-8">
+    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+      <i data-lucide="x-square" class="w-4 h-4 text-slate-400"></i>
+      このプログラムが「扱わないこと」
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="bg-slate-700/50 rounded-lg p-3 text-center">
+        <i data-lucide="book" class="w-5 h-5 text-slate-400 mx-auto mb-2"></i>
+        <div class="text-xs font-bold text-slate-300 mb-1">正解を教えない</div>
+        <p class="text-[10px] text-slate-400 leading-relaxed">誰にも答えを示さない。自分自身の判断と向き合うことが前提。</p>
+      </div>
+      <div class="bg-slate-700/50 rounded-lg p-3 text-center">
+        <i data-lucide="hand-helping" class="w-5 h-5 text-slate-400 mx-auto mb-2"></i>
+        <div class="text-xs font-bold text-slate-300 mb-1">判断を委ねさせない</div>
+        <p class="text-[10px] text-slate-400 leading-relaxed">この場はあなたの代わりに判断を行う場ではない。</p>
+      </div>
+      <div class="bg-slate-700/50 rounded-lg p-3 text-center">
+        <i data-lucide="fast-forward" class="w-5 h-5 text-slate-400 mx-auto mb-2"></i>
+        <div class="text-xs font-bold text-slate-300 mb-1">迷いを急いで回収しない</div>
+        <p class="text-[10px] text-slate-400 leading-relaxed">迷いは結論で塞がない。迷いの中にこそ、前提がある。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 3: プログラム構成 6モジュール                          -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 flex-shrink-0">
+      <i data-lucide="layout-list" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">プログラム構成 — 6つのモジュール</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    6つのモジュールは、「判断とは何か」という問いから始まり、「未来に判断を手渡す」という着地まで、<strong class="text-slate-900">判断の前提を深く掘り下げる旅</strong>として設計されています。
+  </p>
+
+  <div class="space-y-3">
+
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0">01</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">判断はどこから始まっているのか</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">私たちが何かを「判断する」とき、その出発点はどこにあるのか。事実ではなく、すでに「前提」から始まっていることに気づく。</p>
+      </div>
+    </div>
+
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0">02</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">正しかった判断が、次の判断を縛るとき</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">過去の成功体験・正しかった判断が、次の判断の「前提」になり、新しい文脈での判断を縛ってしまう構造を探る。</p>
+      </div>
+    </div>
+
+    <div class="flex gap-4 bg-indigo-500/5 border-2 border-indigo-500/20 rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-600 text-white text-sm font-black flex items-center justify-center flex-shrink-0">03</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">判断の前提を、言葉にする <span class="text-xs text-indigo-600 font-normal ml-1">— コアモジュール</span></h3>
+        <p class="text-sm text-ads-muted leading-relaxed">自分が「なぜそう判断するのか」の根拠にある前提を言語化する。言葉にならないものは、疑うことができない。このプログラムの核心。</p>
+      </div>
+    </div>
+
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0">04</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">「使わないと決める」という判断</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">AIを使う/使わないの判断も含め、何かを「しない」という判断の背景にある前提を検討する。選ばないことも、判断である。</p>
+      </div>
+    </div>
+
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0">05</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">判断を引き受け続けるとはどういうことか</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">一度の判断ではなく、判断を「引き受け続ける」という時間的な責任について。判断は点ではなく、線である。</p>
+      </div>
+    </div>
+
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-full bg-indigo-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0">06</div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-1.5">判断を、未来に手渡す</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">今の判断が、次世代・次の人へと「手渡される」という視点から、自分の判断の意味を問い直す。判断は未来への贈り物でもある。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 4: 参加してほしい人と成功の定義                        -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 flex-shrink-0">
+      <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">参加してほしい人</h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+    <div class="flex items-start gap-3 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="eye-off" class="w-4 h-4 text-indigo-600"></i>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">将来は、<strong class="text-slate-700">過去の延長線上にはないと</strong>どこかで感じている人</p>
+    </div>
+
+    <div class="flex items-start gap-3 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="cpu" class="w-4 h-4 text-indigo-600"></i>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">AIが無意識のうちに<strong class="text-slate-700">自分の判断を補強している</strong>かもしれない、という可能性に向き合える人</p>
+    </div>
+
+    <div class="flex items-start gap-3 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="alert-triangle" class="w-4 h-4 text-indigo-600"></i>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">判断の前提が変わらないまま進むことに、<strong class="text-slate-700">どこか違和感を覚えている</strong>人</p>
+    </div>
+
+    <div class="flex items-start gap-3 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="shield" class="w-4 h-4 text-indigo-600"></i>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">将来の不利益を、<strong class="text-slate-700">自分の判断として引き受ける覚悟</strong>を持ちたい人</p>
+    </div>
+
+  </div>
+
+  <!-- 成功の定義 -->
+  <div class="bg-indigo-500/5 border-2 border-indigo-500/20 rounded-xl p-6 md:p-8">
+    <div class="text-center mb-6">
+      <div class="text-xs font-bold text-indigo-600 tracking-widest uppercase mb-2">このプログラムの「成功」の定義</div>
+      <p class="text-lg md:text-xl font-black text-slate-900 leading-relaxed">
+        参加者が何かを「達成」することでも<br class="hidden md:block">「変化を示すこと」でもない
+      </p>
+    </div>
+    <div class="bg-white border border-indigo-200 rounded-xl p-5 text-center mb-4">
+      <i data-lucide="clock" class="w-6 h-6 text-indigo-500 mx-auto mb-3"></i>
+      <p class="text-base font-bold text-slate-900 leading-relaxed">
+        半年後、参加者一人ひとりが<br>
+        <span class="text-indigo-600">「自分の判断の引き受け方」について<br>自分の言葉で語れる状態にある</span>
+      </p>
+    </div>
+    <div class="text-center space-y-1">
+      <p class="text-sm text-ads-muted">それで十分である。</p>
+      <p class="text-xs text-ads-dim">早くわかろうとしなくて構いません。</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 5: まとめ                                            -->
+<!-- ============================================================ -->
+<section>
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-ads-accent/10 flex-shrink-0">
+      <i data-lucide="check-circle" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">このプログラムが大切にすること</h2>
+  </div>
+
+  <div class="space-y-4 mb-10">
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-indigo-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-indigo-500 leading-none flex-shrink-0 mt-1">01</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">「前提」こそが意思決定の質を決める</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            AIがどれほど高度になっても、問いを立てる前提が変わらなければ、得られる答えも変わらない。前提の更新こそが、意思決定の本質的な変革につながる。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-blue-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-blue-500 leading-none flex-shrink-0 mt-1">02</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">責任は常に人が引き受ける</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            AIは答えを示すが、決断の重さを引き受けない。判断の責任の所在は常に人間にある。この事実を正面から受け止めることが、AI時代における真のリーダーシップである。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-purple-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-purple-500 leading-none flex-shrink-0 mt-1">03</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">判断を軽く扱わないための場をつくる</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            このプログラムは、判断を軽く扱わないための時間と関係性を守る場である。正解を渡す場でも、迷いを急いで解消する場でもない。ただ、判断と向き合い続けることを支える。
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- プロフィール -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 mb-8">
+    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="user" class="w-4 h-4 text-ads-accent"></i>
+      運営責任者
+    </h3>
+    <div class="flex items-start gap-4">
+      <div class="w-14 h-14 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="user" class="w-7 h-7 text-slate-500"></i>
+      </div>
+      <div>
+        <div class="font-bold text-slate-900 text-base mb-0.5">辻本 光邦（つじもと みつくに）</div>
+        <div class="text-xs text-ads-muted mb-2">株式会社インサイトパワーズ 代表取締役</div>
+        <p class="text-xs text-ads-muted leading-relaxed">
+          富士通にて海外ビジネスを経験後、米国ケプナー・トリゴー社にて問題解決・意思決定の組織導入研修および実務適用コンサルティングを実践。同社パートナー・日本支社長を経て日本マイクロソフト執行役員に就任。2010年、株式会社インサイトパワーズを創業。多くの企業において実践的な問題解決・意思決定の支援、経営者・役員との対話を行っている。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center bg-gradient-to-b from-indigo-500/5 to-transparent border border-indigo-500/15 rounded-xl p-8 md:p-10">
+    <i data-lucide="brain" class="w-8 h-8 text-indigo-600 mx-auto mb-4"></i>
+    <p class="text-lg font-bold text-slate-900 mb-3">前提を引き受け直すことで、判断は変わる。</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed text-sm">
+      AIの時代に必要なのは、より多くのAIツールを使いこなすことではない。自分がどのような前提のもとで判断しているかを自覚し、その判断を自分の名前で引き受け続けること。このプログラムは、そのための時間と関係性をつくる場です。
+    </p>
+    <p class="text-[11px] text-ads-dim mt-4">提供: 株式会社インサイトパワーズ</p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
