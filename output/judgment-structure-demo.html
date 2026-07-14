@@ -22,240 +22,109 @@
     .card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 1.125rem 1.25rem; }
     .btn { font-weight: 600; font-size: 0.875rem; padding: 0.5625rem 1.125rem; border-radius: var(--radius); border: none; cursor: pointer; }
     .btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-fg)); }
-    .btn-primary:disabled { opacity: 0.5; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-ghost { background: transparent; color: hsl(var(--muted-fg)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; padding: 0.5rem 0.75rem; }
     .textarea {
-      width: 100%; min-height: 6rem; padding: 0.75rem 1rem;
+      width: 100%; min-height: 5.5rem; padding: 0.75rem 1rem;
       background: hsl(var(--background)); border: 1px solid hsl(var(--border));
-      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.6; resize: vertical;
+      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.65; resize: vertical;
+      color: hsl(var(--foreground));
     }
-    .flow { display: flex; flex-direction: column; gap: 0; }
-    .step { border-radius: var(--radius); padding: 0.875rem 1rem; border: 1px solid hsl(var(--border)); background: hsl(var(--background)); }
-    .step-label { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.06em; color: hsl(var(--muted-fg)); margin-bottom: 0.35rem; }
-    .step-label em { font-style: normal; color: hsl(var(--primary)); }
-    .step-text { font-size: 0.875rem; line-height: 1.55; margin: 0; white-space: pre-line; }
-    .step-list { margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; line-height: 1.55; }
-    .step-list li { padding-left: 0.875rem; position: relative; }
-    .step-list li::before { content: '·'; position: absolute; left: 0; color: hsl(var(--primary)); font-weight: 700; }
-    .arrow { text-align: center; color: hsl(var(--primary)); font-size: 0.875rem; padding: 0.2rem 0; opacity: 0.55; }
-    .step-tension { border: 2px solid hsl(var(--primary) / 0.5); background: hsl(var(--primary) / 0.06); }
-    .step-questions {
-      border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.08);
-      padding: 1.125rem 1.25rem;
+    .textarea:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.45); }
+    .step-progress {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--muted-fg)); margin-bottom: 0.75rem;
     }
-    .tension-pair { margin-bottom: 1rem; }
-    .tension-pair:last-child { margin-bottom: 0; }
-    .tension-but { text-align: center; font-size: 0.75rem; font-weight: 700; color: hsl(var(--primary)); padding: 0.35rem 0; }
-    .q-item { font-size: 0.875rem; line-height: 1.6; padding: 0.5rem 0; border-bottom: 1px solid hsl(var(--border)); white-space: pre-line; }
-    .q-item:last-child { border-bottom: none; }
-    .q-num { color: hsl(var(--primary)); font-weight: 700; }
-    .step-premise { border: 2px solid hsl(var(--primary) / 0.35); }
-    .step-context {
-      border: 2px solid hsl(var(--primary)); background: hsl(var(--primary) / 0.1);
-      padding: 1.125rem 1.25rem;
+    .step-progress em { font-style: normal; color: hsl(var(--primary)); }
+    .q-title { font-size: 1rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.5rem; }
+    .q-help { font-size: 0.75rem; color: hsl(var(--muted-fg)); line-height: 1.6; margin-bottom: 0.875rem; }
+    .concern-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .concern-chip {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      padding: 0.625rem 0.75rem; border-radius: calc(var(--radius) - 2px);
+      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+      font-size: 0.875rem; line-height: 1.5;
     }
-    .step-context-hero {
-      border: 2px solid hsl(var(--primary) / 0.45);
-      background: hsl(var(--primary) / 0.06);
-      padding: 1.25rem 1.125rem;
-      box-shadow: none;
+    .concern-chip button {
+      flex-shrink: 0; background: none; border: none; color: hsl(var(--muted-fg));
+      cursor: pointer; font-size: 0.75rem; padding: 0 0.25rem;
     }
-    .step-context-hero .step-label em { font-size: 0.6875rem; }
-    .step-judgment-declare {
-      border: 2px solid hsl(var(--primary) / 0.5); background: hsl(var(--card));
-      padding: 1.125rem 1.25rem;
+    .theme-option {
+      display: block; width: 100%; text-align: left;
+      padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+      border-radius: var(--radius); border: 1px solid hsl(var(--border));
+      background: hsl(var(--background)); color: hsl(var(--foreground));
+      font-size: 0.875rem; line-height: 1.5; cursor: pointer;
     }
-    .step-judgment-final {
+    .theme-option:hover { border-color: hsl(var(--primary) / 0.5); }
+    .theme-option.selected {
+      border-color: hsl(var(--primary)); background: hsl(var(--primary) / 0.1);
+      font-weight: 600;
+    }
+    .mirror-card {
+      border: 2px solid hsl(var(--primary) / 0.55);
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.05) 100%);
+      border-radius: var(--radius); padding: 1.25rem 1.25rem;
+      font-size: 0.9375rem; line-height: 1.9;
+    }
+    .mirror-card .mirror-label {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--primary)); margin-bottom: 0.75rem;
+    }
+    .mirror-card .quote {
+      font-weight: 600; color: hsl(var(--foreground));
+      border-left: 2px solid hsl(var(--primary) / 0.5); padding-left: 0.75rem; margin: 0.5rem 0;
+    }
+    .mirror-summary {
       border: 3px solid hsl(var(--primary));
-      background: linear-gradient(180deg, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.1) 100%);
-      padding: 1.625rem 1.375rem;
-      box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2), 0 8px 32px hsl(var(--primary) / 0.1);
-      text-align: center;
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.16) 0%, hsl(var(--primary) / 0.06) 100%);
+      border-radius: var(--radius); padding: 1.375rem 1.25rem;
+      font-size: 0.875rem; line-height: 1.85;
     }
-    .step-judgment-final .step-label em { font-size: 0.8125rem; color: hsl(var(--primary)); }
-    .judgment-input {
-      width: 100%; min-height: 5.5rem; margin-top: 0.5rem; padding: 0.875rem 1rem;
+    .mirror-summary h3 {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--primary)); margin: 1rem 0 0.35rem;
+    }
+    .mirror-summary h3:first-child { margin-top: 0; }
+    .ai-block {
+      border: 1px dashed hsl(var(--border)); border-radius: var(--radius);
+      padding: 1rem 1.125rem; font-size: 0.8125rem; line-height: 1.7;
+      color: hsl(var(--muted-fg));
+    }
+    .ai-prompt-box {
+      width: 100%; min-height: 10rem; margin-top: 0.5rem; padding: 0.75rem 1rem;
       background: hsl(var(--background)); border: 1px solid hsl(var(--border));
-      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.7; resize: vertical;
+      border-radius: var(--radius); font-size: 0.8125rem; line-height: 1.75;
+      color: hsl(var(--foreground)); resize: vertical;
+    }
+    .judgment-final {
+      border: 3px solid hsl(var(--primary));
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.2) 0%, hsl(var(--primary) / 0.08) 100%);
+      border-radius: var(--radius); padding: 1.5rem 1.25rem; text-align: center;
+    }
+    .judgment-final .label {
+      font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.06em;
+      color: hsl(var(--primary)); margin-bottom: 0.75rem;
     }
     .judgment-display {
       font-size: 1.0625rem; line-height: 1.85; font-weight: 600;
-      white-space: pre-line; margin-top: 0.75rem; min-height: 2rem;
+      white-space: pre-line; min-height: 1.5rem;
     }
     .judgment-display.empty { display: none; }
-    .judgment-empty-hint {
-      font-size: 0.8125rem; color: hsl(var(--muted-fg)); margin-top: 0.5rem; line-height: 1.6;
-    }
-    .judgment-empty-hint.hidden { display: none; }
-    .step-ai-optional {
-      border: 1px dashed hsl(var(--border)); padding: 0.875rem 1rem;
-      font-size: 0.75rem; color: hsl(var(--muted-fg)); text-align: center; line-height: 1.65;
-    }
-    .step-questions-secondary {
-      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
-      padding: 0.875rem 1rem;
-    }
-    .step-questions-secondary .step-label em { color: hsl(var(--muted-fg)); font-weight: 600; }
-    .step-ai-note {
-      border: 1px dashed hsl(var(--border)); padding: 0.875rem 1rem;
-      font-size: 0.75rem; color: hsl(var(--muted-fg)); text-align: center; line-height: 1.65;
-    }
-    .context-item { font-size: 0.8125rem; line-height: 1.65; padding: 0.35rem 0; }
-    .context-label { font-weight: 700; color: hsl(var(--primary)); }
-    .context-prompt {
-      width: 100%; min-height: 10rem; margin-top: 0.5rem; padding: 0.75rem 1rem;
-      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
-      border-radius: var(--radius); font-size: 0.8125rem; line-height: 1.75; resize: vertical;
-    }
-    .step-ai { border-style: dashed; }
-    .premise-input {
-      width: 100%; min-height: 4rem; margin-top: 0.5rem; padding: 0.75rem 1rem;
-      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
-      border-radius: var(--radius); font-size: 0.875rem; line-height: 1.6; resize: vertical;
-    }
-    .ai-prompt {
-      font-size: 0.8125rem; line-height: 1.55; padding: 0.625rem 0.75rem;
-      border-radius: calc(var(--radius) - 2px);
-      background: hsl(var(--muted) / 0.5); border: 1px solid hsl(var(--border));
-      margin-top: 0.5rem;
-    }
-    .closing {
-      font-size: 0.875rem; line-height: 1.8; padding: 1.125rem 1.25rem;
-      border-radius: var(--radius); border: 1px solid hsl(var(--border)); background: hsl(var(--card));
-      white-space: pre-line;
-    }
-    .step-compare {
-      border: 2px solid hsl(var(--primary) / 0.45); background: hsl(var(--card));
-      padding: 1.125rem 1.25rem;
-    }
-    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
-    @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
-    .compare-panel {
-      border-radius: calc(var(--radius) - 2px); padding: 0.875rem;
-      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
-      font-size: 0.8125rem; line-height: 1.65;
-    }
-    .compare-panel-left { opacity: 0.92; }
-    .compare-panel-right { border-color: hsl(var(--primary) / 0.55); background: hsl(var(--primary) / 0.06); }
-    .compare-head { font-size: 0.6875rem; font-weight: 700; color: hsl(var(--muted-fg)); margin-bottom: 0.5rem; letter-spacing: 0.04em; }
-    .compare-head-right { color: hsl(var(--primary)); }
-    .compare-bubble {
-      padding: 0.625rem 0.75rem; border-radius: calc(var(--radius) - 2px);
-      background: hsl(var(--muted) / 0.45); border: 1px solid hsl(var(--border));
-      white-space: pre-line; margin: 0.35rem 0;
-    }
-    .compare-bubble-ai { background: hsl(var(--muted) / 0.3); font-size: 0.75rem; color: hsl(var(--muted-fg)); }
-    .compare-bubble-ai-rich { background: hsl(var(--primary) / 0.12); border-color: hsl(var(--primary) / 0.35); color: hsl(var(--foreground)); font-size: 0.8125rem; }
-    .compare-arrow { text-align: center; color: hsl(var(--muted-fg)); font-size: 0.6875rem; padding: 0.25rem 0; }
-    .step-insight {
-      text-align: center; padding: 1.25rem 1rem;
-      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
-      background: hsl(var(--card)); font-size: 0.875rem; line-height: 1.85;
-    }
-    .step-purpose {
-      text-align: center; padding: 1.25rem 1rem;
-      border: 2px solid hsl(var(--primary) / 0.4); border-radius: var(--radius);
-      background: hsl(var(--primary) / 0.06); font-size: 0.875rem; line-height: 1.85;
-    }
-    .step-final {
-      text-align: center; padding: 1.5rem 1.25rem;
-      border: 2px solid hsl(var(--primary)); border-radius: var(--radius);
-      background: hsl(var(--primary) / 0.1);
-    }
-    .final-title { font-size: 0.9375rem; font-weight: 700; margin-bottom: 1rem; }
-    .final-xo { display: flex; flex-direction: column; gap: 0.375rem; font-size: 0.875rem; margin-bottom: 1.25rem; }
-    .final-x { color: hsl(var(--muted-fg)); text-decoration: line-through; opacity: 0.7; }
-    .final-o { color: hsl(var(--primary)); font-weight: 700; font-size: 1rem; }
-    .final-quote { font-size: 0.9375rem; line-height: 1.85; font-weight: 600; border-top: 1px solid hsl(var(--primary) / 0.35); padding-top: 1rem; }
-    .step-db {
-      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
-      background: hsl(var(--card)); padding: 1.25rem 1.125rem;
-      text-align: left;
-    }
-    .db-intro { font-size: 0.8125rem; line-height: 1.75; color: hsl(var(--muted-fg)); margin-bottom: 1rem; }
-    .db-intro strong { color: hsl(var(--foreground)); }
-    .db-table-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 1rem 0;
-    }
-    @media (max-width: 520px) { .db-table-grid { grid-template-columns: 1fr; } }
-    .db-entity {
-      padding: 0.625rem 0.75rem; border-radius: calc(var(--radius) - 2px);
-      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
-      font-size: 0.75rem; line-height: 1.5;
-    }
-    .db-entity-name { font-weight: 700; color: hsl(var(--primary)); font-size: 0.6875rem; letter-spacing: 0.03em; }
-    .db-entity-desc { color: hsl(var(--muted-fg)); margin-top: 0.2rem; }
-    .db-flow {
-      margin: 1rem 0; padding: 0.875rem; border-radius: var(--radius);
-      background: hsl(var(--muted) / 0.25); border: 1px dashed hsl(var(--border));
-      font-size: 0.75rem; line-height: 1.9; text-align: center; color: hsl(var(--foreground));
-    }
-    .db-flow-line { opacity: 0.55; color: hsl(var(--primary)); }
-    .db-closing {
-      font-size: 0.8125rem; line-height: 1.85; text-align: center;
-      padding-top: 1rem; margin-top: 0.75rem;
-      border-top: 1px solid hsl(var(--border));
-      color: hsl(var(--foreground));
-    }
-    .db-note { font-size: 0.625rem; color: hsl(var(--muted-fg)); margin-top: 0.75rem; text-align: center; }
-    .brand-os { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; color: hsl(var(--primary)); line-height: 1.2; }
-    .brand-os-tagline { font-size: 0.6875rem; color: hsl(var(--foreground)); font-weight: 600; margin-top: 0.2rem; line-height: 1.4; }
-    .brand-core { font-size: 0.625rem; font-weight: 600; color: hsl(var(--muted-fg)); letter-spacing: 0.05em; margin-top: 0.2rem; }
-    .brand-entry { font-size: 0.8125rem; font-weight: 600; color: hsl(var(--primary)); margin-top: 0.15rem; }
-    .brand-stack {
-      font-size: 0.6875rem; line-height: 1.75; padding: 0.875rem 1rem;
-      border-radius: var(--radius); border: 2px solid hsl(var(--primary) / 0.35);
-      background: hsl(var(--primary) / 0.06);
-    }
-    .brand-stack .layer-os { font-weight: 700; color: hsl(var(--foreground)); font-size: 0.75rem; }
-    .brand-stack .layer-core { padding-left: 1rem; color: hsl(var(--muted-fg)); }
-    .brand-stack .layer-entry { padding-left: 2rem; color: hsl(var(--primary)); font-weight: 600; }
-    .judgment-pipeline {
-      font-size: 0.6875rem; line-height: 1.85; text-align: center;
-      padding: 0.875rem 0.75rem; border-radius: var(--radius);
-      border: 1px solid hsl(var(--border)); background: hsl(var(--background));
-    }
-    .judgment-pipeline .pipe-hero {
-      font-weight: 700; color: hsl(var(--primary)); font-size: 0.8125rem;
-      padding: 0.35rem 0; margin-bottom: 0.25rem;
-      border-bottom: 1px solid hsl(var(--primary) / 0.25);
-    }
-    .judgment-pipeline .pipe-arrow { color: hsl(var(--primary)); opacity: 0.6; padding: 0.1rem 0; }
-    .judgment-pipeline .pipe-support { color: hsl(var(--muted-fg)); font-size: 0.625rem; }
-    .judgment-pipeline .pipe-end { font-weight: 700; color: hsl(var(--foreground)); margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px solid hsl(var(--border)); }
-    .brand-why { font-size: 0.75rem; line-height: 1.7; color: hsl(var(--muted-fg)); }
-    .brand-why strong { color: hsl(var(--foreground)); }
-    .flow-hint {
-      font-size: 0.625rem; line-height: 1.7; color: hsl(var(--muted-fg));
-      padding: 0.625rem 0.75rem; border-radius: var(--radius);
-      background: hsl(var(--muted) / 0.15); border: 1px dashed hsl(var(--border));
-    }
-    .brand-en { font-size: 0.625rem; font-weight: 500; color: hsl(var(--muted-fg)); letter-spacing: 0.04em; }
-    .brand-platform { font-size: 0.625rem; color: hsl(var(--muted-fg)); margin-top: 0.25rem; }
+    .judgment-hint { font-size: 0.8125rem; color: hsl(var(--muted-fg)); line-height: 1.65; }
+    .brand-os { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; color: hsl(var(--primary)); }
     .badge-preview {
       font-size: 0.625rem; font-weight: 700; letter-spacing: 0.06em;
       padding: 0.25rem 0.5rem; border-radius: calc(var(--radius) - 4px);
       border: 1px solid hsl(var(--primary) / 0.5); color: hsl(var(--primary));
       background: hsl(var(--primary) / 0.08);
     }
-    .brand-message { font-size: 0.875rem; line-height: 1.85; }
-    .brand-not { font-size: 0.6875rem; line-height: 1.65; color: hsl(var(--muted-fg)); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid hsl(var(--border)); }
-    .module-tree {
-      font-size: 0.6875rem; line-height: 1.7; color: hsl(var(--muted-fg));
-      padding: 0.75rem 1rem; border-radius: var(--radius);
-      background: hsl(var(--muted) / 0.2); border: 1px solid hsl(var(--border));
-      font-family: ui-monospace, monospace;
-    }
-    .module-tree .active { color: hsl(var(--primary)); font-weight: 700; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .fade-in { animation: fadeIn 0.35s ease-out both; }
-
-    /* —— ブランド体験：世界観画面 —— */
     .landing {
       min-height: 100vh; display: flex; flex-direction: column;
       justify-content: center; align-items: center;
-      padding: 2.5rem 1.25rem 3rem;
-      text-align: center;
+      padding: 2.5rem 1.25rem 3rem; text-align: center;
     }
     .landing-inner { max-width: 26rem; width: 100%; }
     .landing-logo {
@@ -270,23 +139,16 @@
       font-size: 0.9375rem; color: hsl(var(--muted-fg)); font-weight: 500;
       margin-bottom: 2.5rem; line-height: 1.5;
     }
-    .landing-mantra {
-      font-size: 0.9375rem; line-height: 2; margin-bottom: 2rem;
-      color: hsl(var(--foreground));
-    }
+    .landing-mantra { font-size: 0.9375rem; line-height: 2; margin-bottom: 2rem; }
     .landing-mantra p { margin: 0; }
     .landing-promise {
       font-size: 0.875rem; line-height: 1.9; color: hsl(var(--muted-fg));
       margin-bottom: 2.5rem;
     }
     .landing-promise strong { color: hsl(var(--foreground)); font-weight: 600; }
-    .btn-landing {
-      font-size: 1rem; font-weight: 700; padding: 0.875rem 2rem;
-      letter-spacing: 0.04em;
-    }
+    .btn-landing { font-size: 1rem; font-weight: 700; padding: 0.875rem 2rem; letter-spacing: 0.04em; }
     .landing-not-chat {
-      margin-top: 2.5rem; font-size: 0.6875rem; color: hsl(var(--muted-fg));
-      letter-spacing: 0.02em; opacity: 0.85;
+      margin-top: 2.5rem; font-size: 0.6875rem; color: hsl(var(--muted-fg)); opacity: 0.85;
     }
     .workspace-header { border-bottom: 1px solid hsl(var(--border)); }
     .workspace-header .shell { padding-top: 0.75rem; padding-bottom: 0.75rem; }
@@ -300,9 +162,7 @@
       margin-bottom: 1.5rem; padding-bottom: 1.5rem;
       border-bottom: 1px solid hsl(var(--primary) / 0.2);
     }
-    .brand-outro-final {
-      font-size: 1rem; line-height: 2.1; font-weight: 600;
-    }
+    .brand-outro-final { font-size: 1rem; line-height: 2.1; font-weight: 600; }
     .brand-outro-final .you { color: hsl(var(--primary)); }
     .brand-outro-takeaway {
       font-size: 0.875rem; line-height: 1.9; color: hsl(var(--muted-fg));
@@ -310,512 +170,482 @@
       border-top: 1px solid hsl(var(--primary) / 0.15);
     }
     .brand-outro-takeaway strong { color: hsl(var(--foreground)); }
-    details.dev-only { margin-top: 1rem; }
-    details.dev-only summary { font-size: 0.625rem; color: hsl(var(--muted-fg)); cursor: pointer; }
+    .arrow { text-align: center; color: hsl(var(--primary)); font-size: 0.875rem; padding: 0.35rem 0; opacity: 0.55; }
+    .answered-trail {
+      font-size: 0.6875rem; color: hsl(var(--muted-fg)); line-height: 1.55;
+      padding: 0.625rem 0.75rem; border-radius: var(--radius);
+      background: hsl(var(--muted) / 0.2); border: 1px solid hsl(var(--border));
+      margin-bottom: 0.75rem;
+    }
+    .answered-trail strong { color: hsl(var(--foreground)); font-weight: 600; }
   </style>
 </head>
 <body>
 
-  <!-- 世界観 — OSは入力から始まらない -->
   <section id="screen-landing" class="landing fade-in" aria-label="JudgmentOS">
     <div class="landing-inner">
       <p class="landing-logo">JUDGMENT OS</p>
       <h1 class="landing-title">JudgmentOS</h1>
-      <p class="landing-tagline">経営者の意思決定を支えるOS</p>
+      <p class="landing-tagline">経営者が自分自身と対話する思考OS</p>
 
-      <div class="landing-mantra" aria-label="JudgmentOSの思想">
+      <div class="landing-mantra">
         <p>AIは</p>
         <p>最適な答えを示すことはできます。</p>
         <p class="mt-3">しかし</p>
         <p>どの未来を目指すかは</p>
         <p>決められません。</p>
-        <p class="mt-3 font-semibold text-[hsl(var(--foreground))]">未来を決めるのは<br>経営者です。</p>
+        <p class="mt-3 font-semibold">未来を決めるのは<br>経営者です。</p>
       </div>
 
       <p class="landing-promise">
-        JudgmentOSは、<strong>未来を決める前の</strong><br>
-        あなたの意思決定文脈を映します。
+        JudgmentOSは、経営者が自分自身を問い、<br>
+        <strong>意思を言語化し</strong>、<br>
+        その意思に基づいてAIと共に考えるためのOSです。
       </p>
 
       <button type="button" id="btn-enter" class="btn btn-primary btn-landing">映してみる</button>
-
       <p class="landing-not-chat">これはChatGPTではありません。</p>
     </div>
   </section>
 
-  <!-- ワークスペース — 体験してから文脈に出会う -->
   <div id="screen-workspace" class="hidden">
-  <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
-    <div class="shell flex justify-between items-center gap-3">
-      <p class="brand-os text-sm">JudgmentOS</p>
-      <span class="badge-preview">Preview</span>
-    </div>
-  </header>
-
-  <main class="shell space-y-4 py-4">
-
-    <section class="card space-y-3">
-      <p class="text-sm text-[hsl(var(--muted-fg))] leading-relaxed">
-        今、決めようとしていることを、そのまま書いてください。
-      </p>
-      <label for="input" class="block text-sm font-semibold">どんな判断をしようとしていますか？</label>
-      <textarea id="input" class="textarea" placeholder="判断の状況をそのまま書いてください"></textarea>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" id="btn-run" class="btn btn-primary">判断を映す</button>
-        <button type="button" id="btn-sample" class="btn btn-ghost">デモ用サンプル</button>
+    <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
+      <div class="shell flex justify-between items-center gap-3">
+        <p class="brand-os text-sm">JudgmentOS <span class="text-[hsl(var(--muted-fg))] font-medium tracking-normal normal-case">v1.1</span></p>
+        <span class="badge-preview">Preview</span>
       </div>
-    </section>
+    </header>
 
-    <div id="loading" class="hidden card text-center py-8">
-      <p class="text-sm text-[hsl(var(--primary))] animate-pulse">判断を映しています…</p>
-    </div>
-
-    <section id="output" class="hidden space-y-4 fade-in">
-      <div id="flow" class="flow"></div>
-    </section>
-
-  </main>
+    <main class="shell space-y-4 py-4">
+      <div id="dialogue" class="fade-in"></div>
+    </main>
   </div>
 
-  <script src="js/constitution-inference.js"></script>
-  <script src="js/decision-session-client.js"></script>
   <script>
-    const STORAGE_KEY = 'constitution-mirror-history';
+    const STORAGE_KEY = 'judgmentos-v1.1-sessions';
 
-    const DEMO_INPUT = `LinkedInでAI時代の意思決定デザイナーとして発信を開始した。
-営業色を出さずに、潜在クライアントと関係構築する方法を決めたい。`;
+    const DEMO = {
+      concerns: [
+        '新規事業を伸ばしたいが、進め方が定まらない',
+        '社員の働き方改革を後退させたくない',
+        '今年度は予算を増やせない'
+      ],
+      themeIndex: 0,
+      achieve: '新規事業を伸ばしたい',
+      protect: '社員の働き方改革も守りたい',
+      constraints: '今年度の予算は増やせない\n人員増はできない'
+    };
 
-    const DEMO_CONTEXT_PROMPT = `私は
+    /** @type {{ concerns: string[], theme: string, achieve: string, protect: string, constraints: string, newJudgment: string }} */
+    const state = {
+      concerns: [],
+      theme: '',
+      achieve: '',
+      protect: '',
+      constraints: '',
+      newJudgment: ''
+    };
 
-AI時代の経営者の意思決定を変えたい。
+    let step = 1;
+    let concernDraft = '';
 
-営業ではなく
-信頼から始まる関係を守りたい。
-
-営業活動には
-時間を使えない。
-
-LinkedInだけで十分か
-直接対話も必要か迷っている。
-
-判断基準は
-長期的な信頼形成である。
-
-この文脈を前提として
-私に助言してください。`;
-
-    const DEMO_CONTEXTUAL_ANSWER = `「あなたが営業を避けたい理由は
-信頼を守りたいからですね。
-
-その前提なら
-
-営業活動ではなく
-
-· 経営者同士の対話設計
-· 紹介が生まれる仕組み
-· 講演
-· 記事
-
-などが戦略になります。」`;
-
-    function buildNaiveQuestion(decision, profile) {
-      if (profile === 'sales_trust') {
-        return 'LinkedInで営業せずに\n顧客を増やす方法を教えてください。';
-      }
-      const line = decision.split('\n').filter(Boolean)[0] || decision;
-      return line.length > 60 ? line.slice(0, 60) + '…を教えてください。' : line + ' — 方法を教えてください。';
-    }
-
-    function buildContextualAnswer(ctx, profile) {
-      if (profile === 'sales_trust') return DEMO_CONTEXTUAL_ANSWER;
-      return `「${ctx.protect}を大切にしたいのですね。
-
-その前提なら、一般論ではなく
-あなたの判断基準（${ctx.criteria}）に沿った
-具体的な選択肢が見えてきます。」`;
-    }
-
-    function demoDisplayPrompt(d) {
-      return d.profile === 'sales_trust' ? DEMO_CONTEXT_PROMPT : d.context_prompt;
-    }
-
-    function renderComparisonSection(contextPrompt, ctx, profile) {
-      const naiveQ = buildNaiveQuestion(currentInput || '', profile);
-      const naiveA = '· 投稿頻度\n· ペルソナ\n· SNS戦略\n· SEO\n\nなど一般論になる。';
-      const richA = buildContextualAnswer(ctx, profile);
-
-      return `
-        <p class="step-label"><em>⑧ AIへ相談する</em> <span class="font-normal text-[0.5625rem]">（任意）</span></p>
-        <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3 text-center">同じ問いでも、渡すものによって答えは変わります。</p>
-        <div class="compare-grid">
-          <div class="compare-panel compare-panel-left">
-            <p class="compare-head">一行の質問だけを渡す</p>
-            <div class="compare-bubble">${escapeHtml(naiveQ)}</div>
-            <p class="compare-arrow">↓ 返ってくる答え</p>
-            <div class="compare-bubble compare-bubble-ai">${escapeHtml(naiveA)}</div>
-          </div>
-          <div class="compare-panel compare-panel-right">
-            <p class="compare-head compare-head-right">判断の構造を渡す</p>
-            <div class="compare-bubble" id="compare-context-prompt">${escapeHtml(contextPrompt)}</div>
-            <p class="compare-arrow">↓ 返ってくる答え</p>
-            <div class="compare-bubble compare-bubble-ai-rich" id="compare-context-answer">${escapeHtml(richA)}</div>
-          </div>
-        </div>`;
-    }
-
-    function renderDbPhilosophySection() {
-      const entities = [
-        ['Person', '経営者·利用者の基本情報'],
-        ['DecisionSession', '一回ごとの判断テーマと入力内容'],
-        ['Premise', '今回の判断を支えている前提'],
-        ['Tension', '判断構造の中にある矛盾·緊張'],
-        ['KeyQuestion', '本当に判断すべき問い'],
-        ['DecisionContext', '実現·守る·制約·迷い·判断基準'],
-        ['ContextPrompt', 'AIへ渡す意思決定文脈'],
-        ['AIConversation', '文脈を渡した後の対話'],
-        ['DecisionResult', '最終判断と理由'],
-        ['Reflection', '後日の振り返りと学び']
-      ];
-      const cards = entities.map(([name, desc]) => `
-        <div class="db-entity">
-          <p class="db-entity-name">${escapeHtml(name)}</p>
-          <p class="db-entity-desc">${escapeHtml(desc)}</p>
-        </div>`).join('');
-
-      return `
-        <div class="arrow">↓</div>
-        <div class="step step-db">
-          <p class="final-title text-center">データベースに蓄積したいもの</p>
-          <div class="db-intro">
-            <p>このツールで保存したいのは、<strong>会話ログではありません。</strong></p>
-            <p class="mt-2">保存したいのは、<strong>経営者の新しい判断</strong>です。意思決定文脈は、その途中経過です。</p>
-            <p class="mt-2">一回ごとの判断から、</p>
-            <ul class="step-list mt-1 text-[0.75rem]">
-              <li>何を実現したいのか</li>
-              <li>何を守りたいのか</li>
-              <li>何を制約として受け入れているのか</li>
-              <li>本当は何に迷っているのか</li>
-              <li>何を判断基準としているのか</li>
-            </ul>
-            <p class="mt-2">を蓄積していきます。</p>
-          </div>
-          <p class="step-label mb-1">テーブル設計案（将来）</p>
-          <div class="db-table-grid">${cards}</div>
-          <p class="step-label mb-1 mt-3">紐付けイメージ</p>
-          <div class="db-flow">
-            Person<br>
-            <span class="db-flow-line">↓</span><br>
-            DecisionSession<br>
-            <span class="db-flow-line">↓</span><br>
-            Premise / Tension / KeyQuestion<br>
-            <span class="db-flow-line">↓</span><br>
-            DecisionContext<br>
-            <span class="db-flow-line">↓</span><br>
-            ContextPrompt<br>
-            <span class="db-flow-line">↓</span><br>
-            AIConversation<br>
-            <span class="db-flow-line">↓</span><br>
-            DecisionResult<br>
-            <span class="db-flow-line">↓</span><br>
-            Reflection
-          </div>
-          <p class="db-closing">
-            データベースは、<br>
-            判断を保存するためではありません。<br><br>
-            経営者の意思決定文脈が<br>
-            時間とともにどう変化していくかを<br>
-            映すためにあります。
-          </p>
-          <p class="db-note">Preview: localStorage（バックアップ）。本番: Neon Postgres（<code class="text-[0.6rem]">npm run dev</code>）。<code class="text-[0.6rem]">docs/vercel-neon-setup.md</code></p>
-        </div>`;
-    }
-
-    function renderJudgmentSection() {
-      return `
-        <div class="arrow">↓</div>
-        <div class="step step-judgment-declare">
-          <p class="step-label"><em>⑨ 私はこう判断する</em></p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2 leading-relaxed">
-            意思決定文脈を通して、新しい判断を言葉にしてください。<br>
-            JudgmentOS の最終成果物は、文脈ではなく<strong class="text-[hsl(var(--foreground))]">判断</strong>です。
-          </p>
-          <textarea id="new-judgment" class="judgment-input" placeholder="私は、営業ではなく経営者同士の対話から関係を始めると判断する。"></textarea>
-        </div>
-        <div class="arrow">↓</div>
-        <div class="step step-judgment-final" id="judgment-final-card">
-          <p class="step-label"><em>あなたの新しい判断</em></p>
-          <p id="new-judgment-display" class="judgment-display empty"></p>
-          <p id="judgment-empty-hint" class="judgment-empty-hint">上に書いた判断が、ここに映ります。<br>持ち帰るものは、AIの答えではなく、あなた自身の判断です。</p>
-        </div>`;
-    }
-
-    function bindNewJudgment() {
-      const field = document.getElementById('new-judgment');
-      const display = document.getElementById('new-judgment-display');
-      const hint = document.getElementById('judgment-empty-hint');
-      const card = document.getElementById('judgment-final-card');
-      if (!field || !display) return;
-
-      const update = () => {
-        const val = field.value.trim();
-        if (val) {
-          display.textContent = val;
-          display.classList.remove('empty');
-          hint?.classList.add('hidden');
-        } else {
-          display.textContent = '';
-          display.classList.add('empty');
-          hint?.classList.remove('hidden');
-        }
-        saveRecord(currentInput, currentData, document.getElementById('user-premise')?.value.trim() || '', val);
-      };
-
-      field.addEventListener('input', update);
-      field.addEventListener('blur', () => {
-        update();
-        if (field.value.trim() && card) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      });
-    }
-
-    function renderDemoClosing() {
-      return `
-        <div class="arrow">↓</div>
-        <div class="brand-outro">
-          <div class="brand-outro-mantra">
-            <p>AIは</p>
-            <p>最適な答えを示すことはできる。</p>
-            <p class="mt-2">しかし</p>
-            <p>どの未来を目指すかは</p>
-            <p>決められない。</p>
-          </div>
-          <div class="brand-outro-final">
-            <p>未来を決めるのは</p>
-            <p>AIではない。</p>
-            <p class="you">あなたです。</p>
-            <p class="mt-4 text-[0.9375rem] font-medium text-[hsl(var(--muted-fg))]">
-              JudgmentOSは<br>
-              その判断を支えるために存在します。
-            </p>
-          </div>
-          <p class="brand-outro-takeaway">
-            画面を閉じるとき、<br>
-            持ち帰るものは<strong>AIの答えではない</strong>。<br>
-            <strong>あなた自身の判断</strong>です。
-          </p>
-        </div>
-        <details class="dev-only">
-          <summary>開発者向け — データ設計</summary>
-          ${renderDbPhilosophySection()}
-        </details>`;
-    }
-
-    let currentData = null;
-    let currentInput = '';
     function escapeHtml(s) {
       const d = document.createElement('div');
       d.textContent = s;
       return d.innerHTML;
     }
 
-    function renderTensions(tensions) {
-      return tensions.map(t => `
-        <div class="tension-pair">
-          <p>· ${escapeHtml(t.a)}</p>
-          <p class="tension-but">しかし</p>
-          <p>· ${escapeHtml(t.b)}</p>
-        </div>`).join('');
+    function quoteLines(text) {
+      return text.trim().split(/\n+/).map(l => l.trim()).filter(Boolean);
     }
 
-    function renderContextBlock(ctx, prompt, includePremiseField) {
-      const row = (label, val, id) => `
-        <p class="context-item" id="${id}"><span class="context-label">${label}</span> ${escapeHtml(val)}</p>`;
-      const premiseField = includePremiseField ? `
-        <div class="mt-4 pt-3 border-t border-[hsl(var(--primary)/0.25)]">
-          <p class="step-label"><em>意思決定文脈を書き換える</em></p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-1">見えていなかったものに気づき、構造を書き換えてください。新しい問いが生まれます。</p>
-          <textarea id="user-premise" class="premise-input" placeholder="例：営業すると信頼を失う、と無意識に決めていた"></textarea>
-        </div>` : '';
-      return `
-        <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3">
-          あなたの判断から、こう見えてきました。<span class="opacity-80">（仮説 · 今回の判断を見る限り）</span>
-        </p>
-        ${row('· 実現したいこと', ctx.achieve, 'ctx-achieve')}
-        ${row('· 守りたいもの', ctx.protect, 'ctx-protect')}
-        ${row('· 受け入れている制約', ctx.constraints, 'ctx-constraints')}
-        ${row('· 本当に迷っていること', ctx.uncertain, 'ctx-uncertain')}
-        ${row('· 判断基準', ctx.criteria, 'ctx-criteria')}
-        ${premiseField}
-        <div class="mt-4 pt-3 border-t border-[hsl(var(--border))]">
-          <p class="step-label mb-1"><em>あなたの意思決定文脈</em></p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">これが、AIに渡すべきものです。質問一行だけではありません。</p>
-          <textarea id="context-prompt" class="context-prompt" readonly>${escapeHtml(prompt)}</textarea>
-          <button type="button" id="btn-copy-context" class="btn btn-primary mt-2 text-xs">コピーする</button>
-          <p id="copy-toast" class="hidden text-xs text-[hsl(var(--primary))] mt-1">コピーしました</p>
-        </div>`;
+    /** 本人の言葉だけを使う映し返しA（④のあと）— 分析・命名なし */
+    function buildMirrorA() {
+      return {
+        achieve: state.achieve.trim(),
+        protect: state.protect.trim()
+      };
     }
 
-    function bindContextCopy() {
-      const btn = document.getElementById('btn-copy-context');
-      const toast = document.getElementById('copy-toast');
-      if (!btn) return;
-      btn.onclick = async () => {
-        const text = document.getElementById('context-prompt')?.value || '';
-        try {
-          await navigator.clipboard.writeText(text);
-          toast.classList.remove('hidden');
-          setTimeout(() => toast.classList.add('hidden'), 2000);
-        } catch {
-          document.getElementById('context-prompt')?.select();
-          document.execCommand('copy');
-          toast.classList.remove('hidden');
+    /** 映し返しB — テーマ・意思・制約。トレードオフ等の命名なし */
+    function buildMirrorB() {
+      return {
+        theme: state.theme.trim(),
+        achieve: state.achieve.trim(),
+        protect: state.protect.trim(),
+        constraints: quoteLines(state.constraints)
+      };
+    }
+
+    /** AIへ渡す5点のみ */
+    function buildAiContext() {
+      const a = buildMirrorA();
+      const b = buildMirrorB();
+      const reflection = `あなたは
+「${a.achieve}」
+と考えています。
+
+一方で、
+「${a.protect}」
+と考えています。
+
+この二つを両立させながら考えることが、今回のテーマになりそうです。`;
+
+      return `【今日のテーマ】
+${b.theme}
+
+【実現したいこと】
+${b.achieve}
+
+【守りたいもの】
+${b.protect}
+
+【無視できない条件】
+${b.constraints.map(c => `· ${c}`).join('\n')}
+
+【映し返し】
+${reflection}
+
+この前提で、私の視野を広げてください。
+決めるのは私です。答えや正解ではなく、見落としと選択肢を示してください。`;
+    }
+
+    function trailHtml() {
+      const parts = [];
+      if (state.concerns.length) {
+        parts.push(`<div><strong>気になっていること</strong><br>${state.concerns.map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
+      }
+      if (state.theme) parts.push(`<div class="mt-2"><strong>今日のテーマ</strong>：${escapeHtml(state.theme)}</div>`);
+      if (state.achieve) parts.push(`<div class="mt-2"><strong>実現したいこと</strong>：${escapeHtml(state.achieve)}</div>`);
+      if (state.protect) parts.push(`<div class="mt-2"><strong>守りたいもの</strong>：${escapeHtml(state.protect)}</div>`);
+      if (state.constraints) {
+        parts.push(`<div class="mt-2"><strong>制約</strong><br>${quoteLines(state.constraints).map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
+      }
+      if (!parts.length) return '';
+      return `<div class="answered-trail">${parts.join('')}</div>`;
+    }
+
+    function progressLabel() {
+      const map = {
+        1: '① 気になっていること',
+        2: '② 今日のテーマ',
+        3: '③ 実現したいこと',
+        4: '④ 守りたいもの',
+        5: '映し返し',
+        6: '⑤ 条件・制約',
+        7: '意思の確認',
+        8: '新しい判断'
+      };
+      return map[step] || '';
+    }
+
+    function render() {
+      const root = document.getElementById('dialogue');
+      const prog = `<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
+
+      if (step === 1) {
+        root.innerHTML = `
+          <section class="card space-y-3">
+            ${prog}
+            <p class="q-title">今、仕事や経営で気になっていることは何ですか。</p>
+            <p class="q-help">いくつでも書いてください。まだ「判断」にしなくて大丈夫です。</p>
+            <div id="concern-list" class="concern-list"></div>
+            <textarea id="concern-input" class="textarea" placeholder="例：新規事業の進め方が定まらない">${escapeHtml(concernDraft)}</textarea>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="btn-add-concern" class="btn btn-ghost">リストに追加</button>
+              <button type="button" id="btn-next" class="btn btn-primary" ${state.concerns.length === 0 ? 'disabled' : ''}>次へ</button>
+              <button type="button" id="btn-sample" class="btn btn-ghost">デモ用サンプル</button>
+            </div>
+          </section>`;
+        paintConcernList();
+        bindStep1();
+        return;
+      }
+
+      if (step === 2) {
+        if (state.concerns.length === 1) {
+          state.theme = state.concerns[0];
+          step = 3;
+          render();
+          return;
         }
+        root.innerHTML = `
+          <section class="card space-y-3">
+            ${prog}
+            ${trailHtml()}
+            <p class="q-title">その中で、今日いちばん深く考えたいテーマはどれですか。</p>
+            <p class="q-help">一つ選んでください。</p>
+            <div id="theme-options"></div>
+            <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
+          </section>`;
+        const box = document.getElementById('theme-options');
+        state.concerns.forEach((c, i) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'theme-option' + (state.theme === c ? ' selected' : '');
+          btn.textContent = c;
+          btn.onclick = () => {
+            state.theme = c;
+            box.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('btn-next').disabled = false;
+          };
+          box.appendChild(btn);
+        });
+        document.getElementById('btn-next').onclick = () => {
+          if (!state.theme) return;
+          step = 3;
+          render();
+        };
+        return;
+      }
+
+      if (step === 3) {
+        root.innerHTML = `
+          <section class="card space-y-3">
+            ${prog}
+            ${trailHtml()}
+            <p class="q-title">そのテーマについて、あなたは何を実現したいですか。</p>
+            <p class="q-help">解決策ではなく、向かいたい方向を、あなたの言葉で書いてください。</p>
+            <textarea id="field-achieve" class="textarea" placeholder="例：新規事業を伸ばしたい">${escapeHtml(state.achieve)}</textarea>
+            <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+          </section>`;
+        document.getElementById('btn-next').onclick = () => {
+          const v = document.getElementById('field-achieve').value.trim();
+          if (!v) { document.getElementById('field-achieve').focus(); return; }
+          state.achieve = v;
+          step = 4;
+          render();
+        };
+        return;
+      }
+
+      if (step === 4) {
+        root.innerHTML = `
+          <section class="card space-y-3">
+            ${prog}
+            ${trailHtml()}
+            <p class="q-title">それを進める中で、何を守りたいですか。</p>
+            <p class="q-help">人・関係・時間・信頼・文化など。崩したくないものを書いてください。</p>
+            <textarea id="field-protect" class="textarea" placeholder="例：社員の働き方改革も守りたい">${escapeHtml(state.protect)}</textarea>
+            <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+          </section>`;
+        document.getElementById('btn-next').onclick = () => {
+          const v = document.getElementById('field-protect').value.trim();
+          if (!v) { document.getElementById('field-protect').focus(); return; }
+          state.protect = v;
+          step = 5;
+          render();
+        };
+        return;
+      }
+
+      if (step === 5) {
+        const m = buildMirrorA();
+        root.innerHTML = `
+          <section class="space-y-3">
+            ${prog}
+            <div class="mirror-card fade-in">
+              <p class="mirror-label">映し返し</p>
+              <p>あなたは</p>
+              <p class="quote">「${escapeHtml(m.achieve)}」</p>
+              <p>と考えています。</p>
+              <p class="mt-3">一方で、</p>
+              <p class="quote">「${escapeHtml(m.protect)}」</p>
+              <p>と考えています。</p>
+              <p class="mt-4">この二つを両立させながら考えることが、<br>今回のテーマになりそうです。</p>
+            </div>
+            <button type="button" id="btn-next" class="btn btn-primary w-full">続きを考える</button>
+          </section>`;
+        document.getElementById('btn-next').onclick = () => { step = 6; render(); };
+        return;
+      }
+
+      if (step === 6) {
+        root.innerHTML = `
+          <section class="card space-y-3">
+            ${prog}
+            ${trailHtml()}
+            <p class="q-title">このテーマで無視できない条件や制約は何ですか。</p>
+            <p class="q-help">予算・人数・期限・規程など。改行で複数書けます。</p>
+            <textarea id="field-constraints" class="textarea" placeholder="例：今年度の予算は増やせない">${escapeHtml(state.constraints)}</textarea>
+            <button type="button" id="btn-next" class="btn btn-primary">整理を映す</button>
+          </section>`;
+        document.getElementById('btn-next').onclick = () => {
+          const v = document.getElementById('field-constraints').value.trim();
+          if (!v) { document.getElementById('field-constraints').focus(); return; }
+          state.constraints = v;
+          step = 7;
+          render();
+        };
+        return;
+      }
+
+      if (step === 7) {
+        const b = buildMirrorB();
+        const aiText = buildAiContext();
+        root.innerHTML = `
+          <section class="space-y-4 fade-in">
+            ${prog}
+            <div class="mirror-summary">
+              <h3>【今日のテーマ】</h3>
+              <p>${escapeHtml(b.theme)}</p>
+              <h3>【あなたの意思】</h3>
+              <p>あなたは</p>
+              <p class="quote border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2 font-semibold">「${escapeHtml(b.achieve)}」</p>
+              <p>一方で</p>
+              <p class="quote border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2 font-semibold">「${escapeHtml(b.protect)}」</p>
+              <p>と考えています。</p>
+              <p class="mt-3">この二つを両立させながら考えることが、今回のテーマになりそうです。</p>
+              <h3>【無視できない条件】</h3>
+              <ul class="mt-1 space-y-1">${b.constraints.map(c => `<li>· ${escapeHtml(c)}</li>`).join('')}</ul>
+              <p class="mt-4 text-[hsl(var(--muted-fg))] text-sm leading-relaxed">
+                この前提でAIへ渡し、視野を広げますか。<br>
+                決めるのは、あなたです。
+              </p>
+            </div>
+
+            <div class="ai-block card">
+              <p class="text-[0.6875rem] font-bold tracking-wider text-[hsl(var(--primary))] mb-2">AIへ渡す意思（任意）</p>
+              <p class="mb-2">AIは判断の主体ではありません。言語化した意思を受け取り、視野を広げる伴走者です。</p>
+              <textarea id="ai-context" class="ai-prompt-box" readonly>${escapeHtml(aiText)}</textarea>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <button type="button" id="btn-copy-ai" class="btn btn-primary text-xs">意思をコピー</button>
+                <span id="copy-toast" class="hidden text-xs text-[hsl(var(--primary))] self-center">コピーしました</span>
+              </div>
+            </div>
+
+            <div class="card space-y-3">
+              <p class="q-title">私はこう判断する</p>
+              <p class="q-help">持ち帰るものは、AIの答えではなく、あなた自身の判断です。</p>
+              <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
+              <button type="button" id="btn-finish" class="btn btn-primary">判断を残す</button>
+            </div>
+          </section>`;
+
+        document.getElementById('btn-copy-ai').onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(aiText);
+          } catch {
+            document.getElementById('ai-context').select();
+            document.execCommand('copy');
+          }
+          const t = document.getElementById('copy-toast');
+          t.classList.remove('hidden');
+          setTimeout(() => t.classList.add('hidden'), 2000);
+        };
+
+        document.getElementById('btn-finish').onclick = () => {
+          const v = document.getElementById('field-judgment').value.trim();
+          if (!v) { document.getElementById('field-judgment').focus(); return; }
+          state.newJudgment = v;
+          saveSession();
+          step = 8;
+          render();
+        };
+        return;
+      }
+
+      if (step === 8) {
+        root.innerHTML = `
+          <section class="space-y-4 fade-in">
+            <div class="judgment-final">
+              <p class="label">あなたの新しい判断</p>
+              <p class="judgment-display">${escapeHtml(state.newJudgment)}</p>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="brand-outro">
+              <div class="brand-outro-mantra">
+                <p>AIは</p>
+                <p>最適な答えを示すことはできる。</p>
+                <p class="mt-2">しかし</p>
+                <p>どの未来を目指すかは</p>
+                <p>決められない。</p>
+              </div>
+              <div class="brand-outro-final">
+                <p>未来を決めるのは</p>
+                <p>AIではない。</p>
+                <p class="you">あなたです。</p>
+                <p class="mt-4 text-[0.9375rem] font-medium text-[hsl(var(--muted-fg))]">
+                  JudgmentOSは<br>
+                  その判断を支えるために存在します。
+                </p>
+              </div>
+              <p class="brand-outro-takeaway">
+                画面を閉じるとき、<br>
+                持ち帰るものは<strong>AIの答えではない</strong>。<br>
+                <strong>あなた自身の判断</strong>です。
+              </p>
+            </div>
+            <button type="button" id="btn-restart" class="btn btn-ghost w-full">はじめから考える</button>
+          </section>`;
+        document.getElementById('btn-restart').onclick = () => {
+          Object.assign(state, { concerns: [], theme: '', achieve: '', protect: '', constraints: '', newJudgment: '' });
+          concernDraft = '';
+          step = 1;
+          render();
+        };
+      }
+    }
+
+    function paintConcernList() {
+      const list = document.getElementById('concern-list');
+      if (!list) return;
+      list.innerHTML = state.concerns.map((c, i) => `
+        <div class="concern-chip">
+          <span class="flex-1">· ${escapeHtml(c)}</span>
+          <button type="button" data-i="${i}" aria-label="削除">削除</button>
+        </div>`).join('');
+      list.querySelectorAll('button').forEach(btn => {
+        btn.onclick = () => {
+          state.concerns.splice(Number(btn.dataset.i), 1);
+          render();
+        };
+      });
+    }
+
+    function addConcernFromInput() {
+      const el = document.getElementById('concern-input');
+      const v = (el?.value || '').trim();
+      if (!v) return;
+      if (!state.concerns.includes(v)) state.concerns.push(v);
+      concernDraft = '';
+      if (el) el.value = '';
+      render();
+    }
+
+    function bindStep1() {
+      document.getElementById('btn-add-concern').onclick = addConcernFromInput;
+      document.getElementById('btn-next').onclick = () => {
+        const draft = document.getElementById('concern-input')?.value.trim();
+        if (draft && !state.concerns.includes(draft)) state.concerns.push(draft);
+        if (!state.concerns.length) return;
+        concernDraft = '';
+        step = 2;
+        render();
       };
-    }
-
-    function refreshContext(userPremise) {
-      if (!currentData) return;
-      const inferred = ConstitutionInference.runInference(currentInput, userPremise);
-      currentData.decision_context = inferred.decision_context;
-      currentData.context_prompt = inferred.context_prompt;
-      currentData.key_questions = inferred.key_questions;
-
-      const ctx = inferred.decision_context;
-      const setRow = (id, label, val) => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = `<span class="context-label">${label}</span> ${escapeHtml(val)}`;
+      document.getElementById('btn-sample').onclick = () => {
+        state.concerns = [...DEMO.concerns];
+        concernDraft = '';
+        render();
       };
-      setRow('ctx-achieve', '· 実現したいこと', ctx.achieve);
-      setRow('ctx-protect', '· 守りたいもの', ctx.protect);
-      setRow('ctx-constraints', '· 受け入れている制約', ctx.constraints);
-      setRow('ctx-uncertain', '· 本当に迷っていること', ctx.uncertain);
-      setRow('ctx-criteria', '· 判断基準', ctx.criteria);
-
-      const promptEl = document.getElementById('context-prompt');
-      if (promptEl) promptEl.value = inferred.profile === 'sales_trust' && !userPremise
-        ? DEMO_CONTEXT_PROMPT
-        : inferred.context_prompt;
-
-      const comparePrompt = document.getElementById('compare-context-prompt');
-      if (comparePrompt) {
-        comparePrompt.textContent = inferred.profile === 'sales_trust' && !userPremise
-          ? DEMO_CONTEXT_PROMPT
-          : inferred.context_prompt;
-      }
-      const compareAnswer = document.getElementById('compare-context-answer');
-      if (compareAnswer) {
-        compareAnswer.textContent = buildContextualAnswer(ctx, inferred.profile);
-      }
-      const questionsBlock = document.getElementById('questions-block');
-      if (questionsBlock) {
-        questionsBlock.innerHTML = inferred.key_questions.map((q, i) =>
-          `<p class="q-item"><span class="q-num">${i + 1}. </span>${escapeHtml(q)}</p>`
-        ).join('');
-      }
+      document.getElementById('concern-input')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          addConcernFromInput();
+        }
+      });
     }
 
-    function renderFlow(d) {
-      const list = (items) => `<ul class="step-list">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
-      const arrow = () => '<div class="arrow">↓</div>';
-      const displayPrompt = demoDisplayPrompt(d);
-
-      return `
-        <div class="step">
-          <p class="step-label">① 入力された判断</p>
-          <p class="step-text">${escapeHtml(d.decision)}</p>
-        </div>${arrow()}
-        <div class="step">
-          <p class="step-label">② この文章から読み取れる前提 <span class="font-normal text-[0.5625rem]">（仮説）</span></p>
-          <p class="step-text">${escapeHtml(d.premise)}</p>
-        </div>${arrow()}
-        <div class="step">
-          <p class="step-label">③ その前提によって自然に見えているもの</p>
-          ${list(d.visible)}
-        </div>${arrow()}
-        <div class="step">
-          <p class="step-label">④ 見えていなかったもの</p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">この前提では、意識が向きにくかったものです。</p>
-          ${list(d.invisible)}
-        </div>${arrow()}
-        <div class="step step-tension">
-          <p class="step-label"><em>⑤ この構造が生んでいる矛盾（テンション）</em></p>
-          ${renderTensions(d.tensions)}
-        </div>${arrow()}
-        <div class="step step-context-hero">
-          <p class="step-label"><em>⑥ 意思決定文脈</em></p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-3">途中経過です。ここから書き換え、新しい判断へつなげます。</p>
-          <div id="context-block">${renderContextBlock(d.decision_context, displayPrompt, true)}</div>
-        </div>${arrow()}
-        <div class="step step-questions-secondary">
-          <p class="step-label">⑦ 新しい問い</p>
-          <p class="text-[0.6875rem] text-[hsl(var(--muted-fg))] mb-2">書き換えた文脈から、自然に生まれた問いです。</p>
-          <div id="questions-block">${d.key_questions.map((q, i) => `<p class="q-item"><span class="q-num">${i + 1}. </span>${escapeHtml(q)}</p>`).join('')}</div>
-        </div>${arrow()}
-        <div class="step step-compare step-ai-optional">
-          ${renderComparisonSection(displayPrompt, d.decision_context, d.profile)}
-        </div>
-        ${renderJudgmentSection()}${arrow()}
-        ${renderDemoClosing()}`;
-    }
-
-    function saveRecord(input, data, userPremise, newJudgment) {
+    function saveSession() {
       const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       history.unshift({
         date: new Date().toISOString(),
-        input,
-        key_questions: data.key_questions,
-        user_premise: userPremise || '',
-        new_judgment: newJudgment || '',
-        decision_context: data.decision_context,
-        context_prompt: data.context_prompt,
-        ai_version: data.ai_version
+        version: '1.1',
+        ...state,
+        ai_context: buildAiContext()
       });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 15)));
-
-      if (typeof DecisionSessionClient !== 'undefined') {
-        DecisionSessionClient.persistSession(input, data, userPremise).catch(() => {});
-      }
-    }
-
-    async function run() {
-      const text = document.getElementById('input').value.trim();
-      if (!text) { document.getElementById('input').focus(); return; }
-
-      const btn = document.getElementById('btn-run');
-      const loading = document.getElementById('loading');
-      const output = document.getElementById('output');
-
-      btn.disabled = true;
-      loading.classList.remove('hidden');
-      output.classList.add('hidden');
-
-      await new Promise(r => setTimeout(r, 650));
-
-      currentInput = text;
-      const data = ConstitutionInference.runInference(text);
-      currentData = data;
-
-      document.getElementById('flow').innerHTML = renderFlow(data);
-      saveRecord(text, data, '', '');
-
-      bindContextCopy();
-      bindNewJudgment();
-
-      const premiseField = document.getElementById('user-premise');
-      if (premiseField) {
-        const onPremiseChange = () => {
-          refreshContext(premiseField.value.trim());
-          saveRecord(text, currentData, premiseField.value.trim(), document.getElementById('new-judgment')?.value.trim() || '');
-        };
-        premiseField.addEventListener('input', onPremiseChange);
-        premiseField.addEventListener('blur', onPremiseChange);
-      }
-
-      loading.classList.add('hidden');
-      output.classList.remove('hidden');
-      btn.disabled = false;
-      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
     }
 
     document.getElementById('btn-enter').addEventListener('click', () => {
@@ -823,16 +653,8 @@ LinkedInだけで十分か
       const ws = document.getElementById('screen-workspace');
       ws.classList.remove('hidden');
       ws.classList.add('fade-in');
-      document.getElementById('input').focus();
-    });
-
-    document.getElementById('btn-run').addEventListener('click', run);
-    document.getElementById('btn-sample').addEventListener('click', () => {
-      document.getElementById('input').value = DEMO_INPUT;
-      document.getElementById('input').focus();
-    });
-    document.getElementById('input').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) run();
+      step = 1;
+      render();
     });
   </script>
 </body>

@@ -6,7 +6,7 @@
   'use strict';
 
   const API_PATH = '/api/decision-session';
-  const APP_VERSION = 'judgmentos-decision-mirror-1.0.0';
+  const APP_VERSION = 'judgmentos-decision-mirror-1.1.0';
 
   async function saveDecisionSessionToServer(payload) {
     try {
