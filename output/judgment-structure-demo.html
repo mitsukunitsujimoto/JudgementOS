@@ -178,6 +178,29 @@
       margin-bottom: 0.75rem;
     }
     .answered-trail strong { color: hsl(var(--foreground)); font-weight: 600; }
+    .gap-card {
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      padding: 1rem 1.125rem; margin-bottom: 0.75rem; background: hsl(var(--background));
+    }
+    .gap-card .gap-ask {
+      font-weight: 600; color: hsl(var(--foreground)); margin-top: 0.5rem; line-height: 1.7;
+    }
+    .gap-card .gap-note {
+      font-size: 0.75rem; color: hsl(var(--muted-fg)); margin-top: 0.35rem; line-height: 1.55;
+    }
+    .choice-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+    .choice-btn {
+      text-align: left; width: 100%; padding: 0.75rem 1rem;
+      border-radius: var(--radius); border: 1px solid hsl(var(--border));
+      background: hsl(var(--background)); color: hsl(var(--foreground));
+      font-size: 0.875rem; line-height: 1.5; cursor: pointer;
+    }
+    .choice-btn:hover { border-color: hsl(var(--primary) / 0.45); }
+    .choice-btn.selected {
+      border-color: hsl(var(--primary)); background: hsl(var(--primary) / 0.1); font-weight: 600;
+    }
+    .mgmt-list { font-size: 0.9375rem; line-height: 1.9; }
+    .mgmt-list li { margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
@@ -186,32 +209,29 @@
     <div class="landing-inner">
       <p class="landing-logo">JUDGMENT OS</p>
       <h1 class="landing-title">JudgmentOS</h1>
-      <p class="landing-tagline">経営者が自分自身と対話する思考OS</p>
+      <p class="landing-tagline">判断の質を支える思考OS</p>
 
       <div class="landing-mantra">
-        <p>AIは</p>
-        <p>最適な答えを示すことはできます。</p>
-        <p class="mt-3">しかし</p>
-        <p>どの未来を目指すかは</p>
-        <p>決められません。</p>
-        <p class="mt-3 font-semibold">未来を決めるのは<br>経営者です。</p>
+        <p>判断の質は、</p>
+        <p>判断文脈の質で決まります。</p>
+        <p class="mt-3">置くのは、本人だけです。</p>
       </div>
 
       <p class="landing-promise">
-        JudgmentOSは、経営者が自分自身を問い、<br>
-        <strong>意思を言語化し</strong>、<br>
-        その意思に基づいてAIと共に考えるためのOSです。
+        JudgmentOSは、<br>
+        <strong>判断文脈を言語化し、その質を高め続ける</strong><br>
+        ための思考OSです。
       </p>
 
-      <button type="button" id="btn-enter" class="btn btn-primary btn-landing">映してみる</button>
-      <p class="landing-not-chat">これはChatGPTではありません。</p>
+      <button type="button" id="btn-enter" class="btn btn-primary btn-landing">判断文脈を置く</button>
+      <p class="landing-not-chat">答えを出すツールではありません。</p>
     </div>
   </section>
 
   <div id="screen-workspace" class="hidden">
     <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
       <div class="shell flex justify-between items-center gap-3">
-        <p class="brand-os text-sm">JudgmentOS <span class="text-[hsl(var(--muted-fg))] font-medium tracking-normal normal-case">v1.1</span></p>
+        <p class="brand-os text-sm">JudgmentOS <span class="text-[hsl(var(--muted-fg))] font-medium tracking-normal normal-case">v1.2</span></p>
         <span class="badge-preview">Preview</span>
       </div>
     </header>
@@ -221,441 +241,6 @@
     </main>
   </div>
 
-  <script>
-    const STORAGE_KEY = 'judgmentos-v1.1-sessions';
-
-    const DEMO = {
-      concerns: [
-        '新規事業を伸ばしたいが、進め方が定まらない',
-        '社員の働き方改革を後退させたくない',
-        '今年度は予算を増やせない'
-      ],
-      themeIndex: 0,
-      achieve: '新規事業を伸ばしたい',
-      protect: '社員の働き方改革も守りたい',
-      constraints: '今年度の予算は増やせない\n人員増はできない'
-    };
-
-    /** @type {{ concerns: string[], theme: string, achieve: string, protect: string, constraints: string, newJudgment: string }} */
-    const state = {
-      concerns: [],
-      theme: '',
-      achieve: '',
-      protect: '',
-      constraints: '',
-      newJudgment: ''
-    };
-
-    let step = 1;
-    let concernDraft = '';
-
-    function escapeHtml(s) {
-      const d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
-    }
-
-    function quoteLines(text) {
-      return text.trim().split(/\n+/).map(l => l.trim()).filter(Boolean);
-    }
-
-    /** 本人の言葉だけを使う映し返しA（④のあと）— 分析・命名なし */
-    function buildMirrorA() {
-      return {
-        achieve: state.achieve.trim(),
-        protect: state.protect.trim()
-      };
-    }
-
-    /** 映し返しB — テーマ・意思・制約。トレードオフ等の命名なし */
-    function buildMirrorB() {
-      return {
-        theme: state.theme.trim(),
-        achieve: state.achieve.trim(),
-        protect: state.protect.trim(),
-        constraints: quoteLines(state.constraints)
-      };
-    }
-
-    /** AIへ渡す5点のみ */
-    function buildAiContext() {
-      const a = buildMirrorA();
-      const b = buildMirrorB();
-      const reflection = `あなたは
-「${a.achieve}」
-と考えています。
-
-一方で、
-「${a.protect}」
-と考えています。
-
-この二つを両立させながら考えることが、今回のテーマになりそうです。`;
-
-      return `【今日のテーマ】
-${b.theme}
-
-【実現したいこと】
-${b.achieve}
-
-【守りたいもの】
-${b.protect}
-
-【無視できない条件】
-${b.constraints.map(c => `· ${c}`).join('\n')}
-
-【映し返し】
-${reflection}
-
-この前提で、私の視野を広げてください。
-決めるのは私です。答えや正解ではなく、見落としと選択肢を示してください。`;
-    }
-
-    function trailHtml() {
-      const parts = [];
-      if (state.concerns.length) {
-        parts.push(`<div><strong>気になっていること</strong><br>${state.concerns.map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
-      }
-      if (state.theme) parts.push(`<div class="mt-2"><strong>今日のテーマ</strong>：${escapeHtml(state.theme)}</div>`);
-      if (state.achieve) parts.push(`<div class="mt-2"><strong>実現したいこと</strong>：${escapeHtml(state.achieve)}</div>`);
-      if (state.protect) parts.push(`<div class="mt-2"><strong>守りたいもの</strong>：${escapeHtml(state.protect)}</div>`);
-      if (state.constraints) {
-        parts.push(`<div class="mt-2"><strong>制約</strong><br>${quoteLines(state.constraints).map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
-      }
-      if (!parts.length) return '';
-      return `<div class="answered-trail">${parts.join('')}</div>`;
-    }
-
-    function progressLabel() {
-      const map = {
-        1: '① 気になっていること',
-        2: '② 今日のテーマ',
-        3: '③ 実現したいこと',
-        4: '④ 守りたいもの',
-        5: '映し返し',
-        6: '⑤ 条件・制約',
-        7: '意思の確認',
-        8: '新しい判断'
-      };
-      return map[step] || '';
-    }
-
-    function render() {
-      const root = document.getElementById('dialogue');
-      const prog = `<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
-
-      if (step === 1) {
-        root.innerHTML = `
-          <section class="card space-y-3">
-            ${prog}
-            <p class="q-title">今、仕事や経営で気になっていることは何ですか。</p>
-            <p class="q-help">いくつでも書いてください。まだ「判断」にしなくて大丈夫です。</p>
-            <div id="concern-list" class="concern-list"></div>
-            <textarea id="concern-input" class="textarea" placeholder="例：新規事業の進め方が定まらない">${escapeHtml(concernDraft)}</textarea>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" id="btn-add-concern" class="btn btn-ghost">リストに追加</button>
-              <button type="button" id="btn-next" class="btn btn-primary" ${state.concerns.length === 0 ? 'disabled' : ''}>次へ</button>
-              <button type="button" id="btn-sample" class="btn btn-ghost">デモ用サンプル</button>
-            </div>
-          </section>`;
-        paintConcernList();
-        bindStep1();
-        return;
-      }
-
-      if (step === 2) {
-        if (state.concerns.length === 1) {
-          state.theme = state.concerns[0];
-          step = 3;
-          render();
-          return;
-        }
-        root.innerHTML = `
-          <section class="card space-y-3">
-            ${prog}
-            ${trailHtml()}
-            <p class="q-title">その中で、今日いちばん深く考えたいテーマはどれですか。</p>
-            <p class="q-help">一つ選んでください。</p>
-            <div id="theme-options"></div>
-            <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
-          </section>`;
-        const box = document.getElementById('theme-options');
-        state.concerns.forEach((c, i) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'theme-option' + (state.theme === c ? ' selected' : '');
-          btn.textContent = c;
-          btn.onclick = () => {
-            state.theme = c;
-            box.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
-            btn.classList.add('selected');
-            document.getElementById('btn-next').disabled = false;
-          };
-          box.appendChild(btn);
-        });
-        document.getElementById('btn-next').onclick = () => {
-          if (!state.theme) return;
-          step = 3;
-          render();
-        };
-        return;
-      }
-
-      if (step === 3) {
-        root.innerHTML = `
-          <section class="card space-y-3">
-            ${prog}
-            ${trailHtml()}
-            <p class="q-title">そのテーマについて、あなたは何を実現したいですか。</p>
-            <p class="q-help">解決策ではなく、向かいたい方向を、あなたの言葉で書いてください。</p>
-            <textarea id="field-achieve" class="textarea" placeholder="例：新規事業を伸ばしたい">${escapeHtml(state.achieve)}</textarea>
-            <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
-          </section>`;
-        document.getElementById('btn-next').onclick = () => {
-          const v = document.getElementById('field-achieve').value.trim();
-          if (!v) { document.getElementById('field-achieve').focus(); return; }
-          state.achieve = v;
-          step = 4;
-          render();
-        };
-        return;
-      }
-
-      if (step === 4) {
-        root.innerHTML = `
-          <section class="card space-y-3">
-            ${prog}
-            ${trailHtml()}
-            <p class="q-title">それを進める中で、何を守りたいですか。</p>
-            <p class="q-help">人・関係・時間・信頼・文化など。崩したくないものを書いてください。</p>
-            <textarea id="field-protect" class="textarea" placeholder="例：社員の働き方改革も守りたい">${escapeHtml(state.protect)}</textarea>
-            <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
-          </section>`;
-        document.getElementById('btn-next').onclick = () => {
-          const v = document.getElementById('field-protect').value.trim();
-          if (!v) { document.getElementById('field-protect').focus(); return; }
-          state.protect = v;
-          step = 5;
-          render();
-        };
-        return;
-      }
-
-      if (step === 5) {
-        const m = buildMirrorA();
-        root.innerHTML = `
-          <section class="space-y-3">
-            ${prog}
-            <div class="mirror-card fade-in">
-              <p class="mirror-label">映し返し</p>
-              <p>あなたは</p>
-              <p class="quote">「${escapeHtml(m.achieve)}」</p>
-              <p>と考えています。</p>
-              <p class="mt-3">一方で、</p>
-              <p class="quote">「${escapeHtml(m.protect)}」</p>
-              <p>と考えています。</p>
-              <p class="mt-4">この二つを両立させながら考えることが、<br>今回のテーマになりそうです。</p>
-            </div>
-            <button type="button" id="btn-next" class="btn btn-primary w-full">続きを考える</button>
-          </section>`;
-        document.getElementById('btn-next').onclick = () => { step = 6; render(); };
-        return;
-      }
-
-      if (step === 6) {
-        root.innerHTML = `
-          <section class="card space-y-3">
-            ${prog}
-            ${trailHtml()}
-            <p class="q-title">このテーマで無視できない条件や制約は何ですか。</p>
-            <p class="q-help">予算・人数・期限・規程など。改行で複数書けます。</p>
-            <textarea id="field-constraints" class="textarea" placeholder="例：今年度の予算は増やせない">${escapeHtml(state.constraints)}</textarea>
-            <button type="button" id="btn-next" class="btn btn-primary">整理を映す</button>
-          </section>`;
-        document.getElementById('btn-next').onclick = () => {
-          const v = document.getElementById('field-constraints').value.trim();
-          if (!v) { document.getElementById('field-constraints').focus(); return; }
-          state.constraints = v;
-          step = 7;
-          render();
-        };
-        return;
-      }
-
-      if (step === 7) {
-        const b = buildMirrorB();
-        const aiText = buildAiContext();
-        root.innerHTML = `
-          <section class="space-y-4 fade-in">
-            ${prog}
-            <div class="mirror-summary">
-              <h3>【今日のテーマ】</h3>
-              <p>${escapeHtml(b.theme)}</p>
-              <h3>【あなたの意思】</h3>
-              <p>あなたは</p>
-              <p class="quote border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2 font-semibold">「${escapeHtml(b.achieve)}」</p>
-              <p>一方で</p>
-              <p class="quote border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2 font-semibold">「${escapeHtml(b.protect)}」</p>
-              <p>と考えています。</p>
-              <p class="mt-3">この二つを両立させながら考えることが、今回のテーマになりそうです。</p>
-              <h3>【無視できない条件】</h3>
-              <ul class="mt-1 space-y-1">${b.constraints.map(c => `<li>· ${escapeHtml(c)}</li>`).join('')}</ul>
-              <p class="mt-4 text-[hsl(var(--muted-fg))] text-sm leading-relaxed">
-                この前提でAIへ渡し、視野を広げますか。<br>
-                決めるのは、あなたです。
-              </p>
-            </div>
-
-            <div class="ai-block card">
-              <p class="text-[0.6875rem] font-bold tracking-wider text-[hsl(var(--primary))] mb-2">AIへ渡す意思（任意）</p>
-              <p class="mb-2">AIは判断の主体ではありません。言語化した意思を受け取り、視野を広げる伴走者です。</p>
-              <textarea id="ai-context" class="ai-prompt-box" readonly>${escapeHtml(aiText)}</textarea>
-              <div class="flex flex-wrap gap-2 mt-2">
-                <button type="button" id="btn-copy-ai" class="btn btn-primary text-xs">意思をコピー</button>
-                <span id="copy-toast" class="hidden text-xs text-[hsl(var(--primary))] self-center">コピーしました</span>
-              </div>
-            </div>
-
-            <div class="card space-y-3">
-              <p class="q-title">私はこう判断する</p>
-              <p class="q-help">持ち帰るものは、AIの答えではなく、あなた自身の判断です。</p>
-              <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
-              <button type="button" id="btn-finish" class="btn btn-primary">判断を残す</button>
-            </div>
-          </section>`;
-
-        document.getElementById('btn-copy-ai').onclick = async () => {
-          try {
-            await navigator.clipboard.writeText(aiText);
-          } catch {
-            document.getElementById('ai-context').select();
-            document.execCommand('copy');
-          }
-          const t = document.getElementById('copy-toast');
-          t.classList.remove('hidden');
-          setTimeout(() => t.classList.add('hidden'), 2000);
-        };
-
-        document.getElementById('btn-finish').onclick = () => {
-          const v = document.getElementById('field-judgment').value.trim();
-          if (!v) { document.getElementById('field-judgment').focus(); return; }
-          state.newJudgment = v;
-          saveSession();
-          step = 8;
-          render();
-        };
-        return;
-      }
-
-      if (step === 8) {
-        root.innerHTML = `
-          <section class="space-y-4 fade-in">
-            <div class="judgment-final">
-              <p class="label">あなたの新しい判断</p>
-              <p class="judgment-display">${escapeHtml(state.newJudgment)}</p>
-            </div>
-            <div class="arrow">↓</div>
-            <div class="brand-outro">
-              <div class="brand-outro-mantra">
-                <p>AIは</p>
-                <p>最適な答えを示すことはできる。</p>
-                <p class="mt-2">しかし</p>
-                <p>どの未来を目指すかは</p>
-                <p>決められない。</p>
-              </div>
-              <div class="brand-outro-final">
-                <p>未来を決めるのは</p>
-                <p>AIではない。</p>
-                <p class="you">あなたです。</p>
-                <p class="mt-4 text-[0.9375rem] font-medium text-[hsl(var(--muted-fg))]">
-                  JudgmentOSは<br>
-                  その判断を支えるために存在します。
-                </p>
-              </div>
-              <p class="brand-outro-takeaway">
-                画面を閉じるとき、<br>
-                持ち帰るものは<strong>AIの答えではない</strong>。<br>
-                <strong>あなた自身の判断</strong>です。
-              </p>
-            </div>
-            <button type="button" id="btn-restart" class="btn btn-ghost w-full">はじめから考える</button>
-          </section>`;
-        document.getElementById('btn-restart').onclick = () => {
-          Object.assign(state, { concerns: [], theme: '', achieve: '', protect: '', constraints: '', newJudgment: '' });
-          concernDraft = '';
-          step = 1;
-          render();
-        };
-      }
-    }
-
-    function paintConcernList() {
-      const list = document.getElementById('concern-list');
-      if (!list) return;
-      list.innerHTML = state.concerns.map((c, i) => `
-        <div class="concern-chip">
-          <span class="flex-1">· ${escapeHtml(c)}</span>
-          <button type="button" data-i="${i}" aria-label="削除">削除</button>
-        </div>`).join('');
-      list.querySelectorAll('button').forEach(btn => {
-        btn.onclick = () => {
-          state.concerns.splice(Number(btn.dataset.i), 1);
-          render();
-        };
-      });
-    }
-
-    function addConcernFromInput() {
-      const el = document.getElementById('concern-input');
-      const v = (el?.value || '').trim();
-      if (!v) return;
-      if (!state.concerns.includes(v)) state.concerns.push(v);
-      concernDraft = '';
-      if (el) el.value = '';
-      render();
-    }
-
-    function bindStep1() {
-      document.getElementById('btn-add-concern').onclick = addConcernFromInput;
-      document.getElementById('btn-next').onclick = () => {
-        const draft = document.getElementById('concern-input')?.value.trim();
-        if (draft && !state.concerns.includes(draft)) state.concerns.push(draft);
-        if (!state.concerns.length) return;
-        concernDraft = '';
-        step = 2;
-        render();
-      };
-      document.getElementById('btn-sample').onclick = () => {
-        state.concerns = [...DEMO.concerns];
-        concernDraft = '';
-        render();
-      };
-      document.getElementById('concern-input')?.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          addConcernFromInput();
-        }
-      });
-    }
-
-    function saveSession() {
-      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      history.unshift({
-        date: new Date().toISOString(),
-        version: '1.1',
-        ...state,
-        ai_context: buildAiContext()
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
-    }
-
-    document.getElementById('btn-enter').addEventListener('click', () => {
-      document.getElementById('screen-landing').classList.add('hidden');
-      const ws = document.getElementById('screen-workspace');
-      ws.classList.remove('hidden');
-      ws.classList.add('fade-in');
-      step = 1;
-      render();
-    });
-  </script>
+  <script src="js/judgmentos-v12.js"></script>
 </body>
 </html>
