@@ -30,6 +30,20 @@
 
   let step = 1;
   let concernDraft = '';
+  let nextSentencePlaceholder = '';
+
+  const NEXT_SENTENCE_EXAMPLES = [
+    '成功は既存顧客からの紹介件数で測る。',
+    '守る対象は制度ではなく、顧客との信頼である。',
+    '制約は予算ではなく、今年度中の完了である。',
+    '成功は売上ではなく継続率で判断する。',
+    '「伸びた」とは、新規より既存顧客の紹介が増えた状態を指す。'
+  ];
+
+  function pickNextSentencePlaceholder() {
+    const i = Math.floor(Math.random() * NEXT_SENTENCE_EXAMPLES.length);
+    return NEXT_SENTENCE_EXAMPLES[i];
+  }
 
   function escapeHtml(s) {
     const d = document.createElement('div');
@@ -228,6 +242,7 @@ ${buildReflection()}`;
       gapQuestions: [], missingArea: '', nextSentence: '', newJudgment: ''
     });
     concernDraft = '';
+    nextSentencePlaceholder = '';
     step = 1;
   }
 
@@ -449,6 +464,9 @@ ${buildReflection()}`;
             判断の質は、この判断文脈の質で決まります。<br>
             答えを求める前に、置いたものを自分で確認してください。
           </p>
+          <p class="text-xs text-[hsl(var(--muted-fg))] leading-relaxed px-1 -mt-2 opacity-90">
+            この文脈が、AIや他者へ渡す前提になります。
+          </p>
           <div class="flex flex-col gap-2">
             <button type="button" id="btn-gaps" class="btn btn-primary w-full">まだ言葉になっていない層へ進む</button>
             <button type="button" id="btn-update" class="btn btn-ghost w-full">判断文脈を更新する</button>
@@ -502,18 +520,19 @@ ${buildReflection()}`;
     }
 
     if (step === 9) {
+      if (!nextSentencePlaceholder) nextSentencePlaceholder = pickNextSentencePlaceholder();
       const areas = [
         { id: 'achieve', label: '実現したいことの背景・誰のための実現か' },
         { id: 'protect', label: '守りたいものの対象（人・関係・制度）' },
         { id: 'constraints', label: '制約の意味（絶対か、仮定か、自分の上限か）' },
         { id: 'time', label: '時間軸（いつまでに、何をもって成功か）' },
-        { id: 'other', label: 'その他（次の一文で書く）' },
-        { id: 'none', label: '今回は足さない' }
+        { id: 'other', label: 'その他（判断文脈に一文を足す）' },
+        { id: 'none', label: '今回はこのまま渡す' }
       ];
       root.innerHTML = `
         <section class="card space-y-3 fade-in">
           ${prog}
-          <p class="q-title">自分は、何を渡せていなかったか。</p>
+          <p class="q-title">今回、何を渡せていなかったか。</p>
           <p class="q-help">成功は、便利さではありません。判断文脈のどこが薄かったかに気付くことです。</p>
           <div class="choice-grid" id="missing-areas">
             ${areas.map(a => `
@@ -521,9 +540,9 @@ ${buildReflection()}`;
             `).join('')}
           </div>
           <div id="next-wrap" class="${state.missingArea && state.missingArea !== 'none' ? '' : 'hidden'}">
-            <p class="q-title mt-4">次は、こう渡す。</p>
-            <p class="q-help">判断文脈に足す一文を、自分の言葉で書いてください。</p>
-            <textarea id="field-next" class="textarea" placeholder="例：伸びたの定義は、売上より既存顧客からの紹介件数とする。">${escapeHtml(state.nextSentence)}</textarea>
+            <p class="q-title mt-4">判断文脈に一文を足す</p>
+            <p class="q-help">次に渡す判断文脈へ、自分の言葉で一文を書いてください。</p>
+            <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
           </div>
           <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
         </section>`;
@@ -593,7 +612,7 @@ ${buildReflection()}`;
       root.innerHTML = `
         <section class="card space-y-3 fade-in">
           ${prog}
-          ${state.nextSentence ? `<div class="answered-trail"><strong>次に足す一文</strong><br>${escapeHtml(state.nextSentence)}</div>` : ''}
+          ${state.nextSentence ? `<div class="answered-trail"><strong>判断文脈に足す一文</strong><br>${escapeHtml(state.nextSentence)}</div>` : ''}
           <p class="q-title">私はこう判断する</p>
           <p class="q-help">任意です。持ち帰るものは、答えではなく、あなた自身の判断です。</p>
           <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
@@ -629,7 +648,7 @@ ${buildReflection()}`;
             <div class="arrow">↓</div>` : ''}
           ${state.nextSentence ? `
             <div class="mirror-card">
-              <p class="mirror-label">次に渡す判断文脈へ</p>
+              <p class="mirror-label">判断文脈に足した一文</p>
               <p class="quote">「${escapeHtml(state.nextSentence)}」</p>
             </div>
             <div class="arrow">↓</div>` : ''}
@@ -642,9 +661,11 @@ ${buildReflection()}`;
             <p class="brand-outro-takeaway">
               成功とは、便利さではありません。<br>
               <strong>何を渡せていたか</strong>に気付き、<br>
-              <strong>次はこう渡す</strong>と決めること。<br><br>
+              <strong>判断文脈に一文を足す</strong>と決めること。<br><br>
               もっと判断文脈を整えてから、<br>
-              外へ渡そう。
+              外へ渡そう。<br><br>
+              判断文脈は、一度作れば終わりではありません。<br>
+              判断するたびに育っていきます。
             </p>
           </div>
           <button type="button" id="btn-restart" class="btn btn-ghost w-full">はじめから置く</button>
