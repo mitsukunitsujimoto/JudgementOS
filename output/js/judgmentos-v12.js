@@ -2,11 +2,82 @@
  * JudgmentOS Version 1.2
  * 判断文脈を言語化し、その質を高め続ける思考OS。
  * 順序: 本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断
+ *
+ * モニター標準フローの中核:
+ * 判断文脈を言語化 → 見直す →（必要なら）一文を足す → 渡す →（任意）判断
+ *
+ * 「問い返す型」は削除せず将来拡張として保持する（標準フローには含めない）。
  */
 (function () {
   'use strict';
 
   const STORAGE_KEY = 'judgmentos-v1.2-sessions';
+
+  /** V1.2 モニター: false。将来シナリオ別ライブラリを標準/任意導線に載せるとき true */
+  const INCLUDE_REPLY_PATTERN_IN_FLOW = false;
+
+  /**
+   * 将来拡張 — シナリオ別・問い返す型ライブラリ
+   * 例: AI / 部下 / お客様 / 上司 / 取締役会
+   * 中核体験の検証後に、シナリオ選択として接続する想定。
+   */
+  const REPLY_PATTERN_LIBRARY = [
+    {
+      id: 'subordinate_ai',
+      title: '部下がこう言ったとき。',
+      quote: '「AIがこう言っています。」',
+      help: 'あなたが自然に返す型です。一度、心の中で言ってみてください。',
+      questions: [
+        'AIに何を渡したの？',
+        'その前に、自分自身と十分向き合った？',
+        '実現したいこと、守りたいもの、制約まで渡した？'
+      ]
+    },
+    {
+      id: 'ai_direct',
+      title: 'AIがこう言ってきたとき。',
+      quote: '「最適解はこれです。」',
+      help: '答えを受け取る前に、判断文脈を問い返す型です。',
+      questions: [
+        'この答えは、どの判断文脈を前提にしている？',
+        '実現したいことと守りたいものは、渡されている？',
+        'いま足りない判断文脈は何か？'
+      ]
+    },
+    {
+      id: 'customer',
+      title: 'お客様がこう言ったとき。',
+      quote: '「御社の提案はこうですよね。」',
+      help: '相手の言葉の奥にある判断文脈を確かめる型です。',
+      questions: [
+        'お客様は、何を実現したいと言っている？',
+        '何を守りたい／失いたくないと言っている？',
+        '制約として置いている条件は何か？'
+      ]
+    },
+    {
+      id: 'boss',
+      title: '上司がこう言ったとき。',
+      quote: '「とりあえず進めて。」',
+      help: '指示の手前にある判断文脈を言語化する型です。',
+      questions: [
+        'この指示で実現したいことは何か？',
+        '進めるうえで守るものは何か？',
+        '無視できない制約は何か？'
+      ]
+    },
+    {
+      id: 'board',
+      title: '取締役会でこう言われたとき。',
+      quote: '「その判断の根拠は？」',
+      help: '説明の前に、渡す判断文脈を整える型です。',
+      questions: [
+        '実現したいことと守りたいものは、一言で言えるか？',
+        '制約と前提は、どこまで共有されているか？',
+        'まだ渡せていない判断文脈は何か？'
+      ]
+    }
+  ];
 
   const DEMO = {
     concerns: [
@@ -229,11 +300,28 @@ ${buildReflection()}`;
       7: '判断文脈を見る',
       8: 'まだ言葉になっていない層',
       9: '判断文脈を更新する',
-      10: '問い返す型',
+      10: '問い返す型', // 将来拡張（INCLUDE_REPLY_PATTERN_IN_FLOW）
       11: '新しい判断',
       12: '余韻'
     };
     return map[step] || '';
+  }
+
+  function nextAfterContextUpdate() {
+    return INCLUDE_REPLY_PATTERN_IN_FLOW ? 10 : 11;
+  }
+
+  /** @param {typeof REPLY_PATTERN_LIBRARY[0]} pattern */
+  function replyPatternHtml(pattern) {
+    return `
+      <p class="q-title">${escapeHtml(pattern.title)}</p>
+      <p class="text-sm leading-relaxed border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2">
+        ${escapeHtml(pattern.quote)}
+      </p>
+      <p class="q-help">${escapeHtml(pattern.help)}</p>
+      <ol class="mgmt-list list-decimal pl-5">
+        ${pattern.questions.map(q => `<li>${escapeHtml(q)}</li>`).join('')}
+      </ol>`;
   }
 
   function resetState() {
@@ -579,26 +667,24 @@ ${buildReflection()}`;
           state.nextSentence = document.getElementById('field-next').value.trim();
           if (!state.nextSentence) return;
         }
-        step = 10;
+        step = nextAfterContextUpdate();
         render();
       };
       return;
     }
 
+    // 将来拡張: シナリオ別・問い返す型（V1.2モニターの標準フローではスキップ）
     if (step === 10) {
+      if (!INCLUDE_REPLY_PATTERN_IN_FLOW) {
+        step = 11;
+        render();
+        return;
+      }
+      const pattern = REPLY_PATTERN_LIBRARY[0];
       root.innerHTML = `
         <section class="card space-y-4 fade-in">
           ${prog}
-          <p class="q-title">部下がこう言ったとき。</p>
-          <p class="text-sm leading-relaxed border-l-2 border-[hsl(var(--primary)/0.5)] pl-3 my-2">
-            「AIがこう言っています。」
-          </p>
-          <p class="q-help">あなたが自然に返す型です。一度、心の中で言ってみてください。</p>
-          <ol class="mgmt-list list-decimal pl-5">
-            <li>AIに何を渡したの？</li>
-            <li>その前に、自分自身と十分向き合った？</li>
-            <li>実現したいこと、守りたいもの、制約まで渡した？</li>
-          </ol>
+          ${replyPatternHtml(pattern)}
           <button type="button" id="btn-next" class="btn btn-primary w-full">この型を受け取った</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
