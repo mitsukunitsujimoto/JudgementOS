@@ -94,6 +94,7 @@
     protect: '',
     constraints: '',
     gapQuestions: [],
+    gapInsights: {},
     missingArea: '',
     nextSentence: '',
     newJudgment: ''
@@ -114,6 +115,59 @@
   function pickNextSentencePlaceholder() {
     const i = Math.floor(Math.random() * NEXT_SENTENCE_EXAMPLES.length);
     return NEXT_SENTENCE_EXAMPLES[i];
+  }
+
+  function ensureSentenceEnd(s) {
+    const t = s.trim();
+    if (!t) return '';
+    return /[。．.!？?]$/.test(t) ? t : `${t}。`;
+  }
+
+  function filledGapInsights() {
+    return state.gapQuestions
+      .map((g, i) => ({
+        key: g.key,
+        index: i + 1,
+        ask: g.ask,
+        text: (state.gapInsights[g.key] || '').trim()
+      }))
+      .filter(x => x.text);
+  }
+
+  /** ローカル候補（AIではない）。複数あればいちばん具体的な一文を選ぶ */
+  function proposeSentenceFromInsights() {
+    const lines = filledGapInsights().map(x => x.text);
+    if (!lines.length) return '';
+    if (lines.length === 1) return ensureSentenceEnd(lines[0]);
+    const best = lines.slice().sort((a, b) => b.length - a.length)[0];
+    return ensureSentenceEnd(best);
+  }
+
+  function buildInsightIntegratePrompt() {
+    const insights = filledGapInsights();
+    const list = insights.map(x => `${x.index}. ${x.text}`).join('\n');
+    return `【依頼】
+以下は、JudgmentOSの問いに対して利用者が残した気づき（各一文）です。
+これらを踏まえ、判断文脈に追加すべき一文だけを提案してください。
+答えや診断ではなく、渡す判断文脈に足す一文にしてください。
+
+出力は次の形式の一行だけにしてください。
+判断文脈に加えるなら、この一文です。「（ここに一文）」
+
+【既存の判断文脈】
+${buildContextPack()}
+
+【問いから生まれた気づき】
+${list || '（なし）'}`;
+  }
+
+  function gapInsightsTrailHtml() {
+    const insights = filledGapInsights();
+    if (!insights.length) return '';
+    return `<div class="answered-trail">
+      <strong>この問いで気づいたこと</strong><br>
+      ${insights.map(x => `<span class="block mt-1">問い${x.index} · ${escapeHtml(x.text)}</span>`).join('')}
+    </div>`;
   }
 
   function escapeHtml(s) {
@@ -327,7 +381,7 @@ ${buildReflection()}`;
   function resetState() {
     Object.assign(state, {
       concerns: [], theme: '', achieve: '', protect: '', constraints: '',
-      gapQuestions: [], missingArea: '', nextSentence: '', newJudgment: ''
+      gapQuestions: [], gapInsights: {}, missingArea: '', nextSentence: '', newJudgment: ''
     });
     concernDraft = '';
     nextSentencePlaceholder = '';
@@ -347,6 +401,7 @@ ${buildReflection()}`;
       nextSentence: state.nextSentence,
       newJudgment: state.newJudgment,
       gapKeys: state.gapQuestions.map(g => g.key),
+      gapInsights: filledGapInsights().map(x => ({ key: x.key, text: x.text })),
       context_pack: buildContextPack()
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
@@ -569,6 +624,7 @@ ${buildReflection()}`;
         </section>`;
       document.getElementById('btn-gaps').onclick = () => {
         state.gapQuestions = selectGapQuestions();
+        state.gapInsights = {};
         step = 8;
         render();
       };
@@ -594,21 +650,132 @@ ${buildReflection()}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">まだ言葉になっていない判断文脈へ</p>
-          <p class="q-help">答えではありません。いま置いた言葉の隙間に触れる問いです。毎回同じ一覧にはなりません。</p>
+          <p class="q-help">正解を書く場ではありません。各問いから生まれた気づきを、一文だけ言葉にしてください。</p>
           ${gaps.map((g, i) => `
             <div class="gap-card">
               <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${i + 1}</p>
               <p class="gap-note">${escapeHtml(g.note)}</p>
               <p class="gap-ask">${escapeHtml(g.ask)}</p>
+              <label class="gap-insight-label" for="gap-insight-${i}">この問いで気づいたこと</label>
+              <textarea id="gap-insight-${i}" class="textarea gap-insight" rows="2" placeholder="一文で">${escapeHtml(state.gapInsights[g.key] || '')}</textarea>
             </div>`).join('')}
-          <button type="button" id="btn-next" class="btn btn-primary w-full">何を渡せていたかを見る</button>
+          <p id="gap-insight-hint" class="hidden text-xs text-[hsl(var(--primary))] px-1">少なくとも一つの問いで、気づいたことを一文残してください。</p>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">気づきを持って、判断文脈を更新する</button>
         </section>`;
-      document.getElementById('btn-next').onclick = () => { step = 9; render(); };
+
+      const collectInsights = () => {
+        gaps.forEach((g, i) => {
+          const el = document.getElementById(`gap-insight-${i}`);
+          state.gapInsights[g.key] = (el?.value || '').trim();
+        });
+      };
+
+      gaps.forEach((g, i) => {
+        const el = document.getElementById(`gap-insight-${i}`);
+        if (el) {
+          el.oninput = () => {
+            state.gapInsights[g.key] = el.value;
+            document.getElementById('gap-insight-hint')?.classList.add('hidden');
+          };
+        }
+      });
+
+      document.getElementById('btn-next').onclick = () => {
+        collectInsights();
+        const insights = filledGapInsights();
+        if (!insights.length) {
+          document.getElementById('gap-insight-hint')?.classList.remove('hidden');
+          const first = document.getElementById('gap-insight-0');
+          if (first) first.focus();
+          return;
+        }
+        state.missingArea = 'from_gaps';
+        state.nextSentence = proposeSentenceFromInsights();
+        step = 9;
+        render();
+      };
       return;
     }
 
     if (step === 9) {
       if (!nextSentencePlaceholder) nextSentencePlaceholder = pickNextSentencePlaceholder();
+      const insights = filledGapInsights();
+
+      // 問いからの気づきがある場合: それを見ながら一文を足す（中核体験）
+      if (insights.length) {
+        if (state.missingArea !== 'none' && state.missingArea !== 'from_gaps') {
+          state.missingArea = 'from_gaps';
+        }
+        if (state.missingArea !== 'none' && !state.nextSentence.trim()) {
+          state.nextSentence = proposeSentenceFromInsights();
+        }
+        root.innerHTML = `
+          <section class="card space-y-3 fade-in">
+            ${prog}
+            ${gapInsightsTrailHtml()}
+            <p class="q-title">判断文脈に一文を足す</p>
+            <p class="q-help">上の気づきを見ながら、判断文脈に加える一文を整えてください。複数あるときは、いちばん渡したい一文に絞ります。</p>
+            <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
+            <div class="ai-block mt-3">
+              <p class="text-[0.6875rem] font-bold text-[hsl(var(--primary))] mb-1">必要なら、気づきをAIで一文に統合する</p>
+              <p class="mb-2 text-xs">JudgmentOSは答えを出しません。依頼文をコピーしてAIに渡すと、「判断文脈に加えるなら、この一文です。」の形で候補を返せます。採用するのは、あなたです。</p>
+              <textarea id="integrate-pack" class="ai-prompt-box" readonly>${escapeHtml(buildInsightIntegratePrompt())}</textarea>
+              <button type="button" id="btn-copy-integrate" class="btn btn-ghost mt-2 text-xs">統合用の依頼文をコピー</button>
+              <span id="copy-integrate-toast" class="hidden text-xs text-[hsl(var(--primary))] ml-2">コピーしました</span>
+            </div>
+            <div class="flex flex-col gap-2 mt-2">
+              <button type="button" id="btn-next" class="btn btn-primary w-full" disabled>この一文を判断文脈に足す</button>
+              <button type="button" id="btn-skip-add" class="btn btn-ghost w-full">今回はこのまま渡す</button>
+            </div>
+          </section>`;
+
+        const nextBtn = document.getElementById('btn-next');
+        const field = document.getElementById('field-next');
+        const updateNextEnabled = () => {
+          nextBtn.disabled = !(field && field.value.trim());
+        };
+        if (field) {
+          field.oninput = () => {
+            state.nextSentence = field.value;
+            state.missingArea = 'from_gaps';
+            updateNextEnabled();
+          };
+        }
+        updateNextEnabled();
+
+        document.getElementById('btn-skip-add').onclick = () => {
+          state.missingArea = 'none';
+          state.nextSentence = '';
+          step = nextAfterContextUpdate();
+          render();
+        };
+
+        const copyIntegrate = document.getElementById('btn-copy-integrate');
+        if (copyIntegrate) {
+          copyIntegrate.onclick = async () => {
+            const text = buildInsightIntegratePrompt();
+            try { await navigator.clipboard.writeText(text); }
+            catch {
+              document.getElementById('integrate-pack').select();
+              document.execCommand('copy');
+            }
+            const toast = document.getElementById('copy-integrate-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+          };
+        }
+
+        nextBtn.onclick = () => {
+          state.nextSentence = field.value.trim();
+          if (!state.nextSentence) return;
+          state.missingArea = 'from_gaps';
+          step = nextAfterContextUpdate();
+          render();
+        };
+        return;
+      }
+
+      // 問いをスキップした場合のフォールバック（判断文脈を更新する導線）
       const areas = [
         { id: 'achieve', label: '実現したいことの背景・誰のための実現か' },
         { id: 'protect', label: '守りたいものの対象（人・関係・制度）' },
