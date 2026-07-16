@@ -585,53 +585,50 @@ ${change}`;
     }
   }
 
-  function paintConcernList() {
-    const list = document.getElementById('concern-list');
-    if (!list) return;
-    list.innerHTML = state.concerns.map((c, i) => `
-      <div class="concern-chip">
-        <span class="flex-1">· ${escapeHtml(c)}</span>
-        <button type="button" data-i="${i}" aria-label="削除">削除</button>
-      </div>`).join('');
-    list.querySelectorAll('button').forEach(btn => {
-      btn.onclick = () => {
-        state.concerns.splice(Number(btn.dataset.i), 1);
-        render();
-      };
-    });
-  }
-
-  function addConcernFromInput() {
-    const el = document.getElementById('concern-input');
-    const v = (el?.value || '').trim();
-    if (!v) return;
-    if (!state.concerns.includes(v)) state.concerns.push(v);
-    concernDraft = '';
-    if (el) el.value = '';
-    render();
+  function isDevMode() {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      if (q.get('dev') === '1' || q.get('admin') === '1') return true;
+      return localStorage.getItem('judgmentos.dev') === '1';
+    } catch (_) {
+      return false;
+    }
   }
 
   function bindStep1() {
-    document.getElementById('btn-add-concern').onclick = addConcernFromInput;
-    document.getElementById('btn-next').onclick = () => {
-      const draft = document.getElementById('concern-input')?.value.trim();
-      if (draft && !state.concerns.includes(draft)) state.concerns.push(draft);
-      if (!state.concerns.length) return;
-      concernDraft = '';
-      step = 2;
-      render();
+    const input = document.getElementById('concern-input');
+    const nextBtn = document.getElementById('btn-next');
+    const syncNext = () => {
+      nextBtn.disabled = !(input && input.value.trim());
     };
-    document.getElementById('btn-sample').onclick = () => {
-      state.concerns = [...DEMO.concerns];
-      concernDraft = '';
-      render();
-    };
-    document.getElementById('concern-input')?.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        addConcernFromInput();
+    if (input) {
+      input.oninput = () => {
+        concernDraft = input.value;
+        syncNext();
+      };
+    }
+    nextBtn.onclick = () => {
+      const draft = (input?.value || '').trim();
+      if (!draft) {
+        input?.focus();
+        return;
       }
-    });
+      state.concerns = [draft];
+      state.theme = draft;
+      concernDraft = '';
+      step = 3;
+      render();
+    };
+    const btnDev = document.getElementById('btn-dev-sample');
+    if (btnDev) {
+      btnDev.onclick = () => {
+        state.concerns = [...DEMO.concerns];
+        state.theme = DEMO.concerns[0];
+        concernDraft = '';
+        step = 2;
+        render();
+      };
+    }
   }
 
   function render() {
@@ -651,23 +648,18 @@ ${change}`;
         <section class="card space-y-3">
           ${prog}
           <p class="q-title">今、仕事や経営で気になっていることは何ですか。</p>
-          <p class="q-help">いくつでも書いてください。まだ「判断」にしなくて大丈夫です。</p>
-          <div id="concern-list" class="concern-list"></div>
-          <textarea id="concern-input" class="textarea" placeholder="例：新規事業の進め方が定まらない">${escapeHtml(concernDraft)}</textarea>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" id="btn-add-concern" class="btn btn-ghost">リストに追加</button>
-            <button type="button" id="btn-next" class="btn btn-primary" ${state.concerns.length === 0 ? 'disabled' : ''}>次へ</button>
-            <button type="button" id="btn-sample" class="btn btn-ghost">デモ用サンプル</button>
-          </div>
+          <p class="q-help">まだ判断にしなくて大丈夫です。今、気になっていることを書いてください。</p>
+          <textarea id="concern-input" class="textarea">${escapeHtml(concernDraft)}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full" ${concernDraft.trim() ? '' : 'disabled'}>次へ</button>
+          ${isDevMode() ? `<button type="button" id="btn-dev-sample" class="btn btn-ghost w-full text-xs opacity-60">[開発] サンプルで進む</button>` : ''}
         </section>`;
-      paintConcernList();
       bindStep1();
       return;
     }
 
     if (step === 2) {
-      if (state.concerns.length === 1) {
-        state.theme = state.concerns[0];
+      if (state.concerns.length <= 1) {
+        state.theme = state.concerns[0] || state.theme;
         step = 3;
         render();
         return;
