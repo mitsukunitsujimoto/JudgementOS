@@ -260,8 +260,8 @@ ${buildReflection()}`;
     const b = buildMirrorB();
     return `
       <div class="mirror-summary">
-        <h3>【いま置いた判断文脈】</h3>
-        <p class="text-[0.75rem] text-[hsl(var(--muted-fg))] mb-2">渡す前に、まずこれを見てください。</p>
+        <h3>【いま言葉にしたこと】</h3>
+        <p class="text-[0.75rem] text-[hsl(var(--muted-fg))] mb-2">JudgmentOSでは、これを<strong>判断文脈</strong>と呼びます。渡す前に、まず見てください。</p>
         <h3>【今日のテーマ】</h3>
         <p>${escapeHtml(b.theme)}</p>
         <h3>【実現したいこと】</h3>
@@ -297,7 +297,7 @@ ${buildReflection()}`;
       4: '④ 守りたいもの',
       5: '映し返し',
       6: '⑤ 条件・制約',
-      7: '判断文脈を見る',
+      7: 'いま言葉にしたものを見る',
       8: 'まだ言葉になっていない層',
       9: '判断文脈を更新する',
       10: '問い返す型', // 将来拡張（INCLUDE_REPLY_PATTERN_IN_FLOW）
@@ -531,7 +531,7 @@ ${buildReflection()}`;
           <p class="q-title">このテーマで無視できない条件や制約は何ですか。</p>
           <p class="q-help">予算・人数・期限・規程など。改行で複数書けます。</p>
           <textarea id="field-constraints" class="textarea" placeholder="例：今年度の予算は増やせない">${escapeHtml(state.constraints)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary">判断文脈を見る</button>
+          <button type="button" id="btn-next" class="btn btn-primary">いま言葉にしたものを見る</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
         const v = document.getElementById('field-constraints').value.trim();
