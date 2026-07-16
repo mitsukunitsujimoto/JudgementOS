@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>JudgmentOS</title>
+  <meta name="description" content="JudgmentOSは、AI時代の判断を支える思考OSです。答えを出す前に、実現したいこと・守りたいもの・制約を言葉にし、判断文脈を育てます。">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="JudgmentOS — AI時代の判断を支える思考OS">
+  <meta property="og:description" content="答えを出すツールではありません。判断の前に、考えを整えるための場所です。">
+  <meta property="og:type" content="website">
+  <title>JudgmentOS — AI時代の判断を支える思考OS</title>
+  <script>document.documentElement.classList.add('js');</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -217,10 +222,180 @@
     }
     .mgmt-list { font-size: 0.9375rem; line-height: 1.9; }
     .mgmt-list li { margin-bottom: 0.5rem; }
+    .hidden { display: none !important; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    /* ChatGPT等（JS非実行）向け: 画面内容を静的HTMLで提供。JS利用者には隠す */
+    .reader-doc {
+      max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 3rem;
+      font-size: 0.9375rem; line-height: 1.85;
+    }
+    .reader-doc h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.5rem; }
+    .reader-doc h2 {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--primary)); margin: 2rem 0 0.75rem;
+      padding-bottom: 0.35rem; border-bottom: 1px solid hsl(var(--border));
+    }
+    .reader-doc h3 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 0.5rem; }
+    .reader-doc p { margin: 0.5rem 0; }
+    .reader-doc ul, .reader-doc ol { margin: 0.5rem 0 0.5rem 1.25rem; }
+    .reader-doc li { margin-bottom: 0.35rem; }
+    .reader-doc .screen-card {
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      padding: 1rem 1.125rem; margin: 0.75rem 0; background: hsl(var(--card));
+    }
+    .reader-doc .muted { color: hsl(var(--muted-fg)); font-size: 0.875rem; }
+    .reader-doc .brand { color: hsl(var(--primary)); font-weight: 700; letter-spacing: 0.12em; font-size: 0.75rem; }
+    html.js .reader-doc { display: none !important; }
+    html:not(.js) .app-root { display: none !important; }
   </style>
 </head>
 <body>
 
+  <!--
+    このブロックは ChatGPT / クローラ向けの静的画面説明です。
+    JavaScript を実行しない取得でも、JudgmentOS v1.2 の体験内容を読めます。
+    ブラウザ（JSあり）では非表示になり、下の対話アプリが起動します。
+  -->
+  <article id="reader-doc" class="reader-doc" lang="ja">
+    <p class="brand">JUDGMENT OS</p>
+    <h1>JudgmentOS</h1>
+    <p><strong>AI時代の判断を支える思考OS</strong>（Version 1.2）</p>
+
+    <p>良い判断は、AIに答えを聞く前に始まります。<br>
+    自分が何を大切にしているかを、まず言葉にします。</p>
+
+    <p>答えを出すツールではありません。<br>
+    <strong>判断の前に、考えを整える</strong>ための場所です。</p>
+
+    <p class="muted">ブラウザでは「判断の準備を始める」から対話体験が始まります。以下は、その画面内容の全文です。</p>
+
+    <h2>JudgmentOSとは</h2>
+    <p>JudgmentOSは、判断文脈を言語化し、その質を高め続ける思考OSです。</p>
+    <p>順序は常に：本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断。</p>
+    <p>成功とは便利さではありません。判断文脈が少し育ち、「次はこう渡す」と決めることです。</p>
+    <p>判断文脈は、一度作れば終わりではありません。判断するたびに育っていきます。</p>
+
+    <h2>体験の流れ（画面一覧）</h2>
+
+    <div class="screen-card">
+      <h3>画面0 · トップ</h3>
+      <p>サブタイトル：AI時代の判断を支える思考OS</p>
+      <p>良い判断は、AIに答えを聞く前に始まります。<br>
+      自分が何を大切にしているかを、まず言葉にしてみませんか。</p>
+      <p>答えを出すツールではありません。判断の前に、考えを整えるための場所です。</p>
+      <p>ボタン：判断の準備を始める</p>
+      <p class="muted">3〜5分で、いま大切なことを言葉にできます。</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面① · 気になっていること</h3>
+      <p>問い：今、仕事や経営で気になっていることは何ですか。</p>
+      <p class="muted">いくつでも書いてください。まだ「判断」にしなくて大丈夫です。</p>
+      <p>操作：リストに追加 → 次へ（デモ用サンプルあり）</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面② · 今日のテーマ</h3>
+      <p>問い：その中で、今日いちばん深く考えたいテーマはどれですか。</p>
+      <p class="muted">一つ選びます。（気になっていることが一つのときは自動で進みます）</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面③ · 実現したいこと</h3>
+      <p>問い：そのテーマについて、あなたは何を実現したいですか。</p>
+      <p class="muted">解決策ではなく、向かいたい方向を、あなたの言葉で書きます。</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面④ · 守りたいもの</h3>
+      <p>問い：それを進める中で、何を守りたいですか。</p>
+      <p class="muted">人・関係・時間・信頼・文化など。崩したくないものを書きます。</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · 映し返し</h3>
+      <p>あなたは「（実現したいこと）」と考えています。<br>
+      一方で、「（守りたいもの）」と考えています。<br>
+      この二つを両立させながら考えることが、今回のテーマになりそうです。</p>
+      <p class="muted">トレードオフなどの命名はしません。本人の言葉を並べるだけです。</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面⑤ · 条件・制約</h3>
+      <p>問い：このテーマで無視できない条件や制約は何ですか。</p>
+      <p class="muted">予算・人数・期限・規程など。</p>
+      <p>ボタン：いま言葉にしたものを見る</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · いま言葉にしたものを見る（判断文脈）</h3>
+      <p>JudgmentOSでは、いま言葉にしたことを<strong>判断文脈</strong>と呼びます。</p>
+      <ul>
+        <li>今日のテーマ</li>
+        <li>実現したいこと</li>
+        <li>守りたいもの</li>
+        <li>無視できない条件</li>
+      </ul>
+      <p>判断の質は、この判断文脈の質で決まります。<br>
+      この文脈が、AIや他者へ渡す前提になります。</p>
+      <p>操作：まだ言葉になっていない層へ進む / 判断文脈を更新する / 判断文脈をコピー（任意）</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · まだ言葉になっていない判断文脈へ</h3>
+      <p>正解はありません。全部に答える必要もありません。<br>
+      気になった問いだけ立ち止まり、一文でも言葉が増えれば十分です。</p>
+      <p>各問いの下に入力欄「この問いで気づいたこと」（一文で）があります。</p>
+      <p>問いの例（毎回同じ一覧にはなりません。置いた言葉から動的に選ばれます）：</p>
+      <ul>
+        <li>この実現が果たされたとき、自分以外の誰の何が変わっている想定ですか。それは言葉になっていますか。</li>
+        <li>守ろうとしているのは、制度・数字・それとも特定の人との関係ですか。</li>
+        <li>この制約は、変えられない事実ですか。自分が課した上限ですか。それとも、まだ確かめていない仮定ですか。</li>
+        <li>一年後に同じ言葉で振り返ったとき、今の実現と守るは、同じ重みで残っていますか。</li>
+        <li>この判断の成功を、最終的に誰が認める想定ですか。それは渡す文脈に入っていますか。</li>
+      </ul>
+      <p>ボタン：判断文脈を育てる</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · 次は、こう渡す。</h3>
+      <p>問いから残した「この問いで気づいたこと」を見ながら、次に渡す判断文脈へ足す一文を整えます。</p>
+      <p>見出し：<strong>次は、こう渡す。</strong></p>
+      <p>操作：この一文で判断文脈を育てる / 今回はこのまま渡す</p>
+      <p class="muted">必要なら、気づきをAIで一文に統合するための依頼文をコピーできます。採用するのは本人です。</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · 私はこう判断する（任意）</h3>
+      <p>持ち帰るものは、答えではなく、あなた自身の判断です。</p>
+      <p>操作：判断を残す / 判断は後で · 余韻へ</p>
+    </div>
+
+    <div class="screen-card">
+      <h3>画面 · 余韻</h3>
+      <p>判断の質は、判断文脈の質で決まります。<br>
+      決めるのも、渡すのも、あなたです。</p>
+      <p>成功とは、便利さではありません。<br>
+      判断文脈が少し育ち、<strong>次はこう渡す</strong>と決めること。<br>
+      もっと判断文脈を整えてから、外へ渡そう。<br>
+      判断文脈は、一度作れば終わりではありません。判断するたびに育っていきます。</p>
+    </div>
+
+    <h2>核となる思想</h2>
+    <ul>
+      <li>主役はAIではなく、本人の判断です。</li>
+      <li>JudgmentOSは答えを出しません。判断文脈を育てます。</li>
+      <li>「判断文脈」という語は、体験の途中で自然に紹介します。</li>
+      <li>固定の観点カタログを製品の顔にしません。</li>
+    </ul>
+
+    <p class="muted">対話アプリを使うには、JavaScriptが有効なブラウザでこのページを開いてください。<br>
+    URL: https://judgementos-v1.vercel.app/</p>
+  </article>
+
+  <div class="app-root">
   <section id="screen-landing" class="landing fade-in" aria-label="JudgmentOS">
     <div class="landing-inner">
       <p class="landing-logo">JUDGMENT OS</p>
@@ -254,6 +429,7 @@
     <main class="shell space-y-4 py-4">
       <div id="dialogue" class="fade-in"></div>
     </main>
+  </div>
   </div>
 
   <script src="js/judgmentos-v12.js"></script>
