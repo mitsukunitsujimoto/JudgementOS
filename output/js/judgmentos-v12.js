@@ -254,7 +254,7 @@ ${buildReflection()}`;
       },
       {
         key: 'time',
-        note: '時間の層は、まだ薄いことがあります。',
+        note: '時間の層は、まだ言葉になりきっていないことがあります。',
         ask: '一年後に同じ言葉で振り返ったとき、今の実現と守るは、同じ重みで残っていますか。'
       },
       {
@@ -353,7 +353,7 @@ ${buildReflection()}`;
       6: '⑤ 条件・制約',
       7: 'いま言葉にしたものを見る',
       8: 'まだ言葉になっていない層',
-      9: '判断文脈を更新する',
+      9: '次は、こう渡す',
       10: '問い返す型', // 将来拡張（INCLUDE_REPLY_PATTERN_IN_FLOW）
       11: '新しい判断',
       12: '余韻'
@@ -650,7 +650,12 @@ ${buildReflection()}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">まだ言葉になっていない判断文脈へ</p>
-          <p class="q-help">正解を書く場ではありません。各問いから生まれた気づきを、一文だけ言葉にしてください。</p>
+          <div class="gap-reassure">
+            <p>正解はありません。</p>
+            <p>全部に答える必要もありません。</p>
+            <p class="mt-2">気になった問いだけ立ち止まり、<br>一文でも言葉が増えれば十分です。</p>
+          </div>
+          <p class="q-help">気づいたことを、一文だけ残してみてください。</p>
           ${gaps.map((g, i) => `
             <div class="gap-card">
               <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${i + 1}</p>
@@ -659,8 +664,7 @@ ${buildReflection()}`;
               <label class="gap-insight-label" for="gap-insight-${i}">この問いで気づいたこと</label>
               <textarea id="gap-insight-${i}" class="textarea gap-insight" rows="2" placeholder="一文で">${escapeHtml(state.gapInsights[g.key] || '')}</textarea>
             </div>`).join('')}
-          <p id="gap-insight-hint" class="hidden text-xs text-[hsl(var(--primary))] px-1">少なくとも一つの問いで、気づいたことを一文残してください。</p>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">気づきを持って、判断文脈を更新する</button>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">判断文脈を育てる</button>
         </section>`;
 
       const collectInsights = () => {
@@ -675,7 +679,6 @@ ${buildReflection()}`;
         if (el) {
           el.oninput = () => {
             state.gapInsights[g.key] = el.value;
-            document.getElementById('gap-insight-hint')?.classList.add('hidden');
           };
         }
       });
@@ -683,14 +686,10 @@ ${buildReflection()}`;
       document.getElementById('btn-next').onclick = () => {
         collectInsights();
         const insights = filledGapInsights();
-        if (!insights.length) {
-          document.getElementById('gap-insight-hint')?.classList.remove('hidden');
-          const first = document.getElementById('gap-insight-0');
-          if (first) first.focus();
-          return;
+        if (insights.length) {
+          state.missingArea = 'from_gaps';
+          state.nextSentence = proposeSentenceFromInsights();
         }
-        state.missingArea = 'from_gaps';
-        state.nextSentence = proposeSentenceFromInsights();
         step = 9;
         render();
       };
@@ -713,8 +712,8 @@ ${buildReflection()}`;
           <section class="card space-y-3 fade-in">
             ${prog}
             ${gapInsightsTrailHtml()}
-            <p class="q-title">判断文脈に一文を足す</p>
-            <p class="q-help">上の気づきを見ながら、判断文脈に加える一文を整えてください。複数あるときは、いちばん渡したい一文に絞ります。</p>
+            <p class="q-title">次は、こう渡す。</p>
+            <p class="q-help">上の気づきを見ながら、次に渡す判断文脈へ足す一文を整えてください。複数あるときは、いちばん渡したい一文に絞ります。</p>
             <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
             <div class="ai-block mt-3">
               <p class="text-[0.6875rem] font-bold text-[hsl(var(--primary))] mb-1">必要なら、気づきをAIで一文に統合する</p>
@@ -724,7 +723,7 @@ ${buildReflection()}`;
               <span id="copy-integrate-toast" class="hidden text-xs text-[hsl(var(--primary))] ml-2">コピーしました</span>
             </div>
             <div class="flex flex-col gap-2 mt-2">
-              <button type="button" id="btn-next" class="btn btn-primary w-full" disabled>この一文を判断文脈に足す</button>
+              <button type="button" id="btn-next" class="btn btn-primary w-full" disabled>この一文で判断文脈を育てる</button>
               <button type="button" id="btn-skip-add" class="btn btn-ghost w-full">今回はこのまま渡す</button>
             </div>
           </section>`;
@@ -787,15 +786,15 @@ ${buildReflection()}`;
       root.innerHTML = `
         <section class="card space-y-3 fade-in">
           ${prog}
-          <p class="q-title">今回、何を渡せていなかったか。</p>
-          <p class="q-help">成功は、便利さではありません。判断文脈のどこが薄かったかに気付くことです。</p>
+          <p class="q-title">判断文脈を育てる</p>
+          <p class="q-help">判断文脈は、一度で完成しません。いま足したい一文は、どの層に当たりますか。</p>
           <div class="choice-grid" id="missing-areas">
             ${areas.map(a => `
               <button type="button" class="choice-btn${state.missingArea === a.id ? ' selected' : ''}" data-id="${a.id}">${escapeHtml(a.label)}</button>
             `).join('')}
           </div>
           <div id="next-wrap" class="${state.missingArea && state.missingArea !== 'none' ? '' : 'hidden'}">
-            <p class="q-title mt-4">判断文脈に一文を足す</p>
+            <p class="q-title mt-4">次は、こう渡す。</p>
             <p class="q-help">次に渡す判断文脈へ、自分の言葉で一文を書いてください。</p>
             <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
           </div>
@@ -865,7 +864,7 @@ ${buildReflection()}`;
       root.innerHTML = `
         <section class="card space-y-3 fade-in">
           ${prog}
-          ${state.nextSentence ? `<div class="answered-trail"><strong>判断文脈に足す一文</strong><br>${escapeHtml(state.nextSentence)}</div>` : ''}
+          ${state.nextSentence ? `<div class="answered-trail"><strong>次は、こう渡す</strong><br>${escapeHtml(state.nextSentence)}</div>` : ''}
           <p class="q-title">私はこう判断する</p>
           <p class="q-help">任意です。持ち帰るものは、答えではなく、あなた自身の判断です。</p>
           <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
@@ -901,7 +900,7 @@ ${buildReflection()}`;
             <div class="arrow">↓</div>` : ''}
           ${state.nextSentence ? `
             <div class="mirror-card">
-              <p class="mirror-label">判断文脈に足した一文</p>
+              <p class="mirror-label">次は、こう渡す</p>
               <p class="quote">「${escapeHtml(state.nextSentence)}」</p>
             </div>
             <div class="arrow">↓</div>` : ''}
@@ -913,8 +912,8 @@ ${buildReflection()}`;
             </div>
             <p class="brand-outro-takeaway">
               成功とは、便利さではありません。<br>
-              <strong>何を渡せていたか</strong>に気付き、<br>
-              <strong>判断文脈に一文を足す</strong>と決めること。<br><br>
+              判断文脈が少し育ち、<br>
+              <strong>次はこう渡す</strong>と決めること。<br><br>
               もっと判断文脈を整えてから、<br>
               外へ渡そう。<br><br>
               判断文脈は、一度作れば終わりではありません。<br>
