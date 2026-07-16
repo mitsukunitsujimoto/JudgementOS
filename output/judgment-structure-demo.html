@@ -249,6 +249,57 @@
     .reader-doc .brand { color: hsl(var(--primary)); font-weight: 700; letter-spacing: 0.12em; font-size: 0.75rem; }
     html.js .reader-doc { display: none !important; }
     html:not(.js) .app-root { display: none !important; }
+    .phase-nav {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.35rem;
+      font-size: 0.625rem; font-weight: 600; letter-spacing: 0.02em;
+      color: hsl(var(--muted-fg)); margin-bottom: 0.75rem; line-height: 1.4;
+    }
+    .phase-item { opacity: 0.55; }
+    .phase-item.is-current {
+      opacity: 1; color: hsl(var(--primary));
+    }
+    .phase-arrow { opacity: 0.35; }
+    .landing-actions { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+    .compare-grid {
+      display: grid; gap: 0.75rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .compare-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .compare-col {
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      padding: 0.875rem; background: hsl(var(--background));
+    }
+    .compare-col-edit { border-color: hsl(var(--primary) / 0.45); }
+    .compare-label {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--primary)); margin-bottom: 0.5rem;
+    }
+    .compare-body {
+      white-space: pre-wrap; font-family: inherit; font-size: 0.75rem;
+      line-height: 1.7; color: hsl(var(--muted-fg)); margin: 0;
+      max-height: 16rem; overflow: auto;
+    }
+    .compare-edit { min-height: 14rem; font-size: 0.8125rem; }
+    .history-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .history-item {
+      display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.75rem;
+      text-align: left; width: 100%; padding: 0.875rem 1rem;
+      border-radius: var(--radius); border: 1px solid hsl(var(--border));
+      background: hsl(var(--card)); color: hsl(var(--foreground)); cursor: pointer;
+    }
+    .history-item:hover { border-color: hsl(var(--primary) / 0.45); }
+    .history-date { font-size: 0.75rem; color: hsl(var(--primary)); font-weight: 600; }
+    .history-title { grid-column: 2; font-size: 0.9375rem; font-weight: 600; }
+    .history-meta { grid-column: 2; font-size: 0.6875rem; color: hsl(var(--muted-fg)); }
+    .history-entry { margin-bottom: 0.5rem; }
+    .header-link {
+      background: none; border: none; color: hsl(var(--muted-fg));
+      font-size: 0.6875rem; cursor: pointer; text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .header-link:hover { color: hsl(var(--primary)); }
   </style>
 </head>
 <body>
@@ -276,6 +327,17 @@
     <p>順序は常に：本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断。</p>
     <p>成功とは便利さではありません。判断文脈が少し育ち、「次はこう渡す」と決めることです。</p>
     <p>判断文脈は、一度作れば終わりではありません。判断するたびに育っていきます。</p>
+
+    <h2>体験の循環（Version 1.2）</h2>
+    <p><strong>考えている → AIへ渡す → AIから戻る → 育てる</strong></p>
+    <p>目的は保存ではなく、「自分の判断文脈が一段深くなった」と感じることです。</p>
+    <ol>
+      <li>自分と向き合い、判断文脈を言語化する</li>
+      <li>AIへ渡す文面をコピーし、任意のAIと対話する</li>
+      <li>AIの答えを受けて、自分に戻る3問で確かめる</li>
+      <li>渡す前と後を見比べ、育てた判断文脈を残す</li>
+      <li>後から、これまで育てた判断文脈を開き直せる</li>
+    </ol>
 
     <h2>体験の流れ（画面一覧）</h2>
 
@@ -413,8 +475,11 @@
         <strong>判断の前に、考えを整える</strong>ための場所です。
       </p>
 
-      <button type="button" id="btn-enter" class="btn btn-primary btn-landing">判断の準備を始める</button>
-      <p class="landing-not-chat">3〜5分で、いま大切なことを言葉にできます。</p>
+      <div class="landing-actions">
+        <button type="button" id="btn-enter" class="btn btn-primary btn-landing">判断の準備を始める</button>
+        <button type="button" id="btn-open-history" class="btn btn-ghost hidden">これまで育てた判断文脈</button>
+      </div>
+      <p class="landing-not-chat">考えている → AIへ渡す → AIから戻る → 育てる</p>
     </div>
   </section>
 
@@ -422,7 +487,7 @@
     <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
       <div class="shell flex justify-between items-center gap-3">
         <p class="brand-os text-sm">JudgmentOS <span class="text-[hsl(var(--muted-fg))] font-medium tracking-normal normal-case">v1.2</span></p>
-        <span class="badge-preview">Preview</span>
+        <button type="button" id="btn-header-history" class="header-link">育てた判断文脈</button>
       </div>
     </header>
 
@@ -432,6 +497,7 @@
   </div>
   </div>
 
+  <script src="js/judgmentos-store.js"></script>
   <script src="js/judgmentos-v12.js"></script>
 </body>
 </html>

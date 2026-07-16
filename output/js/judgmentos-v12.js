@@ -11,9 +11,6 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'judgmentos-v1.2-sessions';
-
-  /** V1.2 モニター: false。将来シナリオ別ライブラリを標準/任意導線に載せるとき true */
   const INCLUDE_REPLY_PATTERN_IN_FLOW = false;
 
   /**
@@ -79,6 +76,8 @@
     }
   ];
 
+  const AI_PASS_CLOSING = '答えや正解を決めず、私が見落としている前提、別の立場からの見方、長期的な影響、リスク、まだ考えていない選択肢を示してください。決めるのは私です。';
+
   const DEMO = {
     concerns: [
       '新規事業を伸ばしたいが、進め方が定まらない',
@@ -97,12 +96,21 @@
     gapInsights: {},
     missingArea: '',
     nextSentence: '',
-    newJudgment: ''
+    newJudgment: '',
+    contextBefore: '',
+    contextBeforeParts: null,
+    aiReplyPaste: '',
+    reflection: { newPerspective: '', discomfort: '', contextChange: '' },
+    reflectionQ: 0,
+    contextAfterText: '',
+    activeThemeId: null,
+    browseThemeId: null
   };
 
   let step = 1;
   let concernDraft = '';
   let nextSentencePlaceholder = '';
+  let viewMode = 'flow'; // flow | history | theme
 
   const NEXT_SENTENCE_EXAMPLES = [
     '成功は既存顧客からの紹介件数で測る。',
@@ -208,7 +216,8 @@ ${list || '（なし）'}`;
 
   function buildContextPack() {
     const b = buildMirrorB();
-    return `【今日のテーマ】
+    const added = state.nextSentence.trim();
+    let pack = `【今日のテーマ】
 ${b.theme}
 
 【実現したいこと】
@@ -218,10 +227,79 @@ ${b.achieve}
 ${b.protect}
 
 【無視できない条件】
-${b.constraints.map(c => `· ${c}`).join('\n')}
+${b.constraints.map(c => `· ${c}`).join('\n')}`;
+    if (added) {
+      pack += `
+
+【問いを通じて加えた一文】
+${added}`;
+    }
+    pack += `
 
 【映し返し】
 ${buildReflection()}`;
+    return pack;
+  }
+
+  function buildContextParts() {
+    return {
+      theme: state.theme.trim(),
+      achieve: state.achieve.trim(),
+      protect: state.protect.trim(),
+      constraints: state.constraints.trim(),
+      addedSentence: state.nextSentence.trim()
+    };
+  }
+
+  function formatContextParts(parts) {
+    if (!parts) return '';
+    const constraints = quoteLines(parts.constraints || '');
+    let t = `【今日のテーマ】
+${parts.theme || ''}
+
+【実現したいこと】
+${parts.achieve || ''}
+
+【守りたいもの】
+${parts.protect || ''}
+
+【無視できない条件】
+${constraints.map(c => `· ${c}`).join('\n') || '·'}`;
+    if ((parts.addedSentence || '').trim()) {
+      t += `
+
+【問いを通じて加えた一文】
+${parts.addedSentence.trim()}`;
+    }
+    return t;
+  }
+
+  function buildAiPassText() {
+    const parts = state.contextBeforeParts || buildContextParts();
+    return `【JudgmentOS — 判断文脈】
+
+ここまでに、私が言葉にした判断文脈です。
+この内容を前提に対話してください。
+
+${formatContextParts(parts)}
+
+——
+${AI_PASS_CLOSING}`;
+  }
+
+  function snapshotBeforePass() {
+    state.contextBeforeParts = buildContextParts();
+    state.contextBefore = formatContextParts(state.contextBeforeParts);
+  }
+
+  function proposeAfterFromReflection() {
+    const base = state.contextBefore || formatContextParts(buildContextParts());
+    const change = (state.reflection.contextChange || '').trim();
+    if (!change) return base;
+    return `${base}
+
+【AIの回答を受けて、足す・変える・残す】
+${change}`;
   }
 
   /** 固定一覧ではない。置かれた言葉から問いを動的に選ぶ（4〜6） */
@@ -343,6 +421,34 @@ ${buildReflection()}`;
     return `<div class="answered-trail">${parts.join('')}</div>`;
   }
 
+  function currentPhase() {
+    if (viewMode === 'history' || viewMode === 'theme') return null;
+    if (step >= 1 && step <= 9) return 'think';
+    if (step === 10) return 'think';
+    if (step === 13) return 'pass';
+    if (step === 14) return 'return';
+    if (step === 15) return 'grow';
+    if (step === 11 || step === 12) return 'grow';
+    return 'think';
+  }
+
+  function phaseNavHtml() {
+    const phase = currentPhase();
+    if (!phase) return '';
+    const items = [
+      { id: 'think', label: '考えている' },
+      { id: 'pass', label: 'AIへ渡す' },
+      { id: 'return', label: 'AIから戻る' },
+      { id: 'grow', label: '育てる' }
+    ];
+    return `<nav class="phase-nav" aria-label="いまの場所">
+      ${items.map((it, i) => `
+        <span class="phase-item${it.id === phase ? ' is-current' : ''}">${escapeHtml(it.label)}</span>
+        ${i < items.length - 1 ? '<span class="phase-arrow" aria-hidden="true">→</span>' : ''}
+      `).join('')}
+    </nav>`;
+  }
+
   function progressLabel() {
     const map = {
       1: '① 気になっていること',
@@ -354,15 +460,19 @@ ${buildReflection()}`;
       7: 'いま言葉にしたものを見る',
       8: 'まだ言葉になっていない層',
       9: '次は、こう渡す',
-      10: '問い返す型', // 将来拡張（INCLUDE_REPLY_PATTERN_IN_FLOW）
-      11: '新しい判断',
-      12: '余韻'
+      10: '問い返す型',
+      13: 'AIへ渡す',
+      14: 'AIから戻る',
+      15: '判断文脈を育てる',
+      11: '私はこう判断する',
+      12: '一段深くなった'
     };
     return map[step] || '';
   }
 
   function nextAfterContextUpdate() {
-    return INCLUDE_REPLY_PATTERN_IN_FLOW ? 10 : 11;
+    snapshotBeforePass();
+    return 13;
   }
 
   /** @param {typeof REPLY_PATTERN_LIBRARY[0]} pattern */
@@ -381,30 +491,98 @@ ${buildReflection()}`;
   function resetState() {
     Object.assign(state, {
       concerns: [], theme: '', achieve: '', protect: '', constraints: '',
-      gapQuestions: [], gapInsights: {}, missingArea: '', nextSentence: '', newJudgment: ''
+      gapQuestions: [], gapInsights: {}, missingArea: '', nextSentence: '', newJudgment: '',
+      contextBefore: '', contextBeforeParts: null, aiReplyPaste: '',
+      reflection: { newPerspective: '', discomfort: '', contextChange: '' },
+      reflectionQ: 0, contextAfterText: '', activeThemeId: null, browseThemeId: null
     });
     concernDraft = '';
     nextSentencePlaceholder = '';
+    viewMode = 'flow';
     step = 1;
   }
 
-  function saveSession() {
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    history.unshift({
-      date: new Date().toISOString(),
-      version: '1.2',
+  function keepGrownContext() {
+    const Store = window.JudgmentOSStore;
+    if (!Store) return;
+    const result = Store.appendEntry({
       theme: state.theme,
+      concerns: state.concerns.slice(),
       achieve: state.achieve,
       protect: state.protect,
       constraints: state.constraints,
-      missingArea: state.missingArea,
-      nextSentence: state.nextSentence,
-      newJudgment: state.newJudgment,
-      gapKeys: state.gapQuestions.map(g => g.key),
+      gapQuestions: state.gapQuestions.map(g => ({ key: g.key, ask: g.ask })),
       gapInsights: filledGapInsights().map(x => ({ key: x.key, text: x.text })),
-      context_pack: buildContextPack()
+      contextBefore: state.contextBefore,
+      contextBeforeParts: state.contextBeforeParts,
+      aiReplyPaste: state.aiReplyPaste,
+      reflection: { ...state.reflection },
+      contextAfter: state.contextAfterText,
+      contextAfterParts: null,
+      newJudgment: state.newJudgment
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
+    state.activeThemeId = result.themeId;
+  }
+
+  function loadEntryIntoState(theme, entry) {
+    resetState();
+    state.activeThemeId = theme.id;
+    state.concerns = Array.isArray(entry.concerns) ? entry.concerns.slice() : [];
+    state.theme = entry.theme || theme.title;
+    state.achieve = entry.achieve || '';
+    state.protect = entry.protect || '';
+    state.constraints = entry.constraints || '';
+    state.gapQuestions = Array.isArray(entry.gapQuestions) ? entry.gapQuestions.slice() : [];
+    state.gapInsights = {};
+    (entry.gapInsights || []).forEach(g => { state.gapInsights[g.key] = g.text; });
+    state.nextSentence = (entry.contextBeforeParts && entry.contextBeforeParts.addedSentence) || '';
+    state.contextBefore = entry.contextBefore || '';
+    state.contextBeforeParts = entry.contextBeforeParts || buildContextParts();
+    state.aiReplyPaste = entry.aiReplyPaste || '';
+    state.reflection = Object.assign(
+      { newPerspective: '', discomfort: '', contextChange: '' },
+      entry.reflection || {}
+    );
+    state.contextAfterText = entry.contextAfter || entry.contextBefore || '';
+    state.newJudgment = entry.newJudgment || '';
+  }
+
+  function enterWorkspace() {
+    document.getElementById('screen-landing').classList.add('hidden');
+    const ws = document.getElementById('screen-workspace');
+    ws.classList.remove('hidden');
+    ws.classList.add('fade-in');
+  }
+
+  function goLanding() {
+    document.getElementById('screen-workspace').classList.add('hidden');
+    document.getElementById('screen-landing').classList.remove('hidden');
+    viewMode = 'flow';
+    updateHistoryButton();
+  }
+
+  function updateHistoryButton() {
+    const btn = document.getElementById('btn-open-history');
+    if (!btn || !window.JudgmentOSStore) return;
+    const n = window.JudgmentOSStore.listThemesForUi().length;
+    btn.classList.toggle('hidden', n === 0);
+  }
+
+  async function copyText(text, toastId) {
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const toast = document.getElementById(toastId);
+    if (toast) {
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    }
   }
 
   function paintConcernList() {
@@ -458,7 +636,15 @@ ${buildReflection()}`;
 
   function render() {
     const root = document.getElementById('dialogue');
-    const prog = `<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
+    if (viewMode === 'history') {
+      renderHistoryList(root);
+      return;
+    }
+    if (viewMode === 'theme') {
+      renderThemeDetail(root);
+      return;
+    }
+    const prog = `${phaseNavHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
 
     if (step === 1) {
       root.innerHTML = `
@@ -612,14 +798,7 @@ ${buildReflection()}`;
           </p>
           <div class="flex flex-col gap-2">
             <button type="button" id="btn-gaps" class="btn btn-primary w-full">まだ言葉になっていない層へ進む</button>
-            <button type="button" id="btn-update" class="btn btn-ghost w-full">判断文脈を更新する</button>
-          </div>
-          <div class="ai-block">
-            <p class="text-[0.6875rem] font-bold text-[hsl(var(--primary))] mb-1">必要なら、この文脈を外へ渡す</p>
-            <p class="mb-2 text-xs">渡す前に内容を見てください。コピーは任意です。</p>
-            <textarea id="context-pack" class="ai-prompt-box" readonly>${escapeHtml(buildContextPack())}</textarea>
-            <button type="button" id="btn-copy" class="btn btn-ghost mt-2 text-xs">判断文脈をコピー</button>
-            <span id="copy-toast" class="hidden text-xs text-[hsl(var(--primary))] ml-2">コピーしました</span>
+            <button type="button" id="btn-update" class="btn btn-ghost w-full">次は、こう渡すへ</button>
           </div>
         </section>`;
       document.getElementById('btn-gaps').onclick = () => {
@@ -629,17 +808,6 @@ ${buildReflection()}`;
         render();
       };
       document.getElementById('btn-update').onclick = () => { step = 9; render(); };
-      document.getElementById('btn-copy').onclick = async () => {
-        const text = buildContextPack();
-        try { await navigator.clipboard.writeText(text); }
-        catch {
-          document.getElementById('context-pack').select();
-          document.execCommand('copy');
-        }
-        const toast = document.getElementById('copy-toast');
-        toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 2000);
-      };
       return;
     }
 
@@ -842,7 +1010,7 @@ ${buildReflection()}`;
     // 将来拡張: シナリオ別・問い返す型（V1.2モニターの標準フローではスキップ）
     if (step === 10) {
       if (!INCLUDE_REPLY_PATTERN_IN_FLOW) {
-        step = 11;
+        step = 13;
         render();
         return;
       }
@@ -854,7 +1022,129 @@ ${buildReflection()}`;
           <button type="button" id="btn-next" class="btn btn-primary w-full">この型を受け取った</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
-        step = 11;
+        step = 13;
+        render();
+      };
+      return;
+    }
+
+    // AIへ渡す
+    if (step === 13) {
+      if (!state.contextBeforeParts) snapshotBeforePass();
+      const parts = state.contextBeforeParts;
+      root.innerHTML = `
+        <section class="space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">ここまでに、あなたが言葉にした判断文脈</p>
+          <p class="q-help">この内容をAIへ渡すと、あなたが大切にしていること、守りたいもの、制約を前提に対話できます。</p>
+          <div class="mirror-summary">
+            <h3>【今日のテーマ】</h3>
+            <p>${escapeHtml(parts.theme)}</p>
+            <h3>【実現したいこと】</h3>
+            <p class="font-semibold">「${escapeHtml(parts.achieve)}」</p>
+            <h3>【守りたいもの】</h3>
+            <p class="font-semibold">「${escapeHtml(parts.protect)}」</p>
+            <h3>【無視できない条件・制約】</h3>
+            <ul class="mt-1 space-y-1">${quoteLines(parts.constraints).map(c => `<li>· ${escapeHtml(c)}</li>`).join('')}</ul>
+            ${parts.addedSentence ? `
+              <h3>【問いを通じて加えた一文】</h3>
+              <p class="font-semibold">「${escapeHtml(parts.addedSentence)}」</p>` : ''}
+          </div>
+          <div class="flex flex-col gap-2">
+            <button type="button" id="btn-copy-ai" class="btn btn-primary w-full">AIへ渡す文面をコピー</button>
+            <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。任意のAIへ貼り付けてください。</span>
+            <button type="button" id="btn-return" class="btn btn-ghost w-full">AIの答えを受けて、自分に戻る</button>
+          </div>
+        </section>`;
+      document.getElementById('btn-copy-ai').onclick = () => copyText(buildAiPassText(), 'copy-ai-toast');
+      document.getElementById('btn-return').onclick = () => {
+        state.reflectionQ = 0;
+        step = 14;
+        render();
+      };
+      return;
+    }
+
+    // AIから戻る（3問を一問ずつ）
+    if (step === 14) {
+      const questions = [
+        {
+          key: 'newPerspective',
+          title: 'AIの回答の中で、自分にはなかった視点は何でしたか。'
+        },
+        {
+          key: 'discomfort',
+          title: '納得できなかったこと、違和感が残ったことは何でしたか。'
+        },
+        {
+          key: 'contextChange',
+          title: 'その違和感や気づきを踏まえて、判断文脈に何を足す、変える、または残しますか。'
+        }
+      ];
+      const q = Math.min(state.reflectionQ || 0, questions.length - 1);
+      const current = questions[q];
+      root.innerHTML = `
+        <section class="card space-y-3 fade-in">
+          ${prog}
+          <p class="q-title">AIの答えを受けて、もう一度自分に戻る</p>
+          <p class="q-help">ここではAIの答えを採点しません。AIの答えによって、自分の判断文脈のどこが揺れたか、深まったかを確かめます。</p>
+          ${q === 0 ? `
+            <label class="gap-insight-label" for="field-ai-paste">AIの回答（任意）</label>
+            <textarea id="field-ai-paste" class="textarea" rows="4" placeholder="覚えておきたい箇所だけ、貼り付けても構いません。空欄のままでも進めます。">${escapeHtml(state.aiReplyPaste)}</textarea>
+          ` : ''}
+          <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${q + 1} / 3</p>
+          <p class="q-title mt-1">${escapeHtml(current.title)}</p>
+          <textarea id="field-reflect" class="textarea" rows="3" placeholder="短い文章で">${escapeHtml(state.reflection[current.key] || '')}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">${q < 2 ? '次の問いへ' : '判断文脈を見比べる'}</button>
+        </section>`;
+      const paste = document.getElementById('field-ai-paste');
+      if (paste) {
+        paste.oninput = () => { state.aiReplyPaste = paste.value; };
+      }
+      const field = document.getElementById('field-reflect');
+      field.oninput = () => { state.reflection[current.key] = field.value; };
+      document.getElementById('btn-next').onclick = () => {
+        state.reflection[current.key] = field.value.trim();
+        if (paste) state.aiReplyPaste = paste.value;
+        if (q < 2) {
+          state.reflectionQ = q + 1;
+          render();
+          return;
+        }
+        state.contextAfterText = proposeAfterFromReflection();
+        step = 15;
+        render();
+      };
+      return;
+    }
+
+    // 育てる（渡す前 / 渡した後）
+    if (step === 15) {
+      const before = state.contextBefore || formatContextParts(state.contextBeforeParts || buildContextParts());
+      if (!state.contextAfterText) state.contextAfterText = proposeAfterFromReflection();
+      root.innerHTML = `
+        <section class="space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">判断文脈を更新する</p>
+          <p class="q-help">AIへ渡す前と、回答を受けた後を見比べます。最終の言葉は、あなたが整えてください。</p>
+          <div class="compare-grid">
+            <div class="compare-col">
+              <p class="compare-label">AIへ渡す前</p>
+              <pre class="compare-body">${escapeHtml(before)}</pre>
+            </div>
+            <div class="compare-col compare-col-edit">
+              <p class="compare-label">AIの回答を受けた後</p>
+              <textarea id="field-after" class="textarea compare-edit">${escapeHtml(state.contextAfterText)}</textarea>
+            </div>
+          </div>
+          <button type="button" id="btn-keep" class="btn btn-primary w-full">育てた判断文脈を残す</button>
+        </section>`;
+      const after = document.getElementById('field-after');
+      after.oninput = () => { state.contextAfterText = after.value; };
+      document.getElementById('btn-keep').onclick = () => {
+        state.contextAfterText = after.value.trim() || before;
+        keepGrownContext();
+        step = 12;
         render();
       };
       return;
@@ -864,25 +1154,22 @@ ${buildReflection()}`;
       root.innerHTML = `
         <section class="card space-y-3 fade-in">
           ${prog}
-          ${state.nextSentence ? `<div class="answered-trail"><strong>次は、こう渡す</strong><br>${escapeHtml(state.nextSentence)}</div>` : ''}
           <p class="q-title">私はこう判断する</p>
           <p class="q-help">任意です。持ち帰るものは、答えではなく、あなた自身の判断です。</p>
           <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
           <div class="flex flex-wrap gap-2">
-            <button type="button" id="btn-finish" class="btn btn-primary">判断を残す</button>
-            <button type="button" id="btn-skip-j" class="btn btn-ghost">判断は後で · 余韻へ</button>
+            <button type="button" id="btn-finish" class="btn btn-primary">判断を言葉にする</button>
+            <button type="button" id="btn-skip-j" class="btn btn-ghost">判断は後で</button>
           </div>
         </section>`;
       document.getElementById('btn-finish').onclick = () => {
         const v = document.getElementById('field-judgment').value.trim();
         if (!v) { document.getElementById('field-judgment').focus(); return; }
         state.newJudgment = v;
-        saveSession();
         step = 12;
         render();
       };
       document.getElementById('btn-skip-j').onclick = () => {
-        saveSession();
         step = 12;
         render();
       };
@@ -892,49 +1179,155 @@ ${buildReflection()}`;
     if (step === 12) {
       root.innerHTML = `
         <section class="space-y-4 fade-in">
-          ${state.newJudgment ? `
-            <div class="judgment-final">
-              <p class="label">あなたの新しい判断</p>
-              <p class="judgment-display">${escapeHtml(state.newJudgment)}</p>
-            </div>
-            <div class="arrow">↓</div>` : ''}
-          ${state.nextSentence ? `
-            <div class="mirror-card">
-              <p class="mirror-label">次は、こう渡す</p>
-              <p class="quote">「${escapeHtml(state.nextSentence)}」</p>
-            </div>
-            <div class="arrow">↓</div>` : ''}
+          ${prog}
           <div class="brand-outro">
             <div class="brand-outro-final">
-              <p>判断の質は、</p>
-              <p>判断文脈の質で決まります。</p>
-              <p class="mt-4 you">決めるのも、渡すのも、あなたです。</p>
+              <p>判断文脈が、</p>
+              <p class="you">一段深くなりました。</p>
             </div>
             <p class="brand-outro-takeaway">
-              成功とは、便利さではありません。<br>
-              判断文脈が少し育ち、<br>
-              <strong>次はこう渡す</strong>と決めること。<br><br>
-              もっと判断文脈を整えてから、<br>
-              外へ渡そう。<br><br>
               判断文脈は、一度作れば終わりではありません。<br>
               判断するたびに育っていきます。
             </p>
           </div>
-          <button type="button" id="btn-restart" class="btn btn-ghost w-full">はじめから置く</button>
+          ${state.newJudgment ? `
+            <div class="judgment-final">
+              <p class="label">あなたの判断</p>
+              <p class="judgment-display">${escapeHtml(state.newJudgment)}</p>
+            </div>` : ''}
+          <div class="flex flex-col gap-2">
+            <button type="button" id="btn-optional-j" class="btn btn-ghost w-full">私はこう判断する（任意）</button>
+            <button type="button" id="btn-history" class="btn btn-ghost w-full">これまで育てた判断文脈</button>
+            <button type="button" id="btn-restart" class="btn btn-primary w-full">もう一度、考え始める</button>
+            <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
+          </div>
         </section>`;
+      document.getElementById('btn-optional-j').onclick = () => {
+        step = 11;
+        render();
+      };
+      document.getElementById('btn-history').onclick = () => {
+        viewMode = 'history';
+        render();
+      };
       document.getElementById('btn-restart').onclick = () => {
         resetState();
         render();
       };
+      document.getElementById('btn-home').onclick = () => goLanding();
+      return;
     }
   }
 
+  function renderHistoryList(root) {
+    const Store = window.JudgmentOSStore;
+    const themes = Store ? Store.listThemesForUi() : [];
+    root.innerHTML = `
+      <section class="space-y-3 fade-in">
+        <p class="step-progress"><em>JudgmentOS</em> · これまで育てた判断文脈</p>
+        <p class="q-title">これまで育てた判断文脈</p>
+        <p class="q-help">日付とテーマから、当時の言葉を開き直せます。同じテーマを深めるときは、新しい履歴として残ります。</p>
+        ${themes.length === 0 ? `<p class="q-help">まだ残した判断文脈はありません。</p>` : `
+          <div class="history-list">
+            ${themes.map(t => `
+              <button type="button" class="history-item" data-id="${escapeHtml(t.id)}">
+                <span class="history-date">${escapeHtml(Store.formatDateJa(t.latestAt))}</span>
+                <span class="history-title">${escapeHtml(t.title)}</span>
+                <span class="history-meta">${t.entryCount > 1 ? `${t.entryCount}回の育ち` : '1回'}</span>
+              </button>
+            `).join('')}
+          </div>`}
+        <button type="button" id="btn-back-flow" class="btn btn-ghost w-full">戻る</button>
+      </section>`;
+    root.querySelectorAll('.history-item').forEach(btn => {
+      btn.onclick = () => {
+        state.browseThemeId = btn.dataset.id;
+        viewMode = 'theme';
+        render();
+      };
+    });
+    document.getElementById('btn-back-flow').onclick = () => {
+      viewMode = 'flow';
+      if (step < 1) step = 1;
+      render();
+    };
+  }
+
+  function renderThemeDetail(root) {
+    const Store = window.JudgmentOSStore;
+    const theme = Store && state.browseThemeId ? Store.getTheme(state.browseThemeId) : null;
+    if (!theme) {
+      viewMode = 'history';
+      render();
+      return;
+    }
+    const entries = theme.entries.slice().reverse();
+    root.innerHTML = `
+      <section class="space-y-3 fade-in">
+        <p class="step-progress"><em>JudgmentOS</em> · 育ちの履歴</p>
+        <p class="q-title">${escapeHtml(theme.title)}</p>
+        <p class="q-help">同じテーマでも、上書きせずに残しています。開いて見返すか、続きからもう一度育てられます。</p>
+        <div class="history-list">
+          ${entries.map(e => `
+            <div class="history-entry card">
+              <p class="history-date">${escapeHtml(Store.formatDateJa(e.createdAt))} · ${e.entryNumber}回目</p>
+              <p class="text-sm mt-2"><strong>実現</strong>：${escapeHtml(e.achieve || '—')}</p>
+              <p class="text-sm"><strong>守る</strong>：${escapeHtml(e.protect || '—')}</p>
+              ${e.contextAfter || e.contextBefore ? `<pre class="compare-body mt-2">${escapeHtml(e.contextAfter || e.contextBefore)}</pre>` : ''}
+              <div class="flex flex-wrap gap-2 mt-3">
+                <button type="button" class="btn btn-primary btn-resume" data-entry="${escapeHtml(e.id)}">この言葉から、もう一度育てる</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button type="button" id="btn-back-list" class="btn btn-ghost w-full">一覧へ</button>
+      </section>`;
+    root.querySelectorAll('.btn-resume').forEach(btn => {
+      btn.onclick = () => {
+        const packed = Store.getEntry(theme.id, btn.dataset.entry);
+        if (!packed) return;
+        loadEntryIntoState(packed.theme, packed.entry);
+        // 続き：渡す前の文脈があるなら AIへ渡す／戻る／育てるから再開しやすく
+        if (packed.entry.contextAfter) {
+          state.contextAfterText = packed.entry.contextAfter;
+          step = 15;
+        } else if (packed.entry.contextBefore) {
+          step = 13;
+        } else {
+          step = packed.entry.achieve ? 7 : 1;
+        }
+        viewMode = 'flow';
+        render();
+      };
+    });
+    document.getElementById('btn-back-list').onclick = () => {
+      viewMode = 'history';
+      render();
+    };
+  }
+
   document.getElementById('btn-enter').addEventListener('click', () => {
-    document.getElementById('screen-landing').classList.add('hidden');
-    const ws = document.getElementById('screen-workspace');
-    ws.classList.remove('hidden');
-    ws.classList.add('fade-in');
+    enterWorkspace();
     resetState();
     render();
   });
+
+  const btnHistory = document.getElementById('btn-open-history');
+  if (btnHistory) {
+    btnHistory.addEventListener('click', () => {
+      enterWorkspace();
+      viewMode = 'history';
+      render();
+    });
+  }
+
+  const btnHeaderHistory = document.getElementById('btn-header-history');
+  if (btnHeaderHistory) {
+    btnHeaderHistory.addEventListener('click', () => {
+      viewMode = 'history';
+      render();
+    });
+  }
+
+  updateHistoryButton();
 })();
