@@ -64,13 +64,20 @@
       label: 'モニター005',
       assignee: '宮川知己',
       active: true
+    },
+    {
+      id: 'monitor-006',
+      code: 'JOS-MONITOR-006',
+      label: 'モニター006',
+      assignee: '安藤ハル',
+      active: true
     }
 
-    // 6人目以降は下に足す:
+    // 7人目以降は下に足す:
     // {
-    //   id: 'monitor-006',
-    //   code: 'JOS-MONITOR-006',
-    //   label: 'モニター006',
+    //   id: 'monitor-007',
+    //   code: 'JOS-MONITOR-007',
+    //   label: 'モニター007',
     //   assignee: '',
     //   active: true
     // }
