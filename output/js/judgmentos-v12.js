@@ -648,17 +648,127 @@ ${change}`;
   }
 
   function enterWorkspace() {
+    document.getElementById('screen-invite')?.classList.add('hidden');
     document.getElementById('screen-landing').classList.add('hidden');
     const ws = document.getElementById('screen-workspace');
     ws.classList.remove('hidden');
     ws.classList.add('fade-in');
+    updateParticipantChip();
   }
 
   function goLanding() {
     document.getElementById('screen-workspace').classList.add('hidden');
+    document.getElementById('screen-invite')?.classList.add('hidden');
     document.getElementById('screen-landing').classList.remove('hidden');
     viewMode = 'flow';
     updateHistoryButton();
+    updateParticipantChip();
+  }
+
+  function updateParticipantChip() {
+    const chip = document.getElementById('participant-chip');
+    if (!chip) return;
+    const Access = window.JudgmentOSAccess;
+    const name = Access && Access.isAuthorized() ? Access.getDisplayName() : '';
+    if (name) {
+      chip.textContent = name;
+      chip.classList.remove('hidden');
+    } else {
+      chip.textContent = '';
+      chip.classList.add('hidden');
+    }
+  }
+
+  function showInviteGate(onSuccess) {
+    const landing = document.getElementById('screen-landing');
+    const invite = document.getElementById('screen-invite');
+    const ws = document.getElementById('screen-workspace');
+    if (!invite) {
+      onSuccess();
+      return;
+    }
+    landing?.classList.add('hidden');
+    ws?.classList.add('hidden');
+    invite.classList.remove('hidden');
+    invite.classList.add('fade-in');
+
+    const codeEl = document.getElementById('invite-code');
+    const nameEl = document.getElementById('invite-name');
+    const errEl = document.getElementById('invite-error');
+    const submit = document.getElementById('btn-invite-submit');
+    const back = document.getElementById('btn-invite-back');
+    if (errEl) {
+      errEl.textContent = '';
+      errEl.classList.add('hidden');
+    }
+    if (codeEl && !codeEl.value) codeEl.focus();
+
+    const finish = () => {
+      const Access = window.JudgmentOSAccess;
+      if (!Access) {
+        errEl.textContent = '認証モジュールを読み込めませんでした。';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      const result = Access.activate({
+        code: codeEl?.value || '',
+        displayName: nameEl?.value || ''
+      });
+      if (!result.ok) {
+        if (errEl) {
+          errEl.textContent = result.reason || '招待コードを確認してください。';
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+      invite.classList.add('hidden');
+      updateHistoryButton();
+      updateParticipantChip();
+      onSuccess();
+    };
+
+    if (submit) submit.onclick = finish;
+    if (back) {
+      back.onclick = () => {
+        invite.classList.add('hidden');
+        landing?.classList.remove('hidden');
+      };
+    }
+    [codeEl, nameEl].forEach(el => {
+      if (!el) return;
+      el.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          finish();
+        }
+      };
+    });
+  }
+
+  /**
+   * 初回のみ招待コード。認証済みならそのまま進む。
+   * ?dev=1 / localStorage.judgmentos.dev=1 ではゲートをスキップ。
+   */
+  function withAccess(kind, onSuccess) {
+    if (isDevMode()) {
+      onSuccess();
+      return;
+    }
+    const Access = window.JudgmentOSAccess;
+    if (!Access) {
+      showInviteGate(onSuccess);
+      return;
+    }
+    if (Access.isAuthorized()) {
+      Access.touch(kind || 'enter');
+      updateParticipantChip();
+      onSuccess();
+      return;
+    }
+    showInviteGate(() => {
+      Access.touch(kind || 'enter');
+      onSuccess();
+    });
   }
 
   function updateHistoryButton() {
@@ -1459,7 +1569,7 @@ ${change}`;
         <div class="history-list">
           ${entries.map(e => `
             <div class="history-entry card">
-              <p class="history-date">${escapeHtml(Store.formatDateJa(e.createdAt))} · ${e.entryNumber}回目</p>
+              <p class="history-date">${escapeHtml(Store.formatDateJa(e.createdAt))} · ${e.entryNumber}回目${e.participantName ? ` · ${escapeHtml(e.participantName)}` : ''}</p>
               <p class="compare-label mt-3">育てた判断文脈</p>
               <p class="text-sm mt-2"><strong>実現</strong>：${escapeHtml(e.achieve || '—')}</p>
               <p class="text-sm"><strong>守る</strong>：${escapeHtml(e.protect || '—')}</p>
@@ -1501,27 +1611,34 @@ ${change}`;
   }
 
   document.getElementById('btn-enter').addEventListener('click', () => {
-    enterWorkspace();
-    resetState();
-    render();
+    withAccess('enter', () => {
+      enterWorkspace();
+      resetState();
+      render();
+    });
   });
 
   const btnHistory = document.getElementById('btn-open-history');
   if (btnHistory) {
     btnHistory.addEventListener('click', () => {
-      enterWorkspace();
-      viewMode = 'history';
-      render();
+      withAccess('history', () => {
+        enterWorkspace();
+        viewMode = 'history';
+        render();
+      });
     });
   }
 
   const btnHeaderHistory = document.getElementById('btn-header-history');
   if (btnHeaderHistory) {
     btnHeaderHistory.addEventListener('click', () => {
-      viewMode = 'history';
-      render();
+      withAccess('history', () => {
+        viewMode = 'history';
+        render();
+      });
     });
   }
 
   updateHistoryButton();
+  updateParticipantChip();
 })();

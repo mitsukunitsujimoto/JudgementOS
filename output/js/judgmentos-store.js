@@ -13,7 +13,19 @@
   }
 
   function emptyStore() {
-    return { schemaVersion: 1, themes: [] };
+    return {
+      schemaVersion: 2,
+      participant: null,
+      themes: []
+    };
+  }
+
+  function ensureStoreShape(store) {
+    if (!store || typeof store !== 'object') return emptyStore();
+    if (!Array.isArray(store.themes)) store.themes = [];
+    if (store.schemaVersion == null) store.schemaVersion = 2;
+    if (!('participant' in store)) store.participant = null;
+    return store;
   }
 
   function loadRaw() {
@@ -21,7 +33,7 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.themes)) return parsed;
+        if (parsed && Array.isArray(parsed.themes)) return ensureStoreShape(parsed);
       }
     } catch (_) { /* ignore */ }
     return null;
@@ -90,7 +102,44 @@
       store = migrateLegacy(store);
       saveStore(store);
     }
-    return store;
+    return ensureStoreShape(store);
+  }
+
+  function setParticipant(participant) {
+    const store = getStore();
+    const now = new Date().toISOString();
+    store.participant = {
+      displayName: (participant && participant.displayName) || '',
+      inviteId: (participant && participant.inviteId) || '',
+      inviteLabel: (participant && participant.inviteLabel) || '',
+      linkedAt: (store.participant && store.participant.linkedAt) || now,
+      updatedAt: now
+    };
+    saveStore(store);
+    return store.participant;
+  }
+
+  function getParticipant() {
+    const store = getStore();
+    return store.participant || null;
+  }
+
+  function currentParticipantMeta() {
+    const Access = global.JudgmentOSAccess;
+    if (Access && Access.isAuthorized()) {
+      return {
+        participantName: Access.getDisplayName() || '',
+        inviteId: Access.getInviteId() || ''
+      };
+    }
+    const p = getParticipant();
+    if (p) {
+      return {
+        participantName: p.displayName || '',
+        inviteId: p.inviteId || ''
+      };
+    }
+    return { participantName: '', inviteId: '' };
   }
 
   function normalizeTitle(title) {
@@ -116,10 +165,13 @@
     const store = getStore();
     const theme = findOrCreateTheme(store, payload.theme || payload.title);
     const now = new Date().toISOString();
+    const who = currentParticipantMeta();
     const entry = {
       id: uid(),
       entryNumber: theme.entries.length + 1,
       createdAt: now,
+      participantName: payload.participantName != null ? payload.participantName : who.participantName,
+      inviteId: payload.inviteId != null ? payload.inviteId : who.inviteId,
       concerns: payload.concerns || [],
       theme: payload.theme || theme.title,
       achieve: payload.achieve || '',
@@ -204,6 +256,8 @@
     getTheme,
     getEntry,
     formatDateJa,
-    normalizeTitle
+    normalizeTitle,
+    setParticipant,
+    getParticipant
   };
 })(typeof window !== 'undefined' ? window : globalThis);

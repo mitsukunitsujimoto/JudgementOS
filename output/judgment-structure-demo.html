@@ -36,6 +36,24 @@
       color: hsl(var(--foreground));
     }
     .textarea:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.45); }
+    .input {
+      width: 100%; padding: 0.75rem 1rem;
+      background: hsl(var(--background)); border: 1px solid hsl(var(--border));
+      border-radius: var(--radius); font-size: 0.9375rem; line-height: 1.5;
+      color: hsl(var(--foreground));
+    }
+    .input:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.45); }
+    .field-label {
+      display: block; font-size: 0.8125rem; font-weight: 600;
+      margin-bottom: 0.35rem; color: hsl(var(--foreground));
+    }
+    .invite-error {
+      font-size: 0.8125rem; color: hsl(0 72% 65%); margin: 0.25rem 0 0;
+    }
+    .participant-chip {
+      font-size: 0.6875rem; color: hsl(var(--muted-fg));
+      max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .step-progress {
       font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
       color: hsl(var(--muted-fg)); margin-bottom: 0.75rem;
@@ -511,6 +529,9 @@
       自分自身の判断基準を育てる思考OSです。</p>
     </div>
 
+    <h2>モニター招待</h2>
+    <p>利用には招待コードが必要です。初回のみ、招待コードとお名前（ニックネーム可）を入力します。認証後はこのブラウザに保存され、次回以降は不要です。保存した判断文脈・判断基準は、入力した名前と紐づきます。</p>
+
     <h2>核となる思想</h2>
     <ul>
       <li>主役はAIではなく、本人の判断です。</li>
@@ -549,11 +570,38 @@
     </div>
   </section>
 
+  <section id="screen-invite" class="landing hidden" aria-label="招待コード">
+    <div class="landing-inner">
+      <p class="landing-logo">JUDGMENT OS</p>
+      <h1 class="landing-title" style="font-size:1.5rem">モニター招待</h1>
+      <p class="landing-promise" style="margin-top:0.75rem">
+        招待コードと、お名前（ニックネーム可）を入力してください。<br>
+        一度通ると、このブラウザでは次回から不要です。
+      </p>
+      <div class="space-y-4 text-left" style="width:100%; max-width:22rem; margin:1.5rem auto 0;">
+        <div>
+          <label class="field-label" for="invite-code">招待コード</label>
+          <input type="text" id="invite-code" class="input" autocomplete="off" spellcheck="false" autocapitalize="characters">
+        </div>
+        <div>
+          <label class="field-label" for="invite-name">お名前（ニックネーム可）</label>
+          <input type="text" id="invite-name" class="input" autocomplete="nickname" maxlength="40">
+        </div>
+        <p id="invite-error" class="invite-error hidden" role="alert"></p>
+        <button type="button" id="btn-invite-submit" class="btn btn-primary w-full">はじめる</button>
+        <button type="button" id="btn-invite-back" class="btn btn-ghost w-full">戻る</button>
+      </div>
+    </div>
+  </section>
+
   <div id="screen-workspace" class="hidden">
     <header class="workspace-header sticky top-0 z-10 bg-[hsl(224_47%_8%_/0.95)] backdrop-blur">
       <div class="shell flex justify-between items-center gap-3">
         <p class="brand-os text-sm">JudgmentOS <span class="text-[hsl(var(--muted-fg))] font-medium tracking-normal normal-case">v1.3</span></p>
-        <button type="button" id="btn-header-history" class="header-link">育てた判断文脈と基準</button>
+        <div class="flex items-center gap-3">
+          <span id="participant-chip" class="participant-chip hidden" aria-label="参加者名"></span>
+          <button type="button" id="btn-header-history" class="header-link">育てた判断文脈と基準</button>
+        </div>
       </div>
     </header>
 
@@ -563,6 +611,8 @@
   </div>
   </div>
 
+  <script src="js/judgmentos-invite-codes.js"></script>
+  <script src="js/judgmentos-access.js"></script>
   <script src="js/judgmentos-store.js"></script>
   <script src="js/judgmentos-v12.js"></script>
 </body>
