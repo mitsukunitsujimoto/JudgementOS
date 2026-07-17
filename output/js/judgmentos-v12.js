@@ -1,10 +1,10 @@
 /**
- * JudgmentOS Version 1.2
- * 判断文脈を言語化し、その質を高め続ける思考OS。
- * 順序: 本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断
+ * JudgmentOS Version 1.3
+ * 判断文脈を言語化し、AIとの対話を通じて自分自身の判断基準を育てる思考OS。
+ * 順序: 本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断基準の言語化
  *
- * モニター標準フローの中核:
- * 判断文脈を言語化 → 見直す →（必要なら）一文を足す → 渡す →（任意）判断
+ * 循環の完成:
+ * 考えている → AIへ渡す → AIから戻る → 育てる → 判断基準を未来の自分へ残す
  *
  * 「問い返す型」は削除せず将来拡張として保持する（標準フローには含めない）。
  */
@@ -78,6 +78,15 @@
 
   const AI_PASS_CLOSING = '答えや正解を決めず、私が見落としている前提、別の立場からの見方、長期的な影響、リスク、まだ考えていない選択肢を示してください。決めるのは私です。';
 
+  const CRITERIA_CHANGE_TAGS = [
+    { id: 'question', label: '問いが変わった' },
+    { id: 'role', label: '役割の捉え方が変わった' },
+    { id: 'protect', label: '守りたいものが明確になった' },
+    { id: 'premise', label: '前提が変わった' },
+    { id: 'ai_relation', label: 'AIとの付き合い方が変わった' },
+    { id: 'other', label: 'その他' }
+  ];
+
   const DEMO = {
     concerns: [
       '新規事業を伸ばしたいが、進め方が定まらない',
@@ -85,6 +94,17 @@
       '今年度は予算を増やせない'
     ]
   };
+
+  function emptyCriteriaGrowth() {
+    return {
+      firstMe: '',
+      nowMe: '',
+      criteriaChange: '',
+      changeTags: [],
+      keyInsight: '',
+      keepSentence: ''
+    };
+  }
 
   const state = {
     concerns: [],
@@ -103,7 +123,9 @@
     reflection: { newPerspective: '', discomfort: '', contextChange: '' },
     reflectionQ: 0,
     contextAfterText: '',
+    criteriaGrowth: emptyCriteriaGrowth(),
     activeThemeId: null,
+    activeEntryId: null,
     browseThemeId: null
   };
 
@@ -413,7 +435,7 @@ ${change}`;
     if (step === 10) return 'think';
     if (step === 13) return 'pass';
     if (step === 14) return 'return';
-    if (step === 15) return 'grow';
+    if (step === 15 || step === 16) return 'grow';
     if (step === 11 || step === 12) return 'grow';
     return 'think';
   }
@@ -450,6 +472,7 @@ ${change}`;
       13: 'AIへ渡す',
       14: 'AIから戻る',
       15: '判断文脈を育てる',
+      16: '判断基準はどう育ったか',
       11: '私はこう判断する',
       12: '一段深くなった'
     };
@@ -480,7 +503,9 @@ ${change}`;
       gapQuestions: [], gapInsights: {}, missingArea: '', nextSentence: '', newJudgment: '',
       contextBefore: '', contextBeforeParts: null, aiReplyPaste: '',
       reflection: { newPerspective: '', discomfort: '', contextChange: '' },
-      reflectionQ: 0, contextAfterText: '', activeThemeId: null, browseThemeId: null
+      reflectionQ: 0, contextAfterText: '',
+      criteriaGrowth: emptyCriteriaGrowth(),
+      activeThemeId: null, activeEntryId: null, browseThemeId: null
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -504,14 +529,101 @@ ${change}`;
       reflection: { ...state.reflection },
       contextAfter: state.contextAfterText,
       contextAfterParts: null,
-      newJudgment: state.newJudgment
+      newJudgment: state.newJudgment,
+      criteriaGrowth: null
     });
     state.activeThemeId = result.themeId;
+    state.activeEntryId = result.entryId;
+  }
+
+  function keepCriteriaGrowth() {
+    const Store = window.JudgmentOSStore;
+    if (!Store) return;
+    const growth = {
+      firstMe: (state.criteriaGrowth.firstMe || '').trim(),
+      nowMe: (state.criteriaGrowth.nowMe || '').trim(),
+      criteriaChange: (state.criteriaGrowth.criteriaChange || '').trim(),
+      changeTags: Array.isArray(state.criteriaGrowth.changeTags)
+        ? state.criteriaGrowth.changeTags.slice()
+        : [],
+      keyInsight: (state.criteriaGrowth.keyInsight || '').trim(),
+      keepSentence: (state.criteriaGrowth.keepSentence || '').trim()
+    };
+    state.criteriaGrowth = growth;
+    if (state.activeThemeId && state.activeEntryId) {
+      Store.updateEntry(state.activeThemeId, state.activeEntryId, {
+        criteriaGrowth: growth,
+        newJudgment: state.newJudgment
+      });
+      return;
+    }
+    const result = Store.appendEntry({
+      theme: state.theme,
+      concerns: state.concerns.slice(),
+      achieve: state.achieve,
+      protect: state.protect,
+      constraints: state.constraints,
+      gapQuestions: state.gapQuestions.map(g => ({ key: g.key, ask: g.ask })),
+      gapInsights: filledGapInsights().map(x => ({ key: x.key, text: x.text })),
+      contextBefore: state.contextBefore,
+      contextBeforeParts: state.contextBeforeParts,
+      aiReplyPaste: state.aiReplyPaste,
+      reflection: { ...state.reflection },
+      contextAfter: state.contextAfterText,
+      contextAfterParts: null,
+      newJudgment: state.newJudgment,
+      criteriaGrowth: growth
+    });
+    state.activeThemeId = result.themeId;
+    state.activeEntryId = result.entryId;
+  }
+
+  function initialContextMirrorHtml() {
+    const before = state.contextBefore
+      || formatContextParts(state.contextBeforeParts || buildContextParts());
+    const themeLine = state.theme || (state.contextBeforeParts && state.contextBeforeParts.theme) || '';
+    return `
+      <div class="seed-mirror">
+        ${themeLine ? `<p class="seed-mirror-theme">${escapeHtml(themeLine)}</p>` : ''}
+        <pre class="compare-body">${escapeHtml(before || '（まだ言葉が残っていません）')}</pre>
+      </div>`;
+  }
+
+  function criteriaTagLabels(ids) {
+    const set = new Set(ids || []);
+    return CRITERIA_CHANGE_TAGS.filter(t => set.has(t.id)).map(t => t.label);
+  }
+
+  function criteriaGrowthSummaryHtml(growth) {
+    if (!growth) return '';
+    const tags = criteriaTagLabels(growth.changeTags);
+    const rows = [];
+    if (growth.firstMe) rows.push(`<p class="text-sm mt-2"><strong>最初の私は</strong><br>${escapeHtml(growth.firstMe)}</p>`);
+    if (growth.nowMe) rows.push(`<p class="text-sm mt-2"><strong>今の私は</strong><br>${escapeHtml(growth.nowMe)}</p>`);
+    if (tags.length) {
+      rows.push(`<p class="text-sm mt-2"><strong>変わったこと</strong>：${tags.map(escapeHtml).join(' · ')}</p>`);
+    }
+    if (growth.criteriaChange) {
+      rows.push(`<p class="text-sm mt-2"><strong>判断基準の変化</strong><br>${escapeHtml(growth.criteriaChange)}</p>`);
+    }
+    if (growth.keyInsight) {
+      rows.push(`<p class="text-sm mt-2"><strong>今回一番の気づき</strong><br>${escapeHtml(growth.keyInsight)}</p>`);
+    }
+    if (growth.keepSentence) {
+      rows.push(`<p class="text-sm mt-2 criteria-keep-line"><strong>次の判断でも忘れたくない一文</strong><br>${escapeHtml(growth.keepSentence)}</p>`);
+    }
+    if (!rows.length) return '';
+    return `
+      <div class="criteria-history mt-3">
+        <p class="compare-label">今回育った判断基準</p>
+        ${rows.join('')}
+      </div>`;
   }
 
   function loadEntryIntoState(theme, entry) {
     resetState();
     state.activeThemeId = theme.id;
+    state.activeEntryId = entry.id;
     state.concerns = Array.isArray(entry.concerns) ? entry.concerns.slice() : [];
     state.theme = entry.theme || theme.title;
     state.achieve = entry.achieve || '';
@@ -530,6 +642,7 @@ ${change}`;
     );
     state.contextAfterText = entry.contextAfter || entry.contextBefore || '';
     state.newJudgment = entry.newJudgment || '';
+    state.criteriaGrowth = Object.assign(emptyCriteriaGrowth(), entry.criteriaGrowth || {});
   }
 
   function enterWorkspace() {
@@ -1122,6 +1235,90 @@ ${change}`;
       document.getElementById('btn-keep').onclick = () => {
         state.contextAfterText = after.value.trim() || before;
         keepGrownContext();
+        step = 16;
+        render();
+      };
+      return;
+    }
+
+    // 判断基準の言語化（V1.3 · 体験の完成）
+    if (step === 16) {
+      const g = state.criteriaGrowth;
+      const tagSet = new Set(g.changeTags || []);
+      root.innerHTML = `
+        <section class="space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">あなたの判断はどう育ちましたか。</p>
+          <p class="q-help">
+            AIの回答を評価するのではありません。<br>
+            AIとの対話を通じて、あなた自身の判断基準がどう変わったかを書き残してください。
+          </p>
+
+          <div class="grow-block">
+            <p class="grow-block-title">最初の私は</p>
+            <p class="q-help">最初に置いたテーマと判断文脈です。</p>
+            ${initialContextMirrorHtml()}
+            <textarea id="field-first-me" class="textarea" rows="3">${escapeHtml(g.firstMe || '')}</textarea>
+          </div>
+
+          <div class="grow-block">
+            <p class="grow-block-title">今の私は</p>
+            <textarea id="field-now-me" class="textarea" rows="3">${escapeHtml(g.nowMe || '')}</textarea>
+          </div>
+
+          <div class="grow-block">
+            <p class="grow-block-title">判断基準は何が変わりましたか。</p>
+            <div class="criteria-checks" role="group" aria-label="判断基準の変化">
+              ${CRITERIA_CHANGE_TAGS.map(t => `
+                <label class="criteria-check">
+                  <input type="checkbox" data-tag="${escapeHtml(t.id)}"${tagSet.has(t.id) ? ' checked' : ''}>
+                  <span>${escapeHtml(t.label)}</span>
+                </label>
+              `).join('')}
+            </div>
+            <textarea id="field-criteria-change" class="textarea" rows="3">${escapeHtml(g.criteriaChange || '')}</textarea>
+          </div>
+
+          <div class="grow-block">
+            <p class="grow-block-title">今回一番の気づき</p>
+            <textarea id="field-key-insight" class="textarea" rows="3">${escapeHtml(g.keyInsight || '')}</textarea>
+          </div>
+
+          <div class="grow-block">
+            <p class="grow-block-title">次の判断でも忘れたくない一文</p>
+            <textarea id="field-keep-sentence" class="textarea" rows="3">${escapeHtml(g.keepSentence || '')}</textarea>
+          </div>
+
+          <button type="button" id="btn-keep-criteria" class="btn btn-primary w-full">この判断基準を未来の自分へ残す</button>
+        </section>`;
+
+      const syncTags = () => {
+        state.criteriaGrowth.changeTags = Array.from(
+          root.querySelectorAll('.criteria-check input:checked')
+        ).map(el => el.dataset.tag);
+      };
+      root.querySelectorAll('.criteria-check input').forEach(input => {
+        input.onchange = syncTags;
+      });
+      const bind = (id, key) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.oninput = () => { state.criteriaGrowth[key] = el.value; };
+      };
+      bind('field-first-me', 'firstMe');
+      bind('field-now-me', 'nowMe');
+      bind('field-criteria-change', 'criteriaChange');
+      bind('field-key-insight', 'keyInsight');
+      bind('field-keep-sentence', 'keepSentence');
+
+      document.getElementById('btn-keep-criteria').onclick = () => {
+        syncTags();
+        state.criteriaGrowth.firstMe = (document.getElementById('field-first-me').value || '').trim();
+        state.criteriaGrowth.nowMe = (document.getElementById('field-now-me').value || '').trim();
+        state.criteriaGrowth.criteriaChange = (document.getElementById('field-criteria-change').value || '').trim();
+        state.criteriaGrowth.keyInsight = (document.getElementById('field-key-insight').value || '').trim();
+        state.criteriaGrowth.keepSentence = (document.getElementById('field-keep-sentence').value || '').trim();
+        keepCriteriaGrowth();
         step = 12;
         render();
       };
@@ -1144,6 +1341,10 @@ ${change}`;
         const v = document.getElementById('field-judgment').value.trim();
         if (!v) { document.getElementById('field-judgment').focus(); return; }
         state.newJudgment = v;
+        const Store = window.JudgmentOSStore;
+        if (Store && state.activeThemeId && state.activeEntryId) {
+          Store.updateEntry(state.activeThemeId, state.activeEntryId, { newJudgment: v });
+        }
         step = 12;
         render();
       };
@@ -1155,19 +1356,27 @@ ${change}`;
     }
 
     if (step === 12) {
+      const keep = (state.criteriaGrowth && state.criteriaGrowth.keepSentence) || '';
       root.innerHTML = `
         <section class="space-y-4 fade-in">
           ${prog}
           <div class="brand-outro">
             <div class="brand-outro-final">
-              <p>判断文脈が、</p>
+              <p>判断基準が、</p>
               <p class="you">一段深くなりました。</p>
             </div>
             <p class="brand-outro-takeaway">
-              判断文脈は、一度作れば終わりではありません。<br>
-              判断するたびに育っていきます。
+              AIの答えが変わったのではありません。<br>
+              あなた自身の判断基準が更新されました。<br><br>
+              JudgmentOSは、AIとの対話を通じて、<br>
+              自分自身の判断基準を育てる思考OSです。
             </p>
           </div>
+          ${keep ? `
+            <div class="judgment-final">
+              <p class="label">次の判断でも忘れたくない一文</p>
+              <p class="judgment-display">${escapeHtml(keep)}</p>
+            </div>` : ''}
           ${state.newJudgment ? `
             <div class="judgment-final">
               <p class="label">あなたの判断</p>
@@ -1175,7 +1384,7 @@ ${change}`;
             </div>` : ''}
           <div class="flex flex-col gap-2">
             <button type="button" id="btn-optional-j" class="btn btn-ghost w-full">私はこう判断する（任意）</button>
-            <button type="button" id="btn-history" class="btn btn-ghost w-full">これまで育てた判断文脈</button>
+            <button type="button" id="btn-history" class="btn btn-ghost w-full">これまで育てた判断文脈と基準</button>
             <button type="button" id="btn-restart" class="btn btn-primary w-full">もう一度、考え始める</button>
             <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
           </div>
@@ -1202,18 +1411,33 @@ ${change}`;
     const themes = Store ? Store.listThemesForUi() : [];
     root.innerHTML = `
       <section class="space-y-3 fade-in">
-        <p class="step-progress"><em>JudgmentOS</em> · これまで育てた判断文脈</p>
-        <p class="q-title">これまで育てた判断文脈</p>
-        <p class="q-help">日付とテーマから、当時の言葉を開き直せます。同じテーマを深めるときは、新しい履歴として残ります。</p>
-        ${themes.length === 0 ? `<p class="q-help">まだ残した判断文脈はありません。</p>` : `
+        <p class="step-progress"><em>JudgmentOS</em> · これまで育てた判断文脈と基準</p>
+        <p class="q-title">これまで育てた判断文脈と基準</p>
+        <p class="q-help">残しているのはAIの答えではありません。育てた判断文脈と、今回育った判断基準です。同じテーマを深めるときは、新しい履歴として残ります。</p>
+        ${themes.length === 0 ? `<p class="q-help">まだ残した判断文脈・判断基準はありません。</p>` : `
           <div class="history-list">
-            ${themes.map(t => `
+            ${themes.map(t => {
+              const theme = Store.getTheme(t.id);
+              const latest = theme && theme.entries.length
+                ? theme.entries[theme.entries.length - 1]
+                : null;
+              const keep = latest && latest.criteriaGrowth && latest.criteriaGrowth.keepSentence
+                ? latest.criteriaGrowth.keepSentence
+                : '';
+              const hasCriteria = !!(latest && latest.criteriaGrowth && (
+                keep
+                || latest.criteriaGrowth.keyInsight
+                || latest.criteriaGrowth.nowMe
+                || (latest.criteriaGrowth.changeTags && latest.criteriaGrowth.changeTags.length)
+              ));
+              return `
               <button type="button" class="history-item" data-id="${escapeHtml(t.id)}">
                 <span class="history-date">${escapeHtml(Store.formatDateJa(t.latestAt))}</span>
                 <span class="history-title">${escapeHtml(t.title)}</span>
-                <span class="history-meta">${t.entryCount > 1 ? `${t.entryCount}回の育ち` : '1回'}</span>
-              </button>
-            `).join('')}
+                <span class="history-meta">${t.entryCount > 1 ? `${t.entryCount}回の育ち` : '1回'}${hasCriteria ? ' · 判断基準あり' : ''}</span>
+                ${keep ? `<span class="history-keep">${escapeHtml(keep)}</span>` : ''}
+              </button>`;
+            }).join('')}
           </div>`}
         <button type="button" id="btn-back-flow" class="btn btn-ghost w-full">戻る</button>
       </section>`;
@@ -1244,14 +1468,16 @@ ${change}`;
       <section class="space-y-3 fade-in">
         <p class="step-progress"><em>JudgmentOS</em> · 育ちの履歴</p>
         <p class="q-title">${escapeHtml(theme.title)}</p>
-        <p class="q-help">同じテーマでも、上書きせずに残しています。開いて見返すか、続きからもう一度育てられます。</p>
+        <p class="q-help">同じテーマでも、上書きせずに残しています。判断文脈と、育った判断基準の両方を見返せます。</p>
         <div class="history-list">
           ${entries.map(e => `
             <div class="history-entry card">
               <p class="history-date">${escapeHtml(Store.formatDateJa(e.createdAt))} · ${e.entryNumber}回目</p>
+              <p class="compare-label mt-3">育てた判断文脈</p>
               <p class="text-sm mt-2"><strong>実現</strong>：${escapeHtml(e.achieve || '—')}</p>
               <p class="text-sm"><strong>守る</strong>：${escapeHtml(e.protect || '—')}</p>
               ${e.contextAfter || e.contextBefore ? `<pre class="compare-body mt-2">${escapeHtml(e.contextAfter || e.contextBefore)}</pre>` : ''}
+              ${criteriaGrowthSummaryHtml(e.criteriaGrowth)}
               <div class="flex flex-wrap gap-2 mt-3">
                 <button type="button" class="btn btn-primary btn-resume" data-entry="${escapeHtml(e.id)}">この言葉から、もう一度育てる</button>
               </div>
@@ -1265,10 +1491,13 @@ ${change}`;
         const packed = Store.getEntry(theme.id, btn.dataset.entry);
         if (!packed) return;
         loadEntryIntoState(packed.theme, packed.entry);
-        // 続き：渡す前の文脈があるなら AIへ渡す／戻る／育てるから再開しやすく
-        if (packed.entry.contextAfter) {
+        // 続き：文脈は残っているが判断基準未完なら基準へ。完了済みなら余韻へ。
+        const hasKeep = !!(packed.entry.criteriaGrowth && packed.entry.criteriaGrowth.keepSentence);
+        if (packed.entry.contextAfter && !hasKeep) {
           state.contextAfterText = packed.entry.contextAfter;
-          step = 15;
+          step = 16;
+        } else if (hasKeep) {
+          step = 12;
         } else if (packed.entry.contextBefore) {
           step = 13;
         } else {

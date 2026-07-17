@@ -133,7 +133,8 @@
       reflection: payload.reflection || {},
       contextAfter: payload.contextAfter || '',
       contextAfterParts: payload.contextAfterParts || null,
-      newJudgment: payload.newJudgment || ''
+      newJudgment: payload.newJudgment || '',
+      criteriaGrowth: payload.criteriaGrowth || null
     };
     theme.entries.push(entry);
     theme.updatedAt = now;
@@ -141,6 +142,24 @@
     store.themes = [theme, ...store.themes.filter(t => t.id !== theme.id)];
     saveStore(store);
     return { themeId: theme.id, entryId: entry.id, entryNumber: entry.entryNumber };
+  }
+
+  /**
+   * 既存エントリを部分更新（判断基準の追記など）
+   * @returns {{ themeId: string, entryId: string } | null}
+   */
+  function updateEntry(themeId, entryId, patch) {
+    const store = getStore();
+    const theme = store.themes.find(t => t.id === themeId);
+    if (!theme) return null;
+    const entry = theme.entries.find(e => e.id === entryId);
+    if (!entry) return null;
+    const now = new Date().toISOString();
+    Object.assign(entry, patch || {}, { updatedAt: now });
+    theme.updatedAt = now;
+    store.themes = [theme, ...store.themes.filter(t => t.id !== theme.id)];
+    saveStore(store);
+    return { themeId: theme.id, entryId: entry.id };
   }
 
   function listThemesForUi() {
@@ -180,6 +199,7 @@
   global.JudgmentOSStore = {
     getStore,
     appendEntry,
+    updateEntry,
     listThemesForUi,
     getTheme,
     getEntry,
