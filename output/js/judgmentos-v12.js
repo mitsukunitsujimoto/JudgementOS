@@ -109,21 +109,7 @@
 
   let step = 1;
   let concernDraft = '';
-  let nextSentencePlaceholder = '';
   let viewMode = 'flow'; // flow | history | theme
-
-  const NEXT_SENTENCE_EXAMPLES = [
-    '成功は既存顧客からの紹介件数で測る。',
-    '守る対象は制度ではなく、顧客との信頼である。',
-    '制約は予算ではなく、今年度中の完了である。',
-    '成功は売上ではなく継続率で判断する。',
-    '「伸びた」とは、新規より既存顧客の紹介が増えた状態を指す。'
-  ];
-
-  function pickNextSentencePlaceholder() {
-    const i = Math.floor(Math.random() * NEXT_SENTENCE_EXAMPLES.length);
-    return NEXT_SENTENCE_EXAMPLES[i];
-  }
 
   function ensureSentenceEnd(s) {
     const t = s.trim();
@@ -497,7 +483,6 @@ ${change}`;
       reflectionQ: 0, contextAfterText: '', activeThemeId: null, browseThemeId: null
     });
     concernDraft = '';
-    nextSentencePlaceholder = '';
     viewMode = 'flow';
     step = 1;
   }
@@ -702,7 +687,7 @@ ${change}`;
           ${trailHtml()}
           <p class="q-title">そのテーマについて、あなたは何を実現したいですか。</p>
           <p class="q-help">解決策ではなく、向かいたい方向を、あなたの言葉で書いてください。</p>
-          <textarea id="field-achieve" class="textarea" placeholder="例：新規事業を伸ばしたい">${escapeHtml(state.achieve)}</textarea>
+          <textarea id="field-achieve" class="textarea">${escapeHtml(state.achieve)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
@@ -722,7 +707,7 @@ ${change}`;
           ${trailHtml()}
           <p class="q-title">それを進める中で、何を守りたいですか。</p>
           <p class="q-help">人・関係・時間・信頼・文化など。崩したくないものを書いてください。</p>
-          <textarea id="field-protect" class="textarea" placeholder="例：社員の働き方改革も守りたい">${escapeHtml(state.protect)}</textarea>
+          <textarea id="field-protect" class="textarea">${escapeHtml(state.protect)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
@@ -763,7 +748,7 @@ ${change}`;
           ${trailHtml()}
           <p class="q-title">このテーマで無視できない条件や制約は何ですか。</p>
           <p class="q-help">予算・人数・期限・規程など。改行で複数書けます。</p>
-          <textarea id="field-constraints" class="textarea" placeholder="例：今年度の予算は増やせない">${escapeHtml(state.constraints)}</textarea>
+          <textarea id="field-constraints" class="textarea">${escapeHtml(state.constraints)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary">いま言葉にしたものを見る</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
@@ -822,7 +807,7 @@ ${change}`;
               <p class="gap-note">${escapeHtml(g.note)}</p>
               <p class="gap-ask">${escapeHtml(g.ask)}</p>
               <label class="gap-insight-label" for="gap-insight-${i}">この問いで気づいたこと</label>
-              <textarea id="gap-insight-${i}" class="textarea gap-insight" rows="2" placeholder="一文で">${escapeHtml(state.gapInsights[g.key] || '')}</textarea>
+              <textarea id="gap-insight-${i}" class="textarea gap-insight" rows="2">${escapeHtml(state.gapInsights[g.key] || '')}</textarea>
             </div>`).join('')}
           <button type="button" id="btn-next" class="btn btn-primary w-full">判断文脈を育てる</button>
         </section>`;
@@ -857,7 +842,6 @@ ${change}`;
     }
 
     if (step === 9) {
-      if (!nextSentencePlaceholder) nextSentencePlaceholder = pickNextSentencePlaceholder();
       const insights = filledGapInsights();
 
       // 問いからの気づきがある場合: それを見ながら一文を足す（中核体験）
@@ -874,7 +858,7 @@ ${change}`;
             ${gapInsightsTrailHtml()}
             <p class="q-title">次は、こう渡す。</p>
             <p class="q-help">上の気づきを見ながら、次に渡す判断文脈へ足す一文を整えてください。複数あるときは、いちばん渡したい一文に絞ります。</p>
-            <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
+            <textarea id="field-next" class="textarea">${escapeHtml(state.nextSentence)}</textarea>
             <div class="ai-block mt-3">
               <p class="text-[0.6875rem] font-bold text-[hsl(var(--primary))] mb-1">必要なら、気づきをAIで一文に統合する</p>
               <p class="mb-2 text-xs">JudgmentOSは答えを出しません。依頼文をコピーしてAIに渡すと、「判断文脈に加えるなら、この一文です。」の形で候補を返せます。採用するのは、あなたです。</p>
@@ -956,7 +940,7 @@ ${change}`;
           <div id="next-wrap" class="${state.missingArea && state.missingArea !== 'none' ? '' : 'hidden'}">
             <p class="q-title mt-4">次は、こう渡す。</p>
             <p class="q-help">次に渡す判断文脈へ、自分の言葉で一文を書いてください。</p>
-            <textarea id="field-next" class="textarea" placeholder="例：${escapeHtml(nextSentencePlaceholder)}">${escapeHtml(state.nextSentence)}</textarea>
+            <textarea id="field-next" class="textarea">${escapeHtml(state.nextSentence)}</textarea>
           </div>
           <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
         </section>`;
@@ -1082,11 +1066,13 @@ ${change}`;
           <p class="q-help">ここではAIの答えを採点しません。AIの答えによって、自分の判断文脈のどこが揺れたか、深まったかを確かめます。</p>
           ${q === 0 ? `
             <label class="gap-insight-label" for="field-ai-paste">AIの回答（任意）</label>
-            <textarea id="field-ai-paste" class="textarea" rows="4" placeholder="覚えておきたい箇所だけ、貼り付けても構いません。空欄のままでも進めます。">${escapeHtml(state.aiReplyPaste)}</textarea>
+            <p class="q-help">覚えておきたい箇所だけ貼り付けても構いません。空欄のままでも進めます。</p>
+            <textarea id="field-ai-paste" class="textarea" rows="4">${escapeHtml(state.aiReplyPaste)}</textarea>
           ` : ''}
           <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${q + 1} / 3</p>
           <p class="q-title mt-1">${escapeHtml(current.title)}</p>
-          <textarea id="field-reflect" class="textarea" rows="3" placeholder="短い文章で">${escapeHtml(state.reflection[current.key] || '')}</textarea>
+          <p class="q-help">短い文章で構いません。</p>
+          <textarea id="field-reflect" class="textarea" rows="3">${escapeHtml(state.reflection[current.key] || '')}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary w-full">${q < 2 ? '次の問いへ' : '判断文脈を見比べる'}</button>
         </section>`;
       const paste = document.getElementById('field-ai-paste');
@@ -1148,7 +1134,7 @@ ${change}`;
           ${prog}
           <p class="q-title">私はこう判断する</p>
           <p class="q-help">任意です。持ち帰るものは、答えではなく、あなた自身の判断です。</p>
-          <textarea id="field-judgment" class="textarea" placeholder="私は、…と判断する。">${escapeHtml(state.newJudgment)}</textarea>
+          <textarea id="field-judgment" class="textarea">${escapeHtml(state.newJudgment)}</textarea>
           <div class="flex flex-wrap gap-2">
             <button type="button" id="btn-finish" class="btn btn-primary">判断を言葉にする</button>
             <button type="button" id="btn-skip-j" class="btn btn-ghost">判断は後で</button>
