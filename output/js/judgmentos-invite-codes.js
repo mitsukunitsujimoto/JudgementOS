@@ -71,13 +71,20 @@
       label: 'モニター006',
       assignee: '安藤ハル',
       active: true
+    },
+    {
+      id: 'monitor-007',
+      code: 'JOS-MONITOR-007',
+      label: 'モニター007',
+      assignee: '辻本 光邦',
+      active: true
     }
 
-    // 7人目以降は下に足す:
+    // 8人目以降は下に足す:
     // {
-    //   id: 'monitor-007',
-    //   code: 'JOS-MONITOR-007',
-    //   label: 'モニター007',
+    //   id: 'monitor-008',
+    //   code: 'JOS-MONITOR-008',
+    //   label: 'モニター008',
     //   assignee: '',
     //   active: true
     // }
