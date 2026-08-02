@@ -1,19 +1,17 @@
 /**
- * JudgmentOS Version 1.4（考えている＝6問）
- * 建付け: AIと向き合う → 判断基準を明確に → 必要な問いに答える（答えは出さない）
+ * JudgmentOS Version 1.3
+ * 判断文脈を言語化し、AIとの対話を通じて自分自身の判断基準を育てる思考OS。
+ * 順序: 本人 → 判断文脈 →（必要なら）問い → 文脈の更新 → 判断基準の言語化
  *
- * 1 背景 → 2 実現 → 3 決定事項 → 4 守る → 映し返し
- * → 5 判断基準（譲れない／できれば）→ 6 重み・覚悟 → 判断文脈 → AIへ渡す → …
+ * 循環の完成:
+ * 考えている → AIへ渡す → AIから戻る → 育てる → 判断基準を未来の自分へ残す
  *
- * 旧フロー（気になること〜ギャップ問い）に戻す:
- *   - ?flow=legacy で judgmentos-v12.legacy.js を読み込む（index.html）
- *   - または output/js/judgmentos-v12.legacy.js を参照
+ * 「問い返す型」は削除せず将来拡張として保持する（標準フローには含めない）。
  */
 (function () {
   'use strict';
 
   const INCLUDE_REPLY_PATTERN_IN_FLOW = false;
-  const APP_FLOW = 'v14';
 
   /**
    * 将来拡張 — シナリオ別・問い返す型ライブラリ
@@ -78,40 +76,14 @@
     }
   ];
 
-  const AI_PASS_CLOSING = `答えや最適案は出さないでください。断定せず、仮説として示してください。
-目的は、私の判断基準をより明らかにすることです。決めるのは私です。
-
-必ず次の形式だけで返してください。前置きや長い解説は不要です。各見出しの下に仮説を1〜3個。
-
-【見落としている前提】
-仮説1: （一文）
-仮説2: （一文）
-
-【別の立場からの見方】
-仮説1: （一文）
-
-【長期的な影響】
-仮説1: （一文）
-
-【リスク】
-仮説1: （一文）
-
-【まだ考えていない決定事項・選択肢】
-仮説1: （一文）
-
-【いま判断しようとしていることが持ち上がるとしたら】
-候補1: （一文）
-候補2: （一文）`;
+  const AI_PASS_CLOSING = '答えや正解を決めず、私が見落としている前提、別の立場からの見方、長期的な影響、リスク、まだ考えていない選択肢を示してください。決めるのは私です。';
 
   const DEMO = {
-    background: '来期のAI投資を、半年以内に効果を示せという圧力の中で承認するかどうか、現場から急かされている。',
-    achieve: 'AIを使っても、経営判断の質と責任の所在が薄まらない形で導入する。',
-    decision: '来期のAI投資を承認するか、見送りか、条件付きにするかを決める。',
-    protect: '現場の自律と判断責任。顧客との信頼。答えに依存しない文化。',
-    criteriaCore: '判断を引き受ける人が残り、短絡的な答えだけで決めないこと。',
-    criteriaMust: '判断を引き受ける人が残ること。',
-    criteriaWant: '半年以内に効果の兆しを示せること。',
-    weightResolve: '効果の速さより、判断を引き受ける人が残るかを強く見る。最終判断は自分が引き受ける。'
+    concerns: [
+      '新規事業を伸ばしたいが、進め方が定まらない',
+      '社員の働き方改革を後退させたくない',
+      '今年度は予算を増やせない'
+    ]
   };
 
   function emptyCriteriaGrowth() {
@@ -145,143 +117,29 @@
   const state = {
     concerns: [],
     theme: '',
-    background: '',
     achieve: '',
-    decision: '',
     protect: '',
-    criteriaCore: '',
-    criteriaMust: '',
-    criteriaWant: '',
-    weightResolve: '',
     constraints: '',
     gapQuestions: [],
     gapInsights: {},
     missingArea: '',
     nextSentence: '',
     newJudgment: '',
-    decisionInitial: '',
     contextBefore: '',
     contextBeforeParts: null,
     aiReplyPaste: '',
-    hypotheses: [],
-    selectedHypothesisIds: [],
-    decisionCandidates: [],
-    selectedDecisionCandidate: '',
-    hypothesesContextKey: '',
-    hypothesesStale: false,
-    hypothesesSource: '', // 'b' | 'a'
-    hypogenError: '',
-    hypogenBusy: false,
     reflection: { newPerspective: '', discomfort: '', contextChange: '' },
     reflectionQ: 0,
     contextAfterText: '',
     criteriaGrowth: emptyCriteriaGrowth(),
     activeThemeId: null,
     activeEntryId: null,
-    browseThemeId: null,
-    judgmentSessionId: ''
+    browseThemeId: null
   };
 
-  const HYPOGEN_KEY = 'judgmentos.v14.hypogen';
-  const HYPOGEN_LIMIT_JUDGMENT = 3;
-  const HYPOGEN_LIMIT_DAY = 10;
-
   let step = 1;
-  let farthestStep = 1;
   let concernDraft = '';
   let viewMode = 'flow'; // flow | history | theme
-
-  const STEP_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 11, 12];
-
-  function stepIndex(s) {
-    return STEP_ORDER.indexOf(s);
-  }
-
-  function markFarthest() {
-    if (stepIndex(step) > stepIndex(farthestStep)) farthestStep = step;
-  }
-
-  function hasReachedStep(target) {
-    return stepIndex(farthestStep) >= stepIndex(target);
-  }
-
-  function previousStep(s) {
-    const i = stepIndex(s);
-    if (i > 0) return STEP_ORDER[i - 1];
-    return null;
-  }
-
-  function phaseEntryStep(phaseId) {
-    if (phaseId === 'think') return 1;
-    if (phaseId === 'judge') {
-      if (hasReachedStep(14) && (state.hypotheses.length || state.aiReplyPaste)) return 14;
-      return 13;
-    }
-    // 旧 id 互換
-    if (phaseId === 'pass' || phaseId === 'return') return phaseEntryStep('judge');
-    if (phaseId === 'reflect' || phaseId === 'grow') return hasReachedStep(16) ? 16 : 15;
-    return 1;
-  }
-
-  function canGoToPhase(phaseId) {
-    if (phaseId === 'think') return true;
-    if (phaseId === 'judge' || phaseId === 'pass' || phaseId === 'return') return hasReachedStep(13);
-    if (phaseId === 'reflect' || phaseId === 'grow') return hasReachedStep(15);
-    return false;
-  }
-
-  function goToPhase(phaseId) {
-    if (!canGoToPhase(phaseId)) return;
-    step = phaseEntryStep(phaseId);
-    viewMode = 'flow';
-    render();
-  }
-
-  function stepBackHtml() {
-    if (previousStep(step) == null) return '';
-    return `<button type="button" id="btn-step-back" class="step-back">← 前の画面に戻る</button>`;
-  }
-
-  function bindFlowNav() {
-    document.querySelectorAll('[data-phase]').forEach((el) => {
-      el.onclick = () => {
-        const id = el.getAttribute('data-phase');
-        if (!id || !canGoToPhase(id)) return;
-        // 「考えている」はいつでも先頭へ戻り、書き直せる
-        if (id === 'think') {
-          step = 1;
-          render();
-          return;
-        }
-        goToPhase(id);
-      };
-    });
-    const back = document.getElementById('btn-step-back');
-    if (back) {
-      back.onclick = () => {
-        const prev = previousStep(step);
-        if (prev == null) return;
-        step = prev;
-        render();
-      };
-    }
-  }
-
-  function syncThemeFromBackground() {
-    state.theme = (state.decision || state.background || '').trim();
-    state.concerns = state.theme ? [state.theme] : [];
-  }
-
-  /** 旧ストア互換用に、判断基準まわりを constraints 文字列へ要約 */
-  function criteriaAsConstraintsText() {
-    const lines = [];
-    if (state.criteriaCore.trim()) lines.push(`【いちばん大切】${state.criteriaCore.trim()}`);
-    if (state.criteriaMust.trim()) lines.push(`【絶対に譲れない】${state.criteriaMust.trim()}`);
-    if (state.criteriaWant.trim()) lines.push(`【できれば満たしたい】${state.criteriaWant.trim()}`);
-    if (state.weightResolve.trim()) lines.push(`【いちばん強く効いていること／引き受ける範囲】${state.weightResolve.trim()}`);
-    if (state.decision.trim()) lines.push(`【決めること】${state.decision.trim()}`);
-    return lines.join('\n');
-  }
 
   function ensureSentenceEnd(s) {
     const t = s.trim();
@@ -352,16 +210,10 @@ ${list || '（なし）'}`;
 
   function buildMirrorB() {
     return {
-      theme: (state.background || state.theme).trim(),
-      background: state.background.trim(),
+      theme: state.theme.trim(),
       achieve: state.achieve.trim(),
-      decision: state.decision.trim(),
       protect: state.protect.trim(),
-      criteriaCore: state.criteriaCore.trim(),
-      criteriaMust: state.criteriaMust.trim(),
-      criteriaWant: state.criteriaWant.trim(),
-      weightResolve: state.weightResolve.trim(),
-      constraints: quoteLines(state.constraints || criteriaAsConstraintsText())
+      constraints: quoteLines(state.constraints)
     };
   }
 
@@ -379,67 +231,44 @@ ${list || '（なし）'}`;
   }
 
   function buildContextPack() {
-    return `${formatContextParts(buildContextParts())}
+    const b = buildMirrorB();
+    const added = state.nextSentence.trim();
+    let pack = `【今日のテーマ】
+${b.theme}
+
+【実現したいこと】
+${b.achieve}
+
+【守りたいもの】
+${b.protect}
+
+【無視できない条件】
+${b.constraints.map(c => `· ${c}`).join('\n')}`;
+    if (added) {
+      pack += `
+
+【問いを通じて加えた一文】
+${added}`;
+    }
+    pack += `
 
 【映し返し】
 ${buildReflection()}`;
+    return pack;
   }
 
   function buildContextParts() {
-    syncThemeFromBackground();
-    state.constraints = criteriaAsConstraintsText();
     return {
       theme: state.theme.trim(),
-      background: state.background.trim(),
       achieve: state.achieve.trim(),
-      decision: state.decision.trim(),
       protect: state.protect.trim(),
-      criteriaCore: state.criteriaCore.trim(),
-      criteriaMust: state.criteriaMust.trim(),
-      criteriaWant: state.criteriaWant.trim(),
-      weightResolve: state.weightResolve.trim(),
       constraints: state.constraints.trim(),
-      addedSentence: state.nextSentence.trim(),
-      flow: APP_FLOW
+      addedSentence: state.nextSentence.trim()
     };
   }
 
   function formatContextParts(parts) {
     if (!parts) return '';
-    // v14
-    if (parts.background || parts.decision || parts.criteriaCore || parts.criteriaMust || parts.flow === 'v14') {
-      let t = `【いま判断しようとしていること】
-${parts.decision || parts.theme || ''}
-
-【背景（この判断が必要な理由）】
-${parts.background || ''}
-
-【本来実現したいこと（経営者として向かいたい姿）】
-${parts.achieve || ''}
-
-【守りたいもの・崩したくないもの】
-${parts.protect || ''}
-
-【いちばん大切にしたいこと】
-${parts.criteriaCore || ''}
-
-【そのうち、絶対に譲れないもの】
-${parts.criteriaMust || '（未記入）'}
-
-【できれば満たしたいもの】
-${parts.criteriaWant || '（未記入）'}
-
-【いちばん強く効いていること／引き受ける範囲】
-${parts.weightResolve || ''}`;
-      if ((parts.addedSentence || '').trim()) {
-        t += `
-
-【問いを通じて加えた一文】
-${parts.addedSentence.trim()}`;
-      }
-      return t;
-    }
-    // legacy parts
     const constraints = quoteLines(parts.constraints || '');
     let t = `【今日のテーマ】
 ${parts.theme || ''}
@@ -477,309 +306,16 @@ ${AI_PASS_CLOSING}`;
   function snapshotBeforePass() {
     state.contextBeforeParts = buildContextParts();
     state.contextBefore = formatContextParts(state.contextBeforeParts);
-    if (!state.decisionInitial) {
-      state.decisionInitial = (state.decision || '').trim();
-    }
   }
 
   function proposeAfterFromReflection() {
     const base = state.contextBefore || formatContextParts(buildContextParts());
-    const picked = (state.hypotheses || [])
-      .filter((h) => state.selectedHypothesisIds.includes(h.id))
-      .map((h) => `· [${h.category}] ${h.text}`);
-    const note = (state.reflection.contextChange || '').trim();
-    let t = base;
-    if (picked.length) {
-      t += `
+    const change = (state.reflection.contextChange || '').trim();
+    if (!change) return base;
+    return `${base}
 
-【採った仮説】
-${picked.join('\n')}`;
-    }
-    if (note) {
-      t += `
-
-【自分の一言】
-${note}`;
-    }
-    return t;
-  }
-
-  /** AIの番号付き仮説／候補を読み取る（形式が崩れていても行頭番号や「仮説n:」を拾う） */
-  function parseHypothesesFromAi(raw) {
-    const text = (raw || '').replace(/\r\n/g, '\n').trim();
-    if (!text) return { hypotheses: [], decisionCandidates: [] };
-    const hypotheses = [];
-    const decisionCandidates = [];
-    let category = '仮説';
-    let inDecision = false;
-    let n = 0;
-    const lines = text.split('\n');
-    for (const line0 of lines) {
-      const line = line0.trim();
-      if (!line) continue;
-      const cat = line.match(/^【\s*([^】]+?)\s*】$/);
-      if (cat) {
-        category = cat[1].trim();
-        inDecision = /持ち上が|判断しようとしていること/.test(category);
-        continue;
-      }
-      let body = '';
-      let m = line.match(/^(?:仮説|候補)\s*\d+\s*[:：]\s*(.+)$/);
-      if (m) body = m[1].trim();
-      if (!body) {
-        m = line.match(/^\d+\s*[\.\)、．]\s*(.+)$/);
-        if (m) body = m[1].trim();
-      }
-      if (!body) {
-        m = line.match(/^[-・*]\s*(.+)$/);
-        if (m) body = m[1].trim();
-      }
-      if (!body || body.length < 4) continue;
-      n += 1;
-      if (inDecision) {
-        decisionCandidates.push({ id: `dec-${decisionCandidates.length + 1}`, category, text: body });
-      } else {
-        hypotheses.push({ id: `hyp-${hypotheses.length + 1}`, category, text: body });
-      }
-    }
-    // 見出しなしのフォールバック: ある程度の長さの行を仮説扱い
-    if (!hypotheses.length && !decisionCandidates.length) {
-      text.split('\n').map((l) => l.trim()).filter((l) => l.length >= 12 && !/^#{1,3}\s/.test(l)).slice(0, 12).forEach((body, i) => {
-        hypotheses.push({ id: `hyp-${i + 1}`, category: '仮説', text: body.replace(/^[*-・]\s*/, '') });
-      });
-    }
-    return { hypotheses, decisionCandidates };
-  }
-
-  function applyAiPasteParse(source) {
-    const parsed = parseHypothesesFromAi(state.aiReplyPaste);
-    state.hypotheses = parsed.hypotheses;
-    state.decisionCandidates = parsed.decisionCandidates;
-    const ids = new Set(state.hypotheses.map((h) => h.id));
-    state.selectedHypothesisIds = (state.selectedHypothesisIds || []).filter((id) => ids.has(id));
-    if (source) state.hypothesesSource = source;
-    markHypothesesFresh();
-  }
-
-  function ensureJudgmentSessionId() {
-    if (!state.judgmentSessionId) {
-      state.judgmentSessionId = `j-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    }
-    return state.judgmentSessionId;
-  }
-
-  function hypogenTodayKey() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  function hypogenJudgmentKey() {
-    return state.activeEntryId || ensureJudgmentSessionId();
-  }
-
-  function loadHypogenUsage() {
-    try {
-      return JSON.parse(localStorage.getItem(HYPOGEN_KEY) || '{}') || {};
-    } catch (_) {
-      return {};
-    }
-  }
-
-  function getHypogenCounts() {
-    const data = loadHypogenUsage();
-    const day = (data.days && data.days[hypogenTodayKey()]) || 0;
-    const judgment = (data.judgments && data.judgments[hypogenJudgmentKey()]) || 0;
-    return { day, judgment };
-  }
-
-  function canGenerateHypotheses() {
-    const u = getHypogenCounts();
-    if (u.judgment >= HYPOGEN_LIMIT_JUDGMENT) {
-      return {
-        ok: false,
-        reason: `この判断では仮説を出し直せる回数が上限（${HYPOGEN_LIMIT_JUDGMENT}回）です。文脈を直すか、自分のAIを使うか、別の判断でお試しください。`
-      };
-    }
-    if (u.day >= HYPOGEN_LIMIT_DAY) {
-      return {
-        ok: false,
-        reason: `本日の仮説生成が上限（${HYPOGEN_LIMIT_DAY}回）です。明日またお試しいただくか、自分のAIをご利用ください。`
-      };
-    }
-    return { ok: true, remainingJudgment: HYPOGEN_LIMIT_JUDGMENT - u.judgment };
-  }
-
-  function recordHypogenUse() {
-    const data = loadHypogenUsage();
-    if (!data.days) data.days = {};
-    if (!data.judgments) data.judgments = {};
-    const tk = hypogenTodayKey();
-    const jk = hypogenJudgmentKey();
-    data.days[tk] = (data.days[tk] || 0) + 1;
-    data.judgments[jk] = (data.judgments[jk] || 0) + 1;
-    try {
-      localStorage.setItem(HYPOGEN_KEY, JSON.stringify(data));
-    } catch (_) { /* ignore */ }
-  }
-
-  function contextFingerprint() {
-    return formatContextParts(buildContextParts());
-  }
-
-  function markHypothesesFresh() {
-    state.hypothesesContextKey = contextFingerprint();
-    state.hypothesesStale = false;
-  }
-
-  function refreshHypothesesStaleFlag() {
-    if (!state.hypotheses.length) {
-      state.hypothesesStale = false;
-      return false;
-    }
-    if (!state.hypothesesContextKey) {
-      state.hypothesesStale = true;
-      return true;
-    }
-    state.hypothesesStale = state.hypothesesContextKey !== contextFingerprint();
-    return state.hypothesesStale;
-  }
-
-  function clearHypothesesForRegen() {
-    state.hypotheses = [];
-    state.selectedHypothesisIds = [];
-    state.decisionCandidates = [];
-    state.selectedDecisionCandidate = '';
-    state.hypothesesStale = false;
-    state.hypothesesContextKey = '';
-    state.hypogenError = '';
-  }
-
-  function builtinAiAllowed() {
-    const Access = window.JudgmentOSAccess;
-    if (isDevMode()) return true;
-    if (!Access || typeof Access.canUseBuiltinAi !== 'function') return false;
-    return Access.canUseBuiltinAi();
-  }
-
-  async function requestBuiltinHypotheses(isRetry) {
-    const gate = canGenerateHypotheses();
-    if (!gate.ok) {
-      return { ok: false, reason: gate.reason, code: 'LIMIT' };
-    }
-    if (!builtinAiAllowed()) {
-      return {
-        ok: false,
-        reason: '外部AIへの送信に同意していないため、内蔵の仮説生成は使えません。自分のAIを使う方法へ。',
-        code: 'NO_CONSENT'
-      };
-    }
-
-    snapshotBeforePass();
-    const contextText = formatContextParts(state.contextBeforeParts || buildContextParts());
-    const Access = window.JudgmentOSAccess;
-    const profile = Access && Access.getProfile ? Access.getProfile() : null;
-    const inviteCode = (Access && Access.getInviteCode && Access.getInviteCode())
-      || (profile && profile.inviteCode)
-      || '';
-    const inviteId = (Access && Access.getInviteId && Access.getInviteId())
-      || (profile && profile.inviteId)
-      || (isDevMode() ? 'dev' : '');
-
-    const payload = {
-      contextText,
-      inviteCode: inviteCode || (isDevMode() ? 'JOS-MONITOR-001' : ''),
-      inviteId: inviteId || 'monitor-001',
-      securityConsent: true
-    };
-
-    let res;
-    try {
-      res = await fetch('/api/generate-hypotheses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (_) {
-      return {
-        ok: false,
-        reason: 'いまは仮説を出せません。自分のAIを使う方法（A）をご利用ください。',
-        code: 'NETWORK',
-        retryable: true
-      };
-    }
-
-    let data = null;
-    try {
-      data = await res.json();
-    } catch (_) {
-      data = null;
-    }
-
-    if (!res.ok || !data || !data.ok) {
-      const retryable = !!(data && data.retryable) || res.status >= 500;
-      if (retryable && !isRetry) {
-        return requestBuiltinHypotheses(true);
-      }
-      return {
-        ok: false,
-        reason: (data && data.reason) || 'いまは仮説を出せません。自分のAIを使う方法（A）へ。',
-        code: (data && data.code) || 'ERROR',
-        retryable
-      };
-    }
-
-    state.aiReplyPaste = data.text || '';
-    applyAiPasteParse('b');
-    if (!state.hypotheses.length && !state.decisionCandidates.length) {
-      return {
-        ok: false,
-        reason: '仮説の形式を読み取れませんでした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
-        code: 'PARSE_EMPTY',
-        retryable: true
-      };
-    }
-    recordHypogenUse();
-    return { ok: true };
-  }
-
-  /** A非常口: 文面コピー → 貼って判定 */
-  function renderPathACopy() {
-    const root = document.getElementById('dialogue');
-    if (!root) return;
-    markFarthest();
-    snapshotBeforePass();
-    const parts = state.contextBeforeParts;
-    const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${escapeHtml(progressLabel())}</p>`;
-    root.innerHTML = `
-      <section class="space-y-4 fade-in">
-        ${prog}
-        <p class="q-title">自分のAIへ渡す（非常口）</p>
-        <p class="q-help">判断文脈をコピーし、任意のAIに貼ってください。返ってきた仮説を次で判定します。最適案は求めない依頼文です。</p>
-        <div class="mirror-summary">
-          <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
-        </div>
-        <div class="flex flex-col gap-2">
-          <button type="button" id="btn-copy-ai" class="btn btn-primary w-full">AIへ渡す文面をコピー</button>
-          <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。返ってきた仮説を次で貼り付けます。</span>
-          <button type="button" id="btn-return" class="btn btn-ghost w-full">仮説が返ってきたら、判定する</button>
-          ${builtinAiAllowed() ? `<button type="button" id="btn-back-b" class="btn btn-ghost w-full">内蔵の仮説生成に戻る</button>` : ''}
-        </div>
-      </section>`;
-    document.getElementById('btn-copy-ai').onclick = () => copyText(buildAiPassText(), 'copy-ai-toast');
-    document.getElementById('btn-return').onclick = () => {
-      state.pathAMode = true;
-      state.hypothesesSource = 'a';
-      step = 14;
-      render();
-    };
-    const backB = document.getElementById('btn-back-b');
-    if (backB) {
-      backB.onclick = () => {
-        state.pathAMode = false;
-        step = 13;
-        render();
-      };
-    }
-    bindFlowNav();
+【AIの回答を受けて、足す・変える・残す】
+${change}`;
   }
 
   /** 固定一覧ではない。置かれた言葉から問いを動的に選ぶ（4〜6） */
@@ -874,43 +410,41 @@ ${note}`;
       <div class="mirror-summary">
         <h3>【いま言葉にしたこと】</h3>
         <p class="text-[0.75rem] text-[hsl(var(--muted-fg))] mb-2">JudgmentOSでは、これを<strong>判断文脈</strong>と呼びます。渡す前に、まず見てください。</p>
-        <h3>【いま判断しようとしていること】</h3>
-        <p class="font-semibold">「${escapeHtml(b.decision || b.theme)}」</p>
-        <h3>【背景】</h3>
-        <p>${escapeHtml(b.background)}</p>
-        <h3>【本来実現したいこと】</h3>
+        <h3>【今日のテーマ】</h3>
+        <p>${escapeHtml(b.theme)}</p>
+        <h3>【実現したいこと】</h3>
         <p class="font-semibold">「${escapeHtml(b.achieve)}」</p>
         <h3>【守りたいもの】</h3>
         <p class="font-semibold">「${escapeHtml(b.protect)}」</p>
-        <p class="mt-2 text-sm">この二つを両立させながら考えることが、今回の判断の核になりそうです。</p>
-        <h3>【いちばん大切にしたいこと】</h3>
-        <p class="font-semibold">「${escapeHtml(b.criteriaCore)}」</p>
-        ${b.criteriaMust ? `<h3>【絶対に譲れないもの】</h3><p>${escapeHtml(b.criteriaMust)}</p>` : ''}
-        ${b.criteriaWant ? `<h3>【できれば満たしたいもの】</h3><p>${escapeHtml(b.criteriaWant)}</p>` : ''}
-        <h3>【いちばん強く効いていること／引き受ける範囲】</h3>
-        <p>${escapeHtml(b.weightResolve)}</p>
+        <p class="mt-2 text-sm">この二つを両立させながら考えることが、今回のテーマになりそうです。</p>
+        <h3>【無視できない条件】</h3>
+        <ul class="mt-1 space-y-1">${b.constraints.map(c => `<li>· ${escapeHtml(c)}</li>`).join('')}</ul>
       </div>`;
   }
 
   function trailHtml() {
     const parts = [];
-    if (state.decision) parts.push(`<div><strong>判断しようとしていること</strong>：${escapeHtml(state.decision)}</div>`);
-    if (state.background) parts.push(`<div class="mt-2"><strong>背景</strong>：${escapeHtml(state.background)}</div>`);
-    if (state.achieve) parts.push(`<div class="mt-2"><strong>本来実現したいこと</strong>：${escapeHtml(state.achieve)}</div>`);
+    if (state.concerns.length) {
+      parts.push(`<div><strong>気になっていること</strong><br>${state.concerns.map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
+    }
+    if (state.theme) parts.push(`<div class="mt-2"><strong>今日のテーマ</strong>：${escapeHtml(state.theme)}</div>`);
+    if (state.achieve) parts.push(`<div class="mt-2"><strong>実現したいこと</strong>：${escapeHtml(state.achieve)}</div>`);
     if (state.protect) parts.push(`<div class="mt-2"><strong>守りたいもの</strong>：${escapeHtml(state.protect)}</div>`);
-    if (state.criteriaCore) parts.push(`<div class="mt-2"><strong>いちばん大切</strong>：${escapeHtml(state.criteriaCore)}</div>`);
-    if (state.criteriaMust) parts.push(`<div class="mt-2"><strong>譲れない</strong>：${escapeHtml(state.criteriaMust)}</div>`);
-    if (state.criteriaWant) parts.push(`<div class="mt-2"><strong>できれば</strong>：${escapeHtml(state.criteriaWant)}</div>`);
-    if (state.weightResolve) parts.push(`<div class="mt-2"><strong>強く効いていること／引き受ける範囲</strong>：${escapeHtml(state.weightResolve)}</div>`);
+    if (state.constraints) {
+      parts.push(`<div class="mt-2"><strong>制約</strong><br>${quoteLines(state.constraints).map(c => `· ${escapeHtml(c)}`).join('<br>')}</div>`);
+    }
     if (!parts.length) return '';
     return `<div class="answered-trail">${parts.join('')}</div>`;
   }
 
   function currentPhase() {
     if (viewMode === 'history' || viewMode === 'theme') return null;
-    if (step >= 1 && step <= 10) return 'think';
-    if (step === 13 || step === 14 || step === 17) return 'judge';
-    if (step === 15 || step === 16 || step === 11 || step === 12) return 'reflect';
+    if (step >= 1 && step <= 9) return 'think';
+    if (step === 10) return 'think';
+    if (step === 13) return 'pass';
+    if (step === 14) return 'return';
+    if (step === 15 || step === 16) return 'grow';
+    if (step === 11 || step === 12) return 'grow';
     return 'think';
   }
 
@@ -919,40 +453,33 @@ ${note}`;
     if (!phase) return '';
     const items = [
       { id: 'think', label: '考えている' },
-      { id: 'judge', label: '仮説を判定' },
-      { id: 'reflect', label: '振り返る' }
+      { id: 'pass', label: 'AIへ渡す' },
+      { id: 'return', label: 'AIから戻る' },
+      { id: 'grow', label: '育てる' }
     ];
-    return `<nav class="phase-nav" aria-label="画面の移動">
-      ${items.map((it, i) => {
-        const reachable = canGoToPhase(it.id);
-        const current = it.id === phase;
-        const cls = `phase-item${current ? ' is-current' : ''}${reachable ? ' is-reachable' : ''}`;
-        const title = reachable
-          ? (it.id === 'think' ? '考えているに戻り、内容を修正できます。直すと仮説は無効になります。' : `${it.label}へ移動`)
-          : 'まだ到達していません';
-        return `
-        <button type="button" class="${cls}" data-phase="${it.id}" ${reachable ? '' : 'disabled'} title="${escapeHtml(title)}">${escapeHtml(it.label)}</button>
-        ${i < items.length - 1 ? '<span class="phase-arrow" aria-hidden="true">→</span>' : ''}`;
-      }).join('')}
+    return `<nav class="phase-nav" aria-label="いまの場所">
+      ${items.map((it, i) => `
+        <span class="phase-item${it.id === phase ? ' is-current' : ''}">${escapeHtml(it.label)}</span>
+        ${i < items.length - 1 ? '<span class="phase-arrow" aria-hidden="true">→</span>' : ''}
+      `).join('')}
     </nav>`;
   }
 
   function progressLabel() {
     const map = {
-      1: '① いま判断しようとしていること',
-      2: '② 背景',
-      3: '③ 本来実現したいこと',
-      17: '判断しようとしていることは変わったか',
+      1: '① 気になっていること',
+      2: '② 今日のテーマ',
+      3: '③ 実現したいこと',
       4: '④ 守りたいもの',
       5: '映し返し',
-      6: '⑤ いちばん大切にしたいこと',
-      7: '譲れない／できれば（任意）',
-      8: '⑥ 強く効いていること／引き受ける範囲',
-      9: 'いま言葉にしたものを見る',
+      6: '⑤ 条件・制約',
+      7: 'いま言葉にしたものを見る',
+      8: 'まだ言葉になっていない層',
+      9: '次は、こう渡す',
       10: '問い返す型',
-      13: '仮説を示す',
-      14: '仮説を判定する',
-      15: '判断文脈を見比べる',
+      13: 'AIへ渡す',
+      14: 'AIから戻る',
+      15: '判断文脈を育てる',
       16: '判断の変化を振り返る',
       11: '私はこう判断する',
       12: '一段深くなった'
@@ -980,17 +507,9 @@ ${note}`;
 
   function resetState() {
     Object.assign(state, {
-      concerns: [], theme: '',
-      background: '', achieve: '', decision: '', protect: '',
-      criteriaCore: '', criteriaMust: '', criteriaWant: '', weightResolve: '',
-      constraints: '',
+      concerns: [], theme: '', achieve: '', protect: '', constraints: '',
       gapQuestions: [], gapInsights: {}, missingArea: '', nextSentence: '', newJudgment: '',
-      decisionInitial: '',
       contextBefore: '', contextBeforeParts: null, aiReplyPaste: '',
-      hypotheses: [], selectedHypothesisIds: [], decisionCandidates: [], selectedDecisionCandidate: '',
-      hypothesesContextKey: '', hypothesesStale: false, hypothesesSource: '',
-      hypogenError: '', hypogenBusy: false, pathAMode: false,
-      judgmentSessionId: '',
       reflection: { newPerspective: '', discomfort: '', contextChange: '' },
       reflectionQ: 0, contextAfterText: '',
       criteriaGrowth: emptyCriteriaGrowth(),
@@ -999,14 +518,11 @@ ${note}`;
     concernDraft = '';
     viewMode = 'flow';
     step = 1;
-    farthestStep = 1;
   }
 
   function keepGrownContext() {
     const Store = window.JudgmentOSStore;
     if (!Store) return;
-    syncThemeFromBackground();
-    state.constraints = criteriaAsConstraintsText();
     const result = Store.appendEntry({
       theme: state.theme,
       concerns: state.concerns.slice(),
@@ -1050,8 +566,6 @@ ${note}`;
       });
       return;
     }
-    syncThemeFromBackground();
-    state.constraints = criteriaAsConstraintsText();
     const result = Store.appendEntry({
       theme: state.theme,
       concerns: state.concerns.slice(),
@@ -1123,13 +637,6 @@ ${note}`;
     state.achieve = entry.achieve || '';
     state.protect = entry.protect || '';
     state.constraints = entry.constraints || '';
-    const parts = entry.contextBeforeParts || {};
-    state.background = parts.background || entry.theme || theme.title || '';
-    state.decision = parts.decision || '';
-    state.criteriaCore = parts.criteriaCore || '';
-    state.criteriaMust = parts.criteriaMust || '';
-    state.criteriaWant = parts.criteriaWant || '';
-    state.weightResolve = parts.weightResolve || '';
     state.gapQuestions = Array.isArray(entry.gapQuestions) ? entry.gapQuestions.slice() : [];
     state.gapInsights = {};
     (entry.gapInsights || []).forEach(g => { state.gapInsights[g.key] = g.text; });
@@ -1148,7 +655,6 @@ ${note}`;
 
   function enterWorkspace() {
     document.getElementById('screen-invite')?.classList.add('hidden');
-    document.getElementById('screen-security')?.classList.add('hidden');
     document.getElementById('screen-landing').classList.add('hidden');
     const ws = document.getElementById('screen-workspace');
     ws.classList.remove('hidden');
@@ -1159,7 +665,6 @@ ${note}`;
   function goLanding() {
     document.getElementById('screen-workspace').classList.add('hidden');
     document.getElementById('screen-invite')?.classList.add('hidden');
-    document.getElementById('screen-security')?.classList.add('hidden');
     document.getElementById('screen-landing').classList.remove('hidden');
     viewMode = 'flow';
     updateHistoryButton();
@@ -1190,7 +695,6 @@ ${note}`;
     }
     landing?.classList.add('hidden');
     ws?.classList.add('hidden');
-    document.getElementById('screen-security')?.classList.add('hidden');
     invite.classList.remove('hidden');
     invite.classList.add('fade-in');
 
@@ -1247,79 +751,30 @@ ${note}`;
     });
   }
 
-  function showSecurityGate(onSuccess) {
-    const landing = document.getElementById('screen-landing');
-    const invite = document.getElementById('screen-invite');
-    const security = document.getElementById('screen-security');
-    const ws = document.getElementById('screen-workspace');
-    if (!security) {
-      onSuccess();
-      return;
-    }
-    landing?.classList.add('hidden');
-    invite?.classList.add('hidden');
-    ws?.classList.add('hidden');
-    security.classList.remove('hidden');
-    security.classList.add('fade-in');
-
-    const accept = document.getElementById('btn-security-accept');
-    const decline = document.getElementById('btn-security-decline');
-    const Access = window.JudgmentOSAccess;
-
-    const done = (value) => {
-      if (Access && typeof Access.setSecurityConsent === 'function') {
-        Access.setSecurityConsent(value);
-      }
-      security.classList.add('hidden');
-      updateParticipantChip();
-      onSuccess();
-    };
-
-    if (accept) accept.onclick = () => done('accepted');
-    if (decline) decline.onclick = () => done('declined');
-  }
-
   /**
-   * 招待 → セキュリティ同意 → 本編。
-   * ?dev=1 / localStorage.judgmentos.dev=1 では招待をスキップ（同意は未決なら表示）。
+   * 初回のみ招待コード。認証済みならそのまま進む。
+   * ?dev=1 / localStorage.judgmentos.dev=1 ではゲートをスキップ。
    */
   function withAccess(kind, onSuccess) {
-    const Access = window.JudgmentOSAccess;
-    const afterAuth = () => {
-      if (Access) Access.touch(kind || 'enter');
-      updateParticipantChip();
-      if (isDevMode()) {
-        // 開発時は同意済み扱いにしてBを試せる
-        if (Access && typeof Access.setSecurityConsent === 'function' && !Access.hasSecurityDecision()) {
-          Access.setSecurityConsent('accepted');
-        }
-        onSuccess();
-        return;
-      }
-      if (!Access || typeof Access.hasSecurityDecision !== 'function') {
-        onSuccess();
-        return;
-      }
-      if (Access.hasSecurityDecision()) {
-        onSuccess();
-        return;
-      }
-      showSecurityGate(onSuccess);
-    };
-
     if (isDevMode()) {
-      afterAuth();
+      onSuccess();
       return;
     }
+    const Access = window.JudgmentOSAccess;
     if (!Access) {
-      showInviteGate(afterAuth);
+      showInviteGate(onSuccess);
       return;
     }
     if (Access.isAuthorized()) {
-      afterAuth();
+      Access.touch(kind || 'enter');
+      updateParticipantChip();
+      onSuccess();
       return;
     }
-    showInviteGate(afterAuth);
+    showInviteGate(() => {
+      Access.touch(kind || 'enter');
+      onSuccess();
+    });
   }
 
   function updateHistoryButton() {
@@ -1357,7 +812,7 @@ ${note}`;
   }
 
   function bindStep1() {
-    const input = document.getElementById('field-decision');
+    const input = document.getElementById('concern-input');
     const nextBtn = document.getElementById('btn-next');
     const syncNext = () => {
       nextBtn.disabled = !(input && input.value.trim());
@@ -1374,40 +829,25 @@ ${note}`;
         input?.focus();
         return;
       }
-      state.decision = draft;
-      syncThemeFromBackground();
+      state.concerns = [draft];
+      state.theme = draft;
       concernDraft = '';
-      step = 2;
+      step = 3;
       render();
     };
     const btnDev = document.getElementById('btn-dev-sample');
     if (btnDev) {
       btnDev.onclick = () => {
-        state.background = DEMO.background;
-        state.achieve = DEMO.achieve;
-        state.decision = DEMO.decision;
-        state.protect = DEMO.protect;
-        state.criteriaCore = DEMO.criteriaCore;
-        state.criteriaMust = DEMO.criteriaMust;
-        state.criteriaWant = DEMO.criteriaWant;
-        state.weightResolve = DEMO.weightResolve;
-        syncThemeFromBackground();
+        state.concerns = [...DEMO.concerns];
+        state.theme = DEMO.concerns[0];
         concernDraft = '';
-        step = 9;
+        step = 2;
         render();
       };
     }
   }
 
   function render() {
-    renderInner();
-    if (viewMode === 'flow') {
-      markFarthest();
-      bindFlowNav();
-    }
-  }
-
-  function renderInner() {
     const root = document.getElementById('dialogue');
     if (viewMode === 'history') {
       renderHistoryList(root);
@@ -1417,17 +857,16 @@ ${note}`;
       renderThemeDetail(root);
       return;
     }
-    const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
+    const prog = `${phaseNavHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
 
     if (step === 1) {
-      const draft = concernDraft || state.decision;
       root.innerHTML = `
         <section class="card space-y-3">
           ${prog}
-          <p class="q-title">今、あなたは何を判断しようとしていますか。</p>
-          <p class="q-help">重要性の大小は問いません。「最適を決める」ではなく、いま向き合っている判断・分岐を一文で。例: 来期AI投資を承認するか見送るか／この提案を引き受けるか問い直すか。</p>
-          <textarea id="field-decision" class="textarea" rows="3">${escapeHtml(draft)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full" ${draft.trim() ? '' : 'disabled'}>次へ</button>
+          <p class="q-title">今、仕事や経営で気になっていることは何ですか。</p>
+          <p class="q-help">まだ判断にしなくて大丈夫です。大きな決裁だけでなく、今日受けた提案やAIの答えで引っかかったことでも構いません。</p>
+          <textarea id="concern-input" class="textarea">${escapeHtml(concernDraft)}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full" ${concernDraft.trim() ? '' : 'disabled'}>次へ</button>
           ${isDevMode() ? `<button type="button" id="btn-dev-sample" class="btn btn-ghost w-full text-xs opacity-60">[開発] サンプルで進む</button>` : ''}
         </section>`;
       bindStep1();
@@ -1435,19 +874,37 @@ ${note}`;
     }
 
     if (step === 2) {
+      if (state.concerns.length <= 1) {
+        state.theme = state.concerns[0] || state.theme;
+        step = 3;
+        render();
+        return;
+      }
       root.innerHTML = `
         <section class="card space-y-3">
           ${prog}
           ${trailHtml()}
-          <p class="q-title">いま、この判断が必要な理由は何ですか。</p>
-          <p class="q-help">向かいたい姿や結論ではなく、「なぜ今、向き合うのか」を書いてください。きっかけ、圧力、放っておけない事情で構いません。</p>
-          <textarea id="field-background" class="textarea">${escapeHtml(state.background)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
+          <p class="q-title">その中で、今日いちばん深く考えたいテーマはどれですか。</p>
+          <p class="q-help">一つ選んでください。</p>
+          <div id="theme-options"></div>
+          <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
         </section>`;
+      const box = document.getElementById('theme-options');
+      state.concerns.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'theme-option' + (state.theme === c ? ' selected' : '');
+        btn.textContent = c;
+        btn.onclick = () => {
+          state.theme = c;
+          box.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
+          btn.classList.add('selected');
+          document.getElementById('btn-next').disabled = false;
+        };
+        box.appendChild(btn);
+      });
       document.getElementById('btn-next').onclick = () => {
-        const v = document.getElementById('field-background').value.trim();
-        if (!v) { document.getElementById('field-background').focus(); return; }
-        state.background = v;
+        if (!state.theme) return;
         step = 3;
         render();
       };
@@ -1459,10 +916,10 @@ ${note}`;
         <section class="card space-y-3">
           ${prog}
           ${trailHtml()}
-          <p class="q-title">経営者として、本来実現したいことは何ですか。</p>
-          <p class="q-help">いまの施策や数字の目標ではなく、その先で向かいたい姿を書いてください。大きな言葉（社内融和、地域との共生、再生、社会貢献など）で構いません。この判断の手段的なゴールではなく、あなたが経営者として本当に向かいたいものをあぶり出します。</p>
+          <p class="q-title">そのテーマについて、あなたは何を実現したいですか。</p>
+          <p class="q-help">解決策ではなく、向かいたい方向を、あなたの言葉で書いてください。</p>
           <textarea id="field-achieve" class="textarea">${escapeHtml(state.achieve)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
+          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
         const v = document.getElementById('field-achieve').value.trim();
@@ -1479,10 +936,10 @@ ${note}`;
         <section class="card space-y-3">
           ${prog}
           ${trailHtml()}
-          <p class="q-title">守りたいもの、崩したくないものはありますか。</p>
-          <p class="q-help">人・関係・時間・信頼・文化など。大切にしたいことを書く前に、守るものを言葉にしてください。</p>
+          <p class="q-title">それを進める中で、何を守りたいですか。</p>
+          <p class="q-help">人・関係・時間・信頼・文化など。崩したくないものを書いてください。</p>
           <textarea id="field-protect" class="textarea">${escapeHtml(state.protect)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
+          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
         const v = document.getElementById('field-protect').value.trim();
@@ -1507,9 +964,9 @@ ${note}`;
             <p class="mt-3">一方で、</p>
             <p class="quote">「${escapeHtml(m.protect)}」</p>
             <p>と考えています。</p>
-            <p class="mt-4">この二つを両立させながら考えることが、<br>今回の判断の核になりそうです。</p>
+            <p class="mt-4">この二つを両立させながら考えることが、<br>今回のテーマになりそうです。</p>
           </div>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">大切にしたいことへ</button>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">続きを考える</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => { step = 6; render(); };
       return;
@@ -1520,15 +977,15 @@ ${note}`;
         <section class="card space-y-3">
           ${prog}
           ${trailHtml()}
-          <p class="q-title">この決定で、いちばん大切にしたいことは何ですか。</p>
-          <p class="q-help">判断基準という難しい言葉でなくて構いません。いまのあなたが、この決定でいちばん大切にしたいことを書いてください。</p>
-          <textarea id="field-core" class="textarea" rows="4">${escapeHtml(state.criteriaCore)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
+          <p class="q-title">このテーマで無視できない条件や制約は何ですか。</p>
+          <p class="q-help">予算・人数・期限・規程など。改行で複数書けます。</p>
+          <textarea id="field-constraints" class="textarea">${escapeHtml(state.constraints)}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary">いま言葉にしたものを見る</button>
         </section>`;
       document.getElementById('btn-next').onclick = () => {
-        const v = document.getElementById('field-core').value.trim();
-        if (!v) { document.getElementById('field-core').focus(); return; }
-        state.criteriaCore = v;
+        const v = document.getElementById('field-constraints').value.trim();
+        if (!v) { document.getElementById('field-constraints').focus(); return; }
+        state.constraints = v;
         step = 7;
         render();
       };
@@ -1536,54 +993,6 @@ ${note}`;
     }
 
     if (step === 7) {
-      root.innerHTML = `
-        <section class="card space-y-4">
-          ${prog}
-          ${trailHtml()}
-          <p class="q-title">いま書いたことのなかで、もう少し分けてみますか。</p>
-          <p class="q-help">空欄のままで次へ進んで構いません。分かることだけ書いてください。</p>
-          <div>
-            <p class="grow-field-label">そのうち、絶対に譲れないものはありますか。</p>
-            <textarea id="field-must" class="textarea" rows="3">${escapeHtml(state.criteriaMust)}</textarea>
-          </div>
-          <div>
-            <p class="grow-field-label">できれば満たしたいものはありますか。</p>
-            <textarea id="field-want" class="textarea" rows="3">${escapeHtml(state.criteriaWant)}</textarea>
-          </div>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
-        </section>`;
-      document.getElementById('btn-next').onclick = () => {
-        state.criteriaMust = document.getElementById('field-must').value.trim();
-        state.criteriaWant = document.getElementById('field-want').value.trim();
-        step = 8;
-        render();
-      };
-      return;
-    }
-
-    if (step === 8) {
-      root.innerHTML = `
-        <section class="card space-y-3">
-          ${prog}
-          ${trailHtml()}
-          <p class="q-title">いま挙げたなかで、いちばん強く効いているものは何ですか。<br>また、この判断の結果を、どこまで自分の責任として引き受けますか。</p>
-          <p class="q-help">二つまとめて書いて構いません。例: 「効果の速さより、守るべき信頼の方が強い。最終判断は自分が引き受ける。」</p>
-          <textarea id="field-weight" class="textarea" rows="4">${escapeHtml(state.weightResolve)}</textarea>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">いま言葉にしたものを見る</button>
-        </section>`;
-      document.getElementById('btn-next').onclick = () => {
-        const v = document.getElementById('field-weight').value.trim();
-        if (!v) { document.getElementById('field-weight').focus(); return; }
-        state.weightResolve = v;
-        syncThemeFromBackground();
-        state.constraints = criteriaAsConstraintsText();
-        step = 9;
-        render();
-      };
-      return;
-    }
-
-    if (step === 9) {
       root.innerHTML = `
         <section class="space-y-4 fade-in">
           ${prog}
@@ -1593,12 +1002,212 @@ ${note}`;
             答えを求める前に、置いたものを自分で確認してください。
           </p>
           <p class="text-xs text-[hsl(var(--muted-fg))] leading-relaxed px-1 -mt-2 opacity-90">
-            次は、この判断文脈を前提に<strong>仮説</strong>を出します（答え・最適案ではありません）。
+            この文脈が、AIや他者へ渡す前提になります。
           </p>
-          <button type="button" id="btn-pass" class="btn btn-primary w-full">仮説を判定するへ</button>
+          <div class="flex flex-col gap-2">
+            <button type="button" id="btn-gaps" class="btn btn-primary w-full">まだ言葉になっていない層へ進む</button>
+            <button type="button" id="btn-update" class="btn btn-ghost w-full">次は、こう渡すへ</button>
+          </div>
         </section>`;
-      document.getElementById('btn-pass').onclick = () => {
-        ensureJudgmentSessionId();
+      document.getElementById('btn-gaps').onclick = () => {
+        state.gapQuestions = selectGapQuestions();
+        state.gapInsights = {};
+        step = 8;
+        render();
+      };
+      document.getElementById('btn-update').onclick = () => { step = 9; render(); };
+      return;
+    }
+
+    if (step === 8) {
+      const gaps = state.gapQuestions.length ? state.gapQuestions : selectGapQuestions();
+      state.gapQuestions = gaps;
+      root.innerHTML = `
+        <section class="space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">まだ言葉になっていない判断文脈へ</p>
+          <div class="gap-reassure">
+            <p>正解はありません。</p>
+            <p>全部に答える必要もありません。</p>
+            <p class="mt-2">気になった問いだけ立ち止まり、<br>一文でも言葉が増えれば十分です。</p>
+          </div>
+          <p class="q-help">気づいたことを、一文だけ残してみてください。</p>
+          ${gaps.map((g, i) => `
+            <div class="gap-card">
+              <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${i + 1}</p>
+              <p class="gap-note">${escapeHtml(g.note)}</p>
+              <p class="gap-ask">${escapeHtml(g.ask)}</p>
+              <label class="gap-insight-label" for="gap-insight-${i}">この問いで気づいたこと</label>
+              <textarea id="gap-insight-${i}" class="textarea gap-insight" rows="2">${escapeHtml(state.gapInsights[g.key] || '')}</textarea>
+            </div>`).join('')}
+          <button type="button" id="btn-next" class="btn btn-primary w-full">判断文脈を育てる</button>
+        </section>`;
+
+      const collectInsights = () => {
+        gaps.forEach((g, i) => {
+          const el = document.getElementById(`gap-insight-${i}`);
+          state.gapInsights[g.key] = (el?.value || '').trim();
+        });
+      };
+
+      gaps.forEach((g, i) => {
+        const el = document.getElementById(`gap-insight-${i}`);
+        if (el) {
+          el.oninput = () => {
+            state.gapInsights[g.key] = el.value;
+          };
+        }
+      });
+
+      document.getElementById('btn-next').onclick = () => {
+        collectInsights();
+        const insights = filledGapInsights();
+        if (insights.length) {
+          state.missingArea = 'from_gaps';
+          state.nextSentence = proposeSentenceFromInsights();
+        }
+        step = 9;
+        render();
+      };
+      return;
+    }
+
+    if (step === 9) {
+      const insights = filledGapInsights();
+
+      // 問いからの気づきがある場合: それを見ながら一文を足す（中核体験）
+      if (insights.length) {
+        if (state.missingArea !== 'none' && state.missingArea !== 'from_gaps') {
+          state.missingArea = 'from_gaps';
+        }
+        if (state.missingArea !== 'none' && !state.nextSentence.trim()) {
+          state.nextSentence = proposeSentenceFromInsights();
+        }
+        root.innerHTML = `
+          <section class="card space-y-3 fade-in">
+            ${prog}
+            ${gapInsightsTrailHtml()}
+            <p class="q-title">次は、こう渡す。</p>
+            <p class="q-help">上の気づきを見ながら、次に渡す判断文脈へ足す一文を整えてください。複数あるときは、いちばん渡したい一文に絞ります。</p>
+            <textarea id="field-next" class="textarea">${escapeHtml(state.nextSentence)}</textarea>
+            <div class="ai-block mt-3">
+              <p class="text-[0.6875rem] font-bold text-[hsl(var(--primary))] mb-1">必要なら、気づきをAIで一文に統合する</p>
+              <p class="mb-2 text-xs">JudgmentOSは答えを出しません。依頼文をコピーしてAIに渡すと、「判断文脈に加えるなら、この一文です。」の形で候補を返せます。採用するのは、あなたです。</p>
+              <textarea id="integrate-pack" class="ai-prompt-box" readonly>${escapeHtml(buildInsightIntegratePrompt())}</textarea>
+              <button type="button" id="btn-copy-integrate" class="btn btn-ghost mt-2 text-xs">統合用の依頼文をコピー</button>
+              <span id="copy-integrate-toast" class="hidden text-xs text-[hsl(var(--primary))] ml-2">コピーしました</span>
+            </div>
+            <div class="flex flex-col gap-2 mt-2">
+              <button type="button" id="btn-next" class="btn btn-primary w-full" disabled>この一文で判断文脈を育てる</button>
+              <button type="button" id="btn-skip-add" class="btn btn-ghost w-full">今回はこのまま渡す</button>
+            </div>
+          </section>`;
+
+        const nextBtn = document.getElementById('btn-next');
+        const field = document.getElementById('field-next');
+        const updateNextEnabled = () => {
+          nextBtn.disabled = !(field && field.value.trim());
+        };
+        if (field) {
+          field.oninput = () => {
+            state.nextSentence = field.value;
+            state.missingArea = 'from_gaps';
+            updateNextEnabled();
+          };
+        }
+        updateNextEnabled();
+
+        document.getElementById('btn-skip-add').onclick = () => {
+          state.missingArea = 'none';
+          state.nextSentence = '';
+          step = nextAfterContextUpdate();
+          render();
+        };
+
+        const copyIntegrate = document.getElementById('btn-copy-integrate');
+        if (copyIntegrate) {
+          copyIntegrate.onclick = async () => {
+            const text = buildInsightIntegratePrompt();
+            try { await navigator.clipboard.writeText(text); }
+            catch {
+              document.getElementById('integrate-pack').select();
+              document.execCommand('copy');
+            }
+            const toast = document.getElementById('copy-integrate-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+          };
+        }
+
+        nextBtn.onclick = () => {
+          state.nextSentence = field.value.trim();
+          if (!state.nextSentence) return;
+          state.missingArea = 'from_gaps';
+          step = nextAfterContextUpdate();
+          render();
+        };
+        return;
+      }
+
+      // 問いをスキップした場合のフォールバック（判断文脈を更新する導線）
+      const areas = [
+        { id: 'achieve', label: '実現したいことの背景・誰のための実現か' },
+        { id: 'protect', label: '守りたいものの対象（人・関係・制度）' },
+        { id: 'constraints', label: '制約の意味（絶対か、仮定か、自分の上限か）' },
+        { id: 'time', label: '時間軸（いつまでに、何をもって成功か）' },
+        { id: 'other', label: 'その他（判断文脈に一文を足す）' },
+        { id: 'none', label: '今回はこのまま渡す' }
+      ];
+      root.innerHTML = `
+        <section class="card space-y-3 fade-in">
+          ${prog}
+          <p class="q-title">判断文脈を育てる</p>
+          <p class="q-help">判断文脈は、一度で完成しません。いま足したい一文は、どの層に当たりますか。</p>
+          <div class="choice-grid" id="missing-areas">
+            ${areas.map(a => `
+              <button type="button" class="choice-btn${state.missingArea === a.id ? ' selected' : ''}" data-id="${a.id}">${escapeHtml(a.label)}</button>
+            `).join('')}
+          </div>
+          <div id="next-wrap" class="${state.missingArea && state.missingArea !== 'none' ? '' : 'hidden'}">
+            <p class="q-title mt-4">次は、こう渡す。</p>
+            <p class="q-help">次に渡す判断文脈へ、自分の言葉で一文を書いてください。</p>
+            <textarea id="field-next" class="textarea">${escapeHtml(state.nextSentence)}</textarea>
+          </div>
+          <button type="button" id="btn-next" class="btn btn-primary" disabled>次へ</button>
+        </section>`;
+
+      const nextBtn = document.getElementById('btn-next');
+      const updateNextEnabled = () => {
+        if (state.missingArea === 'none') {
+          nextBtn.disabled = false;
+          return;
+        }
+        const field = document.getElementById('field-next');
+        nextBtn.disabled = !(field && field.value.trim());
+      };
+
+      document.querySelectorAll('#missing-areas .choice-btn').forEach(btn => {
+        btn.onclick = () => {
+          state.missingArea = btn.dataset.id;
+          if (btn.dataset.id === 'none') state.nextSentence = '';
+          render();
+        };
+      });
+
+      const field = document.getElementById('field-next');
+      if (field) {
+        field.oninput = () => {
+          state.nextSentence = field.value;
+          updateNextEnabled();
+        };
+      }
+      updateNextEnabled();
+
+      nextBtn.onclick = () => {
+        if (state.missingArea !== 'none') {
+          state.nextSentence = document.getElementById('field-next').value.trim();
+          if (!state.nextSentence) return;
+        }
         step = nextAfterContextUpdate();
         render();
       };
@@ -1626,240 +1235,92 @@ ${note}`;
       return;
     }
 
-    // 仮説を示す（B主経路 / A非常口）
+    // AIへ渡す
     if (step === 13) {
-      snapshotBeforePass();
-      refreshHypothesesStaleFlag();
+      if (!state.contextBeforeParts) snapshotBeforePass();
       const parts = state.contextBeforeParts;
-      const allowB = builtinAiAllowed();
-      const usage = getHypogenCounts();
-      const err = state.hypogenError || '';
-      const busy = state.hypogenBusy;
       root.innerHTML = `
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">ここまでに、あなたが言葉にした判断文脈</p>
-          <p class="q-help">仮説は答えではありません。判断文脈に照らして、採る／捨てるための見立てです。</p>
+          <p class="q-help">この内容をAIへ渡すと、あなたが大切にしていること、守りたいもの、制約を前提に対話できます。</p>
           <div class="mirror-summary">
-            <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
+            <h3>【今日のテーマ】</h3>
+            <p>${escapeHtml(parts.theme)}</p>
+            <h3>【実現したいこと】</h3>
+            <p class="font-semibold">「${escapeHtml(parts.achieve)}」</p>
+            <h3>【守りたいもの】</h3>
+            <p class="font-semibold">「${escapeHtml(parts.protect)}」</p>
+            <h3>【無視できない条件・制約】</h3>
+            <ul class="mt-1 space-y-1">${quoteLines(parts.constraints).map(c => `<li>· ${escapeHtml(c)}</li>`).join('')}</ul>
+            ${parts.addedSentence ? `
+              <h3>【問いを通じて加えた一文】</h3>
+              <p class="font-semibold">「${escapeHtml(parts.addedSentence)}」</p>` : ''}
           </div>
-          ${state.hypothesesStale ? `
-            <p class="q-help" style="color:hsl(var(--warning, 38 92% 50%));">判断文脈が変わったため、以前の仮説は無効です。出し直すか、自分のAIを使ってください。</p>
-          ` : ''}
-          ${err ? `<p class="invite-error" role="alert">${escapeHtml(err)}</p>` : ''}
           <div class="flex flex-col gap-2">
-            ${allowB ? `
-              <button type="button" id="btn-gen-b" class="btn btn-primary w-full" ${busy ? 'disabled' : ''}>
-                ${busy ? '仮説を生成しています…' : (state.hypotheses.length && !state.hypothesesStale ? '仮説を出し直す' : '仮説を示す')}
-              </button>
-              <p class="text-xs text-center text-[hsl(var(--muted-fg))]">この判断 ${usage.judgment}/${HYPOGEN_LIMIT_JUDGMENT} 回 · 本日 ${usage.day}/${HYPOGEN_LIMIT_DAY} 回</p>
-            ` : `
-              <p class="q-help">内蔵の仮説生成は、データ送信に同意した方のみ使えます。下の「自分のAIを使う」で進められます。</p>
-            `}
-            <button type="button" id="btn-path-a" class="btn btn-ghost w-full">自分のAIを使う（A）</button>
-            ${state.hypotheses.length && !state.hypothesesStale ? `
-              <button type="button" id="btn-to-judge" class="btn btn-ghost w-full">すでに出ている仮説を判定する</button>
-            ` : ''}
+            <button type="button" id="btn-copy-ai" class="btn btn-primary w-full">AIへ渡す文面をコピー</button>
+            <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。任意のAIへ貼り付けてください。</span>
+            <button type="button" id="btn-return" class="btn btn-ghost w-full">AIの答えを受けて、自分に戻る</button>
           </div>
         </section>`;
-
-      const goJudge = () => {
+      document.getElementById('btn-copy-ai').onclick = () => copyText(buildAiPassText(), 'copy-ai-toast');
+      document.getElementById('btn-return').onclick = () => {
         state.reflectionQ = 0;
-        state.hypogenError = '';
         step = 14;
         render();
       };
-
-      const genBtn = document.getElementById('btn-gen-b');
-      if (genBtn) {
-        genBtn.onclick = async () => {
-          if (state.hypogenBusy) return;
-          state.hypogenError = '';
-          state.hypogenBusy = true;
-          render();
-          if (state.hypothesesStale) clearHypothesesForRegen();
-          const result = await requestBuiltinHypotheses(false);
-          state.hypogenBusy = false;
-          if (!result.ok) {
-            state.hypogenError = result.reason || '仮説を出せませんでした。';
-            render();
-            return;
-          }
-          goJudge();
-        };
-      }
-      document.getElementById('btn-path-a').onclick = () => {
-        state.hypogenError = '';
-        state.pathAMode = true;
-        renderPathACopy();
-      };
-      const toJudge = document.getElementById('btn-to-judge');
-      if (toJudge) toJudge.onclick = goJudge;
       return;
     }
 
-    // 仮説を判定（採否）
+    // AIから戻る（3問を一問ずつ）
     if (step === 14) {
-      refreshHypothesesStaleFlag();
-      if (state.hypothesesStale) {
-        state.hypogenError = '判断文脈が変わったため、仮説は無効です。出し直してください。';
-        step = 13;
-        render();
-        return;
-      }
-      if (!state.hypotheses.length && state.aiReplyPaste.trim()) applyAiPasteParse(state.hypothesesSource || 'a');
-      const hyps = state.hypotheses || [];
-      const selected = new Set(state.selectedHypothesisIds || []);
-      const showPaste = state.hypothesesSource === 'a' || state.pathAMode || !hyps.length;
+      const questions = [
+        {
+          key: 'newPerspective',
+          title: 'AIの回答の中で、自分にはなかった視点は何でしたか。'
+        },
+        {
+          key: 'discomfort',
+          title: '納得できなかったこと、違和感が残ったことは何でしたか。'
+        },
+        {
+          key: 'contextChange',
+          title: 'その違和感や気づきを踏まえて、判断文脈に何を足す、変える、または残しますか。'
+        }
+      ];
+      const q = Math.min(state.reflectionQ || 0, questions.length - 1);
+      const current = questions[q];
       root.innerHTML = `
-        <section class="card space-y-4 fade-in">
+        <section class="card space-y-3 fade-in">
           ${prog}
-          <p class="q-title">仮説を、あなたが判定する</p>
-          <p class="q-help">仮説は答えではありません。採る・捨てる・残す一言だけを決めるのは、あなたです。</p>
-          ${showPaste ? `
-          <div>
-            <label class="gap-insight-label" for="field-ai-paste">AIから返ってきた仮説（貼り付け）</label>
-            <p class="q-help">自分のAIから返ってきた本文を貼り、「仮説を読み取る」を押してください。</p>
-            <textarea id="field-ai-paste" class="textarea" rows="8">${escapeHtml(state.aiReplyPaste)}</textarea>
-            <button type="button" id="btn-parse" class="btn btn-ghost w-full mt-2">仮説を読み取る</button>
-          </div>
+          <p class="q-title">AIの答えを受けて、もう一度自分に戻る</p>
+          <p class="q-help">ここではAIの答えを採点しません。AIの答えによって、自分の判断文脈のどこが揺れたか、深まったかを確かめます。</p>
+          ${q === 0 ? `
+            <label class="gap-insight-label" for="field-ai-paste">AIの回答（任意）</label>
+            <p class="q-help">覚えておきたい箇所だけ貼り付けても構いません。空欄のままでも進めます。</p>
+            <textarea id="field-ai-paste" class="textarea" rows="4">${escapeHtml(state.aiReplyPaste)}</textarea>
           ` : ''}
-          ${hyps.length ? `
-            <div>
-              <p class="grow-field-label">刺さった仮説を選ぶ（複数可）</p>
-              <div class="choice-grid" id="hyp-list">
-                ${hyps.map((h) => `
-                  <label class="choice-btn${selected.has(h.id) ? ' selected' : ''}" style="display:block;cursor:pointer;text-align:left;">
-                    <input type="checkbox" data-hid="${escapeHtml(h.id)}" ${selected.has(h.id) ? 'checked' : ''} style="margin-right:0.4rem;">
-                    <span class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">${escapeHtml(h.category)}</span><br>
-                    <span class="text-sm">${escapeHtml(h.text)}</span>
-                  </label>
-                `).join('')}
-              </div>
-            </div>
-            <div>
-              <p class="grow-field-label">自分の一言（任意）</p>
-              <p class="q-help">採った仮説への補足や、捨てた理由など。空欄でも進めます。</p>
-              <textarea id="field-reflect" class="textarea" rows="2">${escapeHtml(state.reflection.contextChange || '')}</textarea>
-            </div>
-          ` : `
-            <p class="q-help">まだ仮説がありません。「仮説を示す」に戻るか、上で貼り付けて読み取ってください。</p>
-          `}
-          <div class="flex flex-col gap-2">
-            <button type="button" id="btn-next" class="btn btn-primary w-full" ${hyps.length ? '' : 'disabled'}>判断の持ち上がりへ</button>
-            <button type="button" id="btn-back-gen" class="btn btn-ghost w-full">仮説を示すに戻る</button>
-          </div>
+          <p class="text-[0.625rem] font-bold tracking-wider text-[hsl(var(--primary))]">問い ${q + 1} / 3</p>
+          <p class="q-title mt-1">${escapeHtml(current.title)}</p>
+          <p class="q-help">短い文章で構いません。</p>
+          <textarea id="field-reflect" class="textarea" rows="3">${escapeHtml(state.reflection[current.key] || '')}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">${q < 2 ? '次の問いへ' : '判断文脈を見比べる'}</button>
         </section>`;
-
       const paste = document.getElementById('field-ai-paste');
       if (paste) {
         paste.oninput = () => { state.aiReplyPaste = paste.value; };
-        const parseBtn = document.getElementById('btn-parse');
-        if (parseBtn) {
-          parseBtn.onclick = () => {
-            state.aiReplyPaste = paste.value;
-            if (!state.aiReplyPaste.trim()) {
-              paste.focus();
-              return;
-            }
-            applyAiPasteParse('a');
-            state.pathAMode = false;
-            render();
-          };
-        }
       }
-      document.querySelectorAll('#hyp-list input[type="checkbox"]').forEach((box) => {
-        box.onchange = () => {
-          const id = box.getAttribute('data-hid');
-          const set = new Set(state.selectedHypothesisIds || []);
-          if (box.checked) set.add(id);
-          else set.delete(id);
-          state.selectedHypothesisIds = Array.from(set);
-          const label = box.closest('label');
-          if (label) label.classList.toggle('selected', box.checked);
-        };
-      });
       const field = document.getElementById('field-reflect');
-      if (field) {
-        field.oninput = () => { state.reflection.contextChange = field.value; };
-      }
+      field.oninput = () => { state.reflection[current.key] = field.value; };
       document.getElementById('btn-next').onclick = () => {
-        if (!state.hypotheses.length || state.hypothesesStale) return;
-        if (field) state.reflection.contextChange = field.value.trim();
-        state.contextAfterText = proposeAfterFromReflection();
-        step = 17;
-        render();
-      };
-      document.getElementById('btn-back-gen').onclick = () => {
-        step = 13;
-        render();
-      };
-      return;
-    }
-
-    // 掘り下げのあと：①「判断しようとしていること」の更新（講演導線の核）
-    if (step === 17) {
-      const initial = (state.decisionInitial
-        || (state.contextBeforeParts && state.contextBeforeParts.decision)
-        || state.decision
-        || '').trim();
-      const candidates = state.decisionCandidates || [];
-      root.innerHTML = `
-        <section class="card space-y-4 fade-in">
-          ${prog}
-          <p class="q-title">最初に置いた「判断しようとしていること」は、<br>いまも同じですか。</p>
-          <p class="q-help">AIの候補は仮説です。採る・直す・同じまま進む、をあなたが決めてください。</p>
-          <div class="mirror-summary">
-            <p class="compare-label">最初に置いた判断</p>
-            <p class="font-semibold">「${escapeHtml(initial || '（未記入）')}」</p>
-          </div>
-          ${candidates.length ? `
-            <div>
-              <p class="grow-field-label">AIが示した、持ち上がりの候補</p>
-              <div class="choice-grid" id="decision-cands">
-                ${candidates.map((c) => `
-                  <button type="button" class="choice-btn${state.selectedDecisionCandidate === c.id ? ' selected' : ''}" data-cid="${escapeHtml(c.id)}">${escapeHtml(c.text)}</button>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-          <div>
-            <p class="grow-field-label">いま、判断しようとしていること</p>
-            <textarea id="field-decision-now" class="textarea" rows="3">${escapeHtml(state.decision)}</textarea>
-          </div>
-          <button type="button" id="btn-next" class="btn btn-primary w-full">判断文脈を見比べる</button>
-        </section>`;
-      const fieldNow = document.getElementById('field-decision-now');
-      document.querySelectorAll('#decision-cands .choice-btn').forEach((btn) => {
-        btn.onclick = () => {
-          const id = btn.getAttribute('data-cid');
-          const hit = candidates.find((c) => c.id === id);
-          if (!hit) return;
-          state.selectedDecisionCandidate = id;
-          fieldNow.value = hit.text;
-          document.querySelectorAll('#decision-cands .choice-btn').forEach((b) => b.classList.remove('selected'));
-          btn.classList.add('selected');
-        };
-      });
-      document.getElementById('btn-next').onclick = () => {
-        const v = (fieldNow.value || '').trim();
-        if (!v) {
-          fieldNow.focus();
+        state.reflection[current.key] = field.value.trim();
+        if (paste) state.aiReplyPaste = paste.value;
+        if (q < 2) {
+          state.reflectionQ = q + 1;
+          render();
           return;
         }
-        state.decision = v;
-        syncThemeFromBackground();
-        state.constraints = criteriaAsConstraintsText();
-        const base = proposeAfterFromReflection();
-        if (initial && v !== initial) {
-          state.contextAfterText = `${base}
-
-【掘り下げ後に持ち上がった判断】
-最初：「${initial}」
-いま：「${v}」`;
-        } else {
-          state.contextAfterText = base;
-        }
+        state.contextAfterText = proposeAfterFromReflection();
         step = 15;
         render();
       };
@@ -1874,18 +1335,18 @@ ${note}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">判断文脈を更新する</p>
-          <p class="q-help">仮説を見る前と、採否のあとを見比べます。最終の言葉は、あなたが整えてください。</p>
+          <p class="q-help">AIへ渡す前と、回答を受けた後を見比べます。最終の言葉は、あなたが整えてください。</p>
           <div class="compare-grid">
             <div class="compare-col">
-              <p class="compare-label">仮説を見る前</p>
+              <p class="compare-label">AIへ渡す前</p>
               <pre class="compare-body">${escapeHtml(before)}</pre>
             </div>
             <div class="compare-col compare-col-edit">
-              <p class="compare-label">採否のあと</p>
+              <p class="compare-label">AIの回答を受けた後</p>
               <textarea id="field-after" class="textarea compare-edit">${escapeHtml(state.contextAfterText)}</textarea>
             </div>
           </div>
-          <button type="button" id="btn-keep" class="btn btn-primary w-full">判断文脈を残す</button>
+          <button type="button" id="btn-keep" class="btn btn-primary w-full">育てた判断文脈を残す</button>
         </section>`;
       const after = document.getElementById('field-after');
       after.oninput = () => { state.contextAfterText = after.value; };

@@ -8,7 +8,9 @@
 - デプロイ先: [Vercel](https://vercel.com)
 - DB: [Neon Postgres](https://neon.tech)（Vercel Marketplace から追加）
 - 環境変数: `DATABASE_URL`（ブラウザからは参照しない）
+- B方式（内蔵仮説）: `OPENAI_API_KEY`（必須）、任意で `OPENAI_MODEL`（既定 `gpt-4o`）
 - MVP: `localStorage` がバックアップ。DB 未設定時は API が `saved: false` を返す
+- 仮説API: `POST /api/generate-hypotheses`（招待コード＋セキュリティ同意が必要。判断文脈本文はサーバログに残さない）
 
 ## 1. Vercel アカウント・プロジェクト
 

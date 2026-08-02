@@ -3,8 +3,7 @@
  *
  * 初回のみ招待コード＋名前を要求し、以後は localStorage で継続。
  * 台帳側で active:false / 削除された招待は、次回から再入力を求める。
- *
- * 将来のサーバ同期を想定し、usageLog（利用日時）と useCount を保持する。
+ * セキュリティ同意: accepted → B解禁 / declined → A固定
  */
 (function (global) {
   'use strict';
@@ -14,14 +13,17 @@
 
   function emptyAccess() {
     return {
-      schemaVersion: 1,
+      schemaVersion: 2,
       inviteId: '',
+      inviteCode: '',
       inviteLabel: '',
       displayName: '',
       activatedAt: '',
       lastUsedAt: '',
       useCount: 0,
-      usageLog: []
+      usageLog: [],
+      securityConsent: '',
+      securityConsentAt: ''
     };
   }
 
@@ -55,9 +57,6 @@
     return global.JudgmentOSInviteCodes;
   }
 
-  /**
-   * 保存済み認証が、いま有効な招待に紐づいているか
-   */
   function getAuthorizedAccess() {
     const access = loadRaw();
     if (!access || !access.inviteId || !access.displayName) return null;
@@ -68,6 +67,11 @@
     if (invite.expiresAt) {
       const exp = new Date(invite.expiresAt).getTime();
       if (!Number.isNaN(exp) && Date.now() > exp) return null;
+    }
+    // 旧データ互換: inviteCode が空なら台帳から補完
+    if (!access.inviteCode && invite.code) {
+      access.inviteCode = invite.code;
+      save(access);
     }
     return access;
   }
@@ -81,11 +85,14 @@
     if (!access) return null;
     return {
       inviteId: access.inviteId,
+      inviteCode: access.inviteCode || '',
       inviteLabel: access.inviteLabel || '',
       displayName: access.displayName,
       activatedAt: access.activatedAt,
       lastUsedAt: access.lastUsedAt,
-      useCount: access.useCount || 0
+      useCount: access.useCount || 0,
+      securityConsent: access.securityConsent || '',
+      securityConsentAt: access.securityConsentAt || ''
     };
   }
 
@@ -99,10 +106,59 @@
     return p ? p.inviteId : '';
   }
 
-  /**
-   * @param {{ code: string, displayName: string }} input
-   * @returns {{ ok: true, profile: object } | { ok: false, reason: string }}
-   */
+  function getInviteCode() {
+    const p = getProfile();
+    return p ? (p.inviteCode || '') : '';
+  }
+
+  /** '' | 'accepted' | 'declined' */
+  function getSecurityConsent() {
+    const p = getProfile();
+    return p ? (p.securityConsent || '') : '';
+  }
+
+  function hasSecurityDecision() {
+    const c = getSecurityConsent();
+    return c === 'accepted' || c === 'declined';
+  }
+
+  function canUseBuiltinAi() {
+    if (isDevModeLocal()) return true;
+    return getSecurityConsent() === 'accepted';
+  }
+
+  function isDevModeLocal() {
+    try {
+      if (new URLSearchParams(location.search).get('dev') === '1') return true;
+      if (localStorage.getItem('judgmentos.dev') === '1') return true;
+    } catch (_) { /* ignore */ }
+    return false;
+  }
+
+  function setSecurityConsent(value) {
+    const access = getAuthorizedAccess();
+    if (!access && !isDevModeLocal()) {
+      return { ok: false, reason: '先に招待コードを入力してください。' };
+    }
+    const v = value === 'accepted' || value === 'declined' ? value : '';
+    if (!v) return { ok: false, reason: '同意の選択が不正です。' };
+
+    if (access) {
+      access.securityConsent = v;
+      access.securityConsentAt = new Date().toISOString();
+      pushUsage(access, v === 'accepted' ? 'security_accept' : 'security_decline');
+      save(access);
+    } else if (isDevModeLocal()) {
+      const draft = loadRaw() || emptyAccess();
+      draft.securityConsent = v;
+      draft.securityConsentAt = new Date().toISOString();
+      if (!draft.displayName) draft.displayName = 'dev';
+      if (!draft.inviteId) draft.inviteId = 'dev';
+      save(draft);
+    }
+    return { ok: true, profile: getProfile() };
+  }
+
   function activate(input) {
     const registry = Codes();
     if (!registry) {
@@ -121,13 +177,13 @@
     const now = new Date().toISOString();
     const access = emptyAccess();
     access.inviteId = checked.invite.id;
+    access.inviteCode = checked.invite.code || registry.normalizeCode(input.code);
     access.inviteLabel = checked.invite.label || '';
     access.displayName = name;
     access.activatedAt = now;
     pushUsage(access, 'activate');
     save(access);
 
-    // 体験データ側にも参加者を紐付ける
     if (global.JudgmentOSStore && typeof global.JudgmentOSStore.setParticipant === 'function') {
       global.JudgmentOSStore.setParticipant({
         displayName: name,
@@ -139,7 +195,6 @@
     return { ok: true, profile: getProfile() };
   }
 
-  /** 利用開始時に呼ぶ（回数・日時の記録） */
   function touch(kind) {
     const access = getAuthorizedAccess();
     if (!access) return null;
@@ -158,10 +213,14 @@
     getProfile,
     getDisplayName,
     getInviteId,
+    getInviteCode,
+    getSecurityConsent,
+    hasSecurityDecision,
+    canUseBuiltinAi,
+    setSecurityConsent,
     activate,
     touch,
     clear,
-    /** 拡張・デバッグ用 */
     _loadRaw: loadRaw
   };
 })(typeof window !== 'undefined' ? window : globalThis);
