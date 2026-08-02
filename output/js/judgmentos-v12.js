@@ -1,13 +1,12 @@
 /**
- * JudgmentOS Version 1.4（考えている＝6問）
+ * JudgmentOS Version 1.5（導入UX＝低摩擦）
  * 建付け: AIと向き合う → 判断基準を明確に → 必要な問いに答える（答えは出さない）
  *
- * 1 背景 → 2 実現 → 3 決定事項 → 4 守る → 映し返し
- * → 5 判断基準（譲れない／できれば）→ 6 重み・覚悟 → 判断文脈 → AIへ渡す → …
+ * 導入: テーマ選択 → 吐き出し（音声／殴り書き）→ 自動構造化 → 映し返し
+ * → いちばん大切にしたいこと → … → 論点を判定 → 振り返る
  *
  * 旧フロー（気になること〜ギャップ問い）に戻す:
  *   - ?flow=legacy で judgmentos-v12.legacy.js を読み込む（index.html）
- *   - または output/js/judgmentos-v12.legacy.js を参照
  */
 (function () {
   'use strict';
@@ -188,19 +187,36 @@
     activeThemeId: null,
     activeEntryId: null,
     browseThemeId: null,
-    judgmentSessionId: ''
+    judgmentSessionId: '',
+    // 導入UX（テーマ選択 → 吐き出し → 自動構造化 → 映し返し）
+    introCategoryId: '',
+    introDump: '',
+    introExtractSource: '',
+    introConstraintTags: [],
+    introBusy: false,
+    introFetchStarted: false,
+    introEditAchieve: false,
+    introEditProtect: false
   };
+
+  const INTRO_CATEGORIES = [
+    { id: 'strategy', title: '戦略・投資・撤退', hint: '新規事業、予算配分、事業のやめ時' },
+    { id: 'org', title: '組織・人・意思決定', hint: 'アサイン、評価、チームの衝突' },
+    { id: 'ai_dissonance', title: 'AIや提案への『違和感』', hint: '上がってきた提案・AIの回答に納得がいかない' },
+    { id: 'vague', title: 'とにかくモヤモヤしている', hint: 'テーマがまだ定まっていない' }
+  ];
 
   const HYPOGEN_KEY = 'judgmentos.v14.hypogen';
   const HYPOGEN_LIMIT_JUDGMENT = 3;
   const HYPOGEN_LIMIT_DAY = 10;
 
-  let step = 1;
-  let farthestStep = 1;
+  let step = 101;
+  let farthestStep = 101;
   let concernDraft = '';
   let viewMode = 'flow'; // flow | history | theme
 
-  const STEP_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 11, 12];
+  // 101–104: 低摩擦導入 → ⑥以降。旧①–⑤は履歴復帰用に残す
+  const STEP_ORDER = [101, 102, 103, 104, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -221,7 +237,7 @@
   }
 
   function phaseEntryStep(phaseId) {
-    if (phaseId === 'think') return 1;
+    if (phaseId === 'think') return 101;
     if (phaseId === 'judge') {
       if (hasReachedStep(14) && (state.hypotheses.length || state.aiReplyPaste)) return 14;
       return 13;
@@ -229,7 +245,7 @@
     // 旧 id 互換
     if (phaseId === 'pass' || phaseId === 'return') return phaseEntryStep('judge');
     if (phaseId === 'reflect' || phaseId === 'grow') return hasReachedStep(16) ? 16 : 15;
-    return 1;
+    return 101;
   }
 
   function canGoToPhase(phaseId) {
@@ -256,9 +272,9 @@
       el.onclick = () => {
         const id = el.getAttribute('data-phase');
         if (!id || !canGoToPhase(id)) return;
-        // 「考えている」はいつでも先頭へ戻り、書き直せる
+        // 「考えている」はいつでも導入の先頭へ戻り、書き直せる
         if (id === 'think') {
-          step = 1;
+          step = 101;
           render();
           return;
         }
@@ -970,15 +986,19 @@ ${note}`;
 
   function progressLabel() {
     const map = {
+      101: 'テーマを選ぶ',
+      102: '頭の中を出す',
+      103: '思考を分類中',
+      104: '映し返し',
       1: '① いま判断しようとしていること',
       2: '② 背景',
       3: '③ 本来実現したいこと',
       17: '判断しようとしていることは変わったか',
       4: '④ 守りたいもの',
       5: 'いまの言葉を並べて見る',
-      6: '⑤ いちばん大切にしたいこと',
+      6: 'いちばん大切にしたいこと',
       7: '譲れない／できれば（任意）',
-      8: '⑥ 強く効いていること／引き受ける範囲',
+      8: '強く効いていること／引き受ける範囲',
       9: 'いま言葉にしたものを見る',
       10: '問い返す型',
       13: '論点を示す',
@@ -989,6 +1009,133 @@ ${note}`;
       12: '一段深くなった'
     };
     return map[step] || '';
+  }
+
+  function introCategory() {
+    return INTRO_CATEGORIES.find((c) => c.id === state.introCategoryId) || null;
+  }
+
+  function mockStructureIntroLocal() {
+    const text = String(state.introDump || '').replace(/\s+/g, ' ').trim();
+    const snippet = text.length > 48 ? `${text.slice(0, 48)}…` : text;
+    const id = state.introCategoryId;
+    const table = {
+      strategy: {
+        realization: snippet
+          ? `${snippet}を踏まえ、将来の打ち手を自分の基準で決められる状態にしたい`
+          : '投資や撤退の判断を、数字だけでなく自分の基準で決められる状態にしたい',
+        protection: '現場の判断責任と、安易な拡大・縮小で失われる信頼',
+        constraints_recommend: ['予算の上限', '撤退の条件', '時間軸']
+      },
+      org: {
+        realization: snippet
+          ? `${snippet}を整理し、人と組織の意思決定が噛み合う形にしたい`
+          : '人と組織の意思決定が噛み合い、衝突が建設的になる状態にしたい',
+        protection: '一人ひとりの尊厳と、チームの信頼関係',
+        constraints_recommend: ['役割の明確さ', '評価の公正', '対話の時間']
+      },
+      ai_dissonance: {
+        realization: snippet
+          ? `「${snippet}」という違和感を言葉にし、問い返せる判断軸を持ちたい`
+          : 'AIや提案の答えに飲み込まれず、自分の問い返しができる状態にしたい',
+        protection: '判断を引き受ける人の責任と、答え依存にしない文化',
+        constraints_recommend: ['説明可能性', '最終判断者', '前提の共有']
+      },
+      vague: {
+        realization: snippet
+          ? `${snippet}の奥にある、本当に向かいたい姿をはっきりさせたい`
+          : 'モヤモヤの奥にある、本当に向かいたい姿をはっきりさせたい',
+        protection: '焦って結論を急がず、自分の感覚を粗末にしないこと',
+        constraints_recommend: ['今は決めなくてよい範囲', '最低限守りたいこと']
+      }
+    };
+    return table[id] || table.vague;
+  }
+
+  async function requestStructureIntro() {
+    const Access = window.JudgmentOSAccess;
+    const profile = Access && Access.getProfile ? Access.getProfile() : null;
+    const payload = {
+      categoryId: state.introCategoryId,
+      dumpText: state.introDump,
+      inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
+      inviteId: (Access && Access.getInviteId && Access.getInviteId()) || (profile && profile.inviteId) || '',
+      securityConsent: !!(Access && Access.canUseBuiltinAi && Access.canUseBuiltinAi())
+    };
+    try {
+      const res = await fetch('/api/structure-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && data.realization && data.protection) {
+        return {
+          realization: data.realization,
+          protection: data.protection,
+          constraints_recommend: Array.isArray(data.constraints_recommend) ? data.constraints_recommend : [],
+          source: data.source || 'model'
+        };
+      }
+    } catch (_) { /* fall through */ }
+    const m = mockStructureIntroLocal();
+    return { ...m, source: 'mock' };
+  }
+
+  function applyIntroExtraction(extracted) {
+    state.achieve = (extracted.realization || '').trim();
+    state.protect = (extracted.protection || '').trim();
+    state.introConstraintTags = (extracted.constraints_recommend || []).slice();
+    state.introExtractSource = extracted.source || '';
+    const cat = introCategory();
+    state.theme = cat ? cat.title : state.theme;
+    state.background = state.introDump.trim();
+    if (!state.decision.trim()) {
+      const firstLine = state.introDump.split(/\n/).map((l) => l.trim()).find(Boolean) || '';
+      state.decision = firstLine.slice(0, 120) || (cat ? `${cat.title}について向き合う` : 'いまの判断');
+    }
+    state.decisionInitial = state.decision;
+  }
+
+  function bindSpeechMic(textarea, btn) {
+    if (!textarea || !btn) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      btn.classList.add('hidden');
+      btn.title = 'このブラウザでは音声入力に対応していません';
+      return;
+    }
+    const rec = new SR();
+    rec.lang = 'ja-JP';
+    rec.continuous = true;
+    rec.interimResults = false;
+    let listening = false;
+    const setListening = (on) => {
+      listening = on;
+      btn.classList.toggle('is-listening', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.textContent = on ? '聞き取り中（タップで停止）' : 'マイクで話す';
+    };
+    btn.onclick = () => {
+      if (listening) {
+        try { rec.stop(); } catch (_) { /* ignore */ }
+        return;
+      }
+      try { rec.start(); } catch (_) { /* ignore */ }
+    };
+    rec.onstart = () => setListening(true);
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    rec.onresult = (ev) => {
+      let chunk = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i += 1) {
+        if (ev.results[i].isFinal) chunk += ev.results[i][0].transcript;
+      }
+      if (!chunk) return;
+      const cur = textarea.value;
+      textarea.value = `${cur}${cur && !/\s$/.test(cur) ? '\n' : ''}${chunk}`;
+      textarea.dispatchEvent(new Event('input'));
+    };
   }
 
   function nextAfterContextUpdate() {
@@ -1025,12 +1172,15 @@ ${note}`;
       reflection: { newPerspective: '', discomfort: '', contextChange: '' },
       reflectionQ: 0, contextAfterText: '',
       criteriaGrowth: emptyCriteriaGrowth(),
-      activeThemeId: null, activeEntryId: null, browseThemeId: null
+      activeThemeId: null, activeEntryId: null, browseThemeId: null,
+      introCategoryId: '', introDump: '', introExtractSource: '',
+      introConstraintTags: [], introBusy: false, introFetchStarted: false,
+      introEditAchieve: false, introEditProtect: false
     });
     concernDraft = '';
     viewMode = 'flow';
-    step = 1;
-    farthestStep = 1;
+    step = 101;
+    farthestStep = 101;
   }
 
   function keepGrownContext() {
@@ -1449,6 +1599,192 @@ ${note}`;
       return;
     }
     const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
+
+    // —— 導入UX STEP1: テーマ選択（ワンタップ）——
+    if (step === 101) {
+      root.innerHTML = `
+        <section class="card space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">今、どのことで頭を悩ませていますか？</p>
+          <p class="q-help">まずは近いものを一つ選んでください。あとから言葉は整えられます。</p>
+          <div class="theme-card-grid" id="intro-cat-grid">
+            ${INTRO_CATEGORIES.map((c) => `
+              <button type="button" class="theme-card${state.introCategoryId === c.id ? ' selected' : ''}" data-cid="${escapeHtml(c.id)}">
+                <span class="theme-card-title">${escapeHtml(c.title)}</span>
+                <span class="theme-card-hint">${escapeHtml(c.hint)}</span>
+              </button>
+            `).join('')}
+          </div>
+          ${isDevMode() ? `<button type="button" id="btn-dev-sample" class="btn btn-ghost w-full text-xs opacity-60">[開発] サンプルで進む</button>` : ''}
+        </section>`;
+      root.querySelectorAll('#intro-cat-grid .theme-card').forEach((btn) => {
+        btn.onclick = () => {
+          state.introCategoryId = btn.getAttribute('data-cid') || '';
+          step = 102;
+          render();
+        };
+      });
+      const btnDev = document.getElementById('btn-dev-sample');
+      if (btnDev) {
+        btnDev.onclick = () => {
+          state.introCategoryId = 'ai_dissonance';
+          state.background = DEMO.background;
+          state.achieve = DEMO.achieve;
+          state.decision = DEMO.decision;
+          state.protect = DEMO.protect;
+          state.criteriaCore = DEMO.criteriaCore;
+          state.criteriaMust = DEMO.criteriaMust;
+          state.criteriaWant = DEMO.criteriaWant;
+          state.weightResolve = DEMO.weightResolve;
+          syncThemeFromBackground();
+          step = 9;
+          render();
+        };
+      }
+      return;
+    }
+
+    // —— 導入UX STEP2: 吐き出し（音声／殴り書き）——
+    if (step === 102) {
+      const cat = introCategory();
+      root.innerHTML = `
+        <section class="card space-y-3 fade-in">
+          ${prog}
+          <p class="q-title">頭の中にあることを、そのまま出してください。</p>
+          <p class="q-help">${cat ? `テーマ: ${escapeHtml(cat.title)} — ` : ''}まとまっていなくて構いません。</p>
+          <textarea id="field-intro-dump" class="textarea textarea-dump" rows="7" placeholder="まとまっていなくて構いません。頭の中にあることをそのまま喋るか、箇条書きで打ってください。">${escapeHtml(state.introDump)}</textarea>
+          <div class="dump-actions">
+            <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+            <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>これで分類する</button>
+          </div>
+        </section>`;
+      const ta = document.getElementById('field-intro-dump');
+      const next = document.getElementById('btn-next');
+      const mic = document.getElementById('btn-mic');
+      if (ta) {
+        ta.oninput = () => {
+          state.introDump = ta.value;
+          if (next) next.disabled = ta.value.trim().length < 4;
+        };
+      }
+      bindSpeechMic(ta, mic);
+      if (next) {
+        next.onclick = () => {
+          const v = (ta?.value || '').trim();
+          if (v.length < 4) {
+            ta?.focus();
+            return;
+          }
+          state.introDump = v;
+          state.introBusy = true;
+          state.introFetchStarted = false;
+          step = 103;
+          render();
+        };
+      }
+      return;
+    }
+
+    // —— 導入UX STEP3: 自動構造化（ローディング）——
+    if (step === 103) {
+      root.innerHTML = `
+        <section class="card space-y-4 fade-in extract-loading" aria-live="polite">
+          ${prog}
+          <div class="extract-spinner" aria-hidden="true"></div>
+          <p class="q-title" style="text-align:center;margin-bottom:0">思考を分類中...</p>
+          <p class="q-help" style="text-align:center;margin-bottom:0">実現したいことと、守りたいものを抜き出しています。</p>
+        </section>`;
+      if (!state.introFetchStarted) {
+        state.introFetchStarted = true;
+        state.introBusy = true;
+        requestStructureIntro().then((extracted) => {
+          if (step !== 103) return;
+          applyIntroExtraction(extracted);
+          state.introBusy = false;
+          state.introFetchStarted = false;
+          state.introEditAchieve = false;
+          state.introEditProtect = false;
+          step = 104;
+          render();
+        });
+      }
+      return;
+    }
+
+    // —— 導入UX STEP4: 映し返し（15秒で届く）——
+    if (step === 104) {
+      const tags = state.introConstraintTags || [];
+      root.innerHTML = `
+        <section class="space-y-4 fade-in reveal-in">
+          ${prog}
+          <p class="q-title">この2つのバランスを取ることが、今回のテーマですね？</p>
+          <p class="q-help">AIが吐き出しから抜き出した軸です。違うところだけ直して進んでください。</p>
+          <div class="axis-pair">
+            <div class="axis-card reveal-card">
+              <p class="axis-label">実現したいこと</p>
+              ${state.introEditAchieve
+                ? `<textarea id="field-edit-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>`
+                : `<p class="axis-body">「${escapeHtml(state.achieve || '（未抽出）')}」</p>`}
+              <button type="button" id="btn-edit-achieve" class="btn btn-ghost w-full mt-2">${state.introEditAchieve ? '反映する' : '微修正'}</button>
+            </div>
+            <div class="axis-card reveal-card reveal-card-delay">
+              <p class="axis-label">守りたいもの</p>
+              ${state.introEditProtect
+                ? `<textarea id="field-edit-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>`
+                : `<p class="axis-body">「${escapeHtml(state.protect || '（未抽出）')}」</p>`}
+              <button type="button" id="btn-edit-protect" class="btn btn-ghost w-full mt-2">${state.introEditProtect ? '反映する' : '微修正'}</button>
+            </div>
+          </div>
+          ${tags.length ? `
+            <div class="constraint-suggest">
+              <p class="grow-field-label">意識するとよい制約（参考）</p>
+              <div class="tag-row">${tags.map((t) => `<span class="soft-tag">${escapeHtml(t)}</span>`).join('')}</div>
+            </div>
+          ` : ''}
+          <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>この軸で進める</button>
+          <button type="button" id="btn-redump" class="btn btn-ghost w-full">吐き出しに戻る</button>
+        </section>`;
+      const editA = document.getElementById('btn-edit-achieve');
+      const editP = document.getElementById('btn-edit-protect');
+      if (editA) {
+        editA.onclick = () => {
+          if (state.introEditAchieve) {
+            const v = (document.getElementById('field-edit-achieve')?.value || '').trim();
+            if (v) state.achieve = v;
+            state.introEditAchieve = false;
+          } else {
+            state.introEditAchieve = true;
+          }
+          render();
+        };
+      }
+      if (editP) {
+        editP.onclick = () => {
+          if (state.introEditProtect) {
+            const v = (document.getElementById('field-edit-protect')?.value || '').trim();
+            if (v) state.protect = v;
+            state.introEditProtect = false;
+          } else {
+            state.introEditProtect = true;
+          }
+          render();
+        };
+      }
+      document.getElementById('btn-next').onclick = () => {
+        if (!state.achieve.trim() || !state.protect.trim()) return;
+        if (state.introConstraintTags.length && !state.criteriaWant.trim()) {
+          state.criteriaWant = state.introConstraintTags.join('／');
+        }
+        syncThemeFromBackground();
+        step = 6;
+        render();
+      };
+      document.getElementById('btn-redump').onclick = () => {
+        step = 102;
+        render();
+      };
+      return;
+    }
 
     if (step === 1) {
       const draft = concernDraft || state.decision;
