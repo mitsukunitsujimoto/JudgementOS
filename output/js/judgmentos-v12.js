@@ -79,7 +79,7 @@
   ];
 
   const AI_PASS_CLOSING = `答えや最適案は出さないでください。断定せず、論点として示してください。
-目的は、気づいていない論点を掘り起こし、振り返りと問いの更新に使える材料を渡すことです。決めるのは私です。
+目的は、気づいていない論点を掘り起こし、あとで振り返って最初の判断を見直す材料を渡すことです。決めるのは私です。
 
 必ず次の形式だけで返してください。前置きや長い解説は不要です。各見出しの下に論点を1〜3個。
 番号付きの行は必ず「論点1:」「論点2:」と書くこと。「仮説」という語は使わない（「仮説1:」も禁止）。
@@ -390,7 +390,7 @@ ${list || '（なし）'}`;
   function buildContextPack() {
     return `${formatContextParts(buildContextParts())}
 
-【映し返し】
+【いまの言葉を並べて見る】
 ${buildReflection()}`;
   }
 
@@ -678,7 +678,7 @@ ${note}`;
     if (!builtinAiAllowed()) {
       return {
         ok: false,
-        reason: '外部AIへの送信に同意していないため、内蔵の論点提示は使えません。自分のAIを使う方法へ。',
+        reason: '外部AIへの送信に同意していないため、この画面で論点を出す機能は使えません。自分のChatGPTなどを使う方法へ。',
         code: 'NO_CONSENT'
       };
     }
@@ -732,7 +732,7 @@ ${note}`;
     } catch (_) {
       return {
         ok: false,
-        reason: 'いまは論点を示せません。自分のAIを使う方法（A）をご利用ください。',
+        reason: 'いまは論点を示せません。自分のChatGPTなどを使う方法をご利用ください。',
         code: 'NETWORK',
         retryable: true
       };
@@ -752,7 +752,7 @@ ${note}`;
       }
       return {
         ok: false,
-        reason: (data && data.reason) || 'いまは論点を示せません。自分のAIを使う方法（A）へ。',
+        reason: (data && data.reason) || 'いまは論点を示せません。自分のChatGPTなどを使う方法へ。',
         code: (data && data.code) || 'ERROR',
         retryable
       };
@@ -763,7 +763,7 @@ ${note}`;
     if (!state.hypotheses.length && !state.decisionCandidates.length) {
       return {
         ok: false,
-        reason: '論点の形式を読み取れませんでした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
+        reason: '論点の形式を読み取れませんでした。もう一度お試しいただくか、自分のChatGPTなどを使う方法へ。',
         code: 'PARSE_EMPTY',
         retryable: true
       };
@@ -783,8 +783,8 @@ ${note}`;
     root.innerHTML = `
       <section class="space-y-4 fade-in">
         ${prog}
-        <p class="q-title">自分のAIへ渡す（非常口）</p>
-        <p class="q-help">判断文脈をコピーし、任意のAIに貼ってください。返ってきた論点を次で判定します。最適案は求めない依頼文です。</p>
+        <p class="q-title">自分のAIへ渡す（コピーして使う）</p>
+        <p class="q-help">いま言葉にした内容をコピーし、任意のAIに貼ってください。返ってきた論点を次で選びます。「いちばん良い案を出して」とは書かない依頼文です。</p>
         <div class="mirror-summary">
           <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
         </div>
@@ -792,7 +792,7 @@ ${note}`;
           <button type="button" id="btn-copy-ai" class="btn btn-primary w-full">AIへ渡す文面をコピー</button>
           <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。返ってきた論点を次で貼り付けます。</span>
           <button type="button" id="btn-return" class="btn btn-ghost w-full">論点が返ってきたら、判定する</button>
-          ${builtinAiAllowed() ? `<button type="button" id="btn-back-b" class="btn btn-ghost w-full">内蔵の論点提示に戻る</button>` : ''}
+          ${builtinAiAllowed() ? `<button type="button" id="btn-back-b" class="btn btn-ghost w-full">この画面で論点を出すに戻る</button>` : ''}
         </div>
       </section>`;
     document.getElementById('btn-copy-ai').onclick = () => copyText(buildAiPassText(), 'copy-ai-toast');
@@ -975,7 +975,7 @@ ${note}`;
       3: '③ 本来実現したいこと',
       17: '判断しようとしていることは変わったか',
       4: '④ 守りたいもの',
-      5: '映し返し',
+      5: 'いまの言葉を並べて見る',
       6: '⑤ いちばん大切にしたいこと',
       7: '譲れない／できれば（任意）',
       8: '⑥ 強く効いていること／引き受ける範囲',
@@ -1140,7 +1140,7 @@ ${note}`;
     if (!rows.length) return '';
     return `
       <div class="criteria-history mt-3">
-        <p class="compare-label">今回育った判断基準</p>
+        <p class="compare-label">今回はっきりした判断基準</p>
         ${rows.join('')}
       </div>`;
   }
@@ -1491,7 +1491,7 @@ ${note}`;
           ${prog}
           ${trailHtml()}
           <p class="q-title">経営者として、本来実現したいことは何ですか。</p>
-          <p class="q-help">いまの施策や数字の目標ではなく、その先で向かいたい姿を書いてください。大きな言葉（社内融和、地域との共生、再生、社会貢献など）で構いません。この判断の手段的なゴールではなく、あなたが経営者として本当に向かいたいものをあぶり出します。</p>
+          <p class="q-help">いまの施策や数字の目標ではなく、その先で向かいたい姿を書いてください。大きな言葉（社内融和、地域との共生、再生、社会貢献など）で構いません。施策の目標ではなく、あなたが経営者として本当に向かいたい姿を書いてください。</p>
           <textarea id="field-achieve" class="textarea">${escapeHtml(state.achieve)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
         </section>`;
@@ -1531,7 +1531,7 @@ ${note}`;
         <section class="space-y-3">
           ${prog}
           <div class="mirror-card fade-in">
-            <p class="mirror-label">映し返し</p>
+            <p class="mirror-label">いまの言葉を並べて見る</p>
             <p>あなたは</p>
             <p class="quote">「${escapeHtml(m.achieve)}」</p>
             <p>と考えています。</p>
@@ -1670,7 +1670,7 @@ ${note}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">ここまでに、あなたが言葉にした判断文脈</p>
-          <p class="q-help">論点は答えではありません。気づいていなかった点を、判断文脈に照らして採る／捨てるためのものです。振り返りと問いの更新につながります。</p>
+          <p class="q-help">論点は答えではありません。気づいていなかった点を、いま言葉にした内容に照らして採る／捨てるためのものです。あとで振り返り、最初の判断を見直す材料になります。</p>
           <div class="mirror-summary">
             <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
           </div>
@@ -1685,9 +1685,9 @@ ${note}`;
               </button>
               <p class="text-xs text-center text-[hsl(var(--muted-fg))]">この判断 ${usage.judgment}/${HYPOGEN_LIMIT_JUDGMENT} 回 · 本日 ${usage.day}/${HYPOGEN_LIMIT_DAY} 回</p>
             ` : `
-              <p class="q-help">内蔵の論点提示は、データ送信に同意した方のみ使えます。下の「自分のAIを使う」で進められます。</p>
+              <p class="q-help">この画面で論点を出す機能は、データ送信に同意した方のみ使えます。下の「自分のAIを使う」で進められます。</p>
             `}
-            <button type="button" id="btn-path-a" class="btn btn-ghost w-full">自分のAIを使う（A）</button>
+            <button type="button" id="btn-path-a" class="btn btn-ghost w-full">自分のChatGPTなどを使う</button>
             ${state.hypotheses.length && !state.hypothesesStale ? `
               <button type="button" id="btn-to-judge" class="btn btn-ghost w-full">すでに出ている論点を判定する</button>
             ` : ''}
@@ -1749,7 +1749,7 @@ ${note}`;
         <section class="card space-y-4 fade-in">
           ${prog}
           <p class="q-title">論点を、あなたが判定する</p>
-          <p class="q-help">論点は答えではありません。採る・捨てる・残す一言だけを決めるのは、あなたです。振り返りと問いの更新のための材料です。</p>
+          <p class="q-help">論点は答えではありません。採る・捨てる・残す一言だけを決めるのは、あなたです。あとで振り返り、最初の判断を見直す材料です。</p>
           ${showPaste ? `
           <div>
             <label class="gap-insight-label" for="field-ai-paste">AIから返ってきた論点（貼り付け）</label>
@@ -1760,7 +1760,7 @@ ${note}`;
           ` : ''}
           ${hyps.length ? `
             <div>
-              <p class="grow-field-label">刺さった論点を選ぶ（複数可）</p>
+              <p class="grow-field-label">気になった論点を選ぶ（複数可）</p>
               <div class="choice-grid" id="hyp-list">
                 ${hyps.map((h) => `
                   <label class="choice-btn${selected.has(h.id) ? ' selected' : ''}" style="display:block;cursor:pointer;text-align:left;">
@@ -1908,14 +1908,14 @@ ${note}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">判断文脈を更新する</p>
-          <p class="q-help">論点を見る前と、採否のあとを見比べます。最終の言葉は、あなたが整えてください。</p>
+          <p class="q-help">論点を見る前と、採る・捨てるのあとを見比べます。最終の言葉は、あなたが整えてください。</p>
           <div class="compare-grid">
             <div class="compare-col">
               <p class="compare-label">論点を見る前</p>
               <pre class="compare-body">${escapeHtml(before)}</pre>
             </div>
             <div class="compare-col compare-col-edit">
-              <p class="compare-label">採否のあと</p>
+              <p class="compare-label">採る・捨てるのあと</p>
               <textarea id="field-after" class="textarea compare-edit">${escapeHtml(state.contextAfterText)}</textarea>
             </div>
           </div>
@@ -2088,7 +2088,7 @@ ${note}`;
             </div>` : ''}
           <div class="flex flex-col gap-2">
             <button type="button" id="btn-optional-j" class="btn btn-ghost w-full">私はこう判断する（任意）</button>
-            <button type="button" id="btn-history" class="btn btn-ghost w-full">これまで育てた判断文脈と基準</button>
+            <button type="button" id="btn-history" class="btn btn-ghost w-full">残した判断文脈と基準</button>
             <button type="button" id="btn-restart" class="btn btn-primary w-full">もう一度、考え始める</button>
             <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
           </div>
@@ -2115,9 +2115,9 @@ ${note}`;
     const themes = Store ? Store.listThemesForUi() : [];
     root.innerHTML = `
       <section class="space-y-3 fade-in">
-        <p class="step-progress"><em>JudgmentOS</em> · これまで育てた判断文脈と基準</p>
-        <p class="q-title">これまで育てた判断文脈と基準</p>
-        <p class="q-help">残しているのはAIの答えではありません。育てた判断文脈と、今回育った判断基準です。同じテーマを深めるときは、新しい履歴として残ります。</p>
+        <p class="step-progress"><em>JudgmentOS</em> · 残した判断文脈と基準</p>
+        <p class="q-title">残した判断文脈と基準</p>
+        <p class="q-help">残しているのはAIの答えではありません。残した判断文脈と、今回はっきりした判断基準です。同じテーマを深めるときは、新しい履歴として残ります。</p>
         ${themes.length === 0 ? `<p class="q-help">まだ残した判断文脈・判断基準はありません。</p>` : `
           <div class="history-list">
             ${themes.map(t => {
@@ -2131,7 +2131,7 @@ ${note}`;
               <button type="button" class="history-item" data-id="${escapeHtml(t.id)}">
                 <span class="history-date">${escapeHtml(Store.formatDateJa(t.latestAt))}</span>
                 <span class="history-title">${escapeHtml(t.title)}</span>
-                <span class="history-meta">${t.entryCount > 1 ? `${t.entryCount}回の育ち` : '1回'}${hasCriteria ? ' · 判断基準あり' : ''}</span>
+                <span class="history-meta">${t.entryCount > 1 ? `${t.entryCount}回の記録` : '1回'}${hasCriteria ? ' · 判断基準あり' : ''}</span>
                 ${keep ? `<span class="history-keep">${escapeHtml(keep)}</span>` : ''}
               </button>`;
             }).join('')}
@@ -2163,20 +2163,20 @@ ${note}`;
     const entries = theme.entries.slice().reverse();
     root.innerHTML = `
       <section class="space-y-3 fade-in">
-        <p class="step-progress"><em>JudgmentOS</em> · 育ちの履歴</p>
+        <p class="step-progress"><em>JudgmentOS</em> · 残した履歴</p>
         <p class="q-title">${escapeHtml(theme.title)}</p>
-        <p class="q-help">同じテーマでも、上書きせずに残しています。判断文脈と、育った判断基準の両方を見返せます。</p>
+        <p class="q-help">同じテーマでも、上書きせずに残しています。判断文脈と、はっきりした判断基準の両方を見返せます。</p>
         <div class="history-list">
           ${entries.map(e => `
             <div class="history-entry card">
               <p class="history-date">${escapeHtml(Store.formatDateJa(e.createdAt))} · ${e.entryNumber}回目${e.participantName ? ` · ${escapeHtml(e.participantName)}` : ''}</p>
-              <p class="compare-label mt-3">育てた判断文脈</p>
+              <p class="compare-label mt-3">残した判断文脈</p>
               <p class="text-sm mt-2"><strong>実現</strong>：${escapeHtml(e.achieve || '—')}</p>
               <p class="text-sm"><strong>守る</strong>：${escapeHtml(e.protect || '—')}</p>
               ${e.contextAfter || e.contextBefore ? `<pre class="compare-body mt-2">${escapeHtml(e.contextAfter || e.contextBefore)}</pre>` : ''}
               ${criteriaGrowthSummaryHtml(e.criteriaGrowth)}
               <div class="flex flex-wrap gap-2 mt-3">
-                <button type="button" class="btn btn-primary btn-resume" data-entry="${escapeHtml(e.id)}">この言葉から、もう一度育てる</button>
+                <button type="button" class="btn btn-primary btn-resume" data-entry="${escapeHtml(e.id)}">この言葉から続ける</button>
               </div>
             </div>
           `).join('')}

@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(503).json({
       ok: false,
-      reason: '論点の提示がまだ設定されていません。自分のAIを使う方法（A）をご利用ください。',
+      reason: '論点の提示がまだ設定されていません。自分のChatGPTなどを使う方法をご利用ください。',
       code: 'NOT_CONFIGURED'
     });
   }
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
   } catch {
     return res.status(502).json({
       ok: false,
-      reason: 'いまは論点を示せません。しばらくして再度お試しいただくか、自分のAIを使う方法（A）へ。',
+      reason: 'いまは論点を示せません。しばらくして再度お試しいただくか、自分のChatGPTなどを使う方法へ。',
       code: 'NETWORK',
       retryable: true
     });
@@ -109,8 +109,8 @@ export default async function handler(req, res) {
     return res.status(502).json({
       ok: false,
       reason: retryable
-        ? 'いまは論点を示せません。自動で一度だけ再試行するか、自分のAIを使う方法（A）へ。'
-        : '論点を提示できませんでした。自分のAIを使う方法（A）をご利用ください。',
+        ? 'いまは論点を示せません。自動で一度だけ再試行するか、自分のChatGPTなどを使う方法へ。'
+        : '論点を提示できませんでした。自分のChatGPTなどを使う方法をご利用ください。',
       code: 'UPSTREAM',
       retryable,
       // 本文・プロンプトは返さない。運用確認用に短いコードのみ
@@ -125,7 +125,7 @@ export default async function handler(req, res) {
   } catch {
     return res.status(502).json({
       ok: false,
-      reason: 'いまは論点を示せません。自分のAIを使う方法（A）へ。',
+      reason: 'いまは論点を示せません。自分のChatGPTなどを使う方法へ。',
       code: 'PARSE',
       retryable: true
     });
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
   if (!text) {
     return res.status(502).json({
       ok: false,
-      reason: '論点が空でした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
+      reason: '論点が空でした。もう一度お試しいただくか、自分のChatGPTなどを使う方法へ。',
       code: 'EMPTY',
       retryable: true
     });
