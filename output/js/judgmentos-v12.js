@@ -78,26 +78,26 @@
     }
   ];
 
-  const AI_PASS_CLOSING = `答えや最適案は出さないでください。断定せず、仮説として示してください。
-目的は、私の判断基準をより明らかにすることです。決めるのは私です。
+  const AI_PASS_CLOSING = `答えや最適案は出さないでください。断定せず、論点として示してください。
+目的は、気づいていない論点を掘り起こし、振り返りと問いの更新に使える材料を渡すことです。決めるのは私です。
 
-必ず次の形式だけで返してください。前置きや長い解説は不要です。各見出しの下に仮説を1〜3個。
+必ず次の形式だけで返してください。前置きや長い解説は不要です。各見出しの下に論点を1〜3個。
 
 【見落としている前提】
-仮説1: （一文）
-仮説2: （一文）
+論点1: （一文）
+論点2: （一文）
 
 【別の立場からの見方】
-仮説1: （一文）
+論点1: （一文）
 
 【長期的な影響】
-仮説1: （一文）
+論点1: （一文）
 
 【リスク】
-仮説1: （一文）
+論点1: （一文）
 
 【まだ考えていない決定事項・選択肢】
-仮説1: （一文）
+論点1: （一文）
 
 【いま判断しようとしていることが持ち上がるとしたら】
 候補1: （一文）
@@ -492,7 +492,7 @@ ${AI_PASS_CLOSING}`;
     if (picked.length) {
       t += `
 
-【採った仮説】
+【採った論点】
 ${picked.join('\n')}`;
     }
     if (note) {
@@ -504,13 +504,13 @@ ${note}`;
     return t;
   }
 
-  /** AIの番号付き仮説／候補を読み取る（形式が崩れていても行頭番号や「仮説n:」を拾う） */
+  /** AIの番号付き論点／候補を読み取る（論点・仮説の両方の表記に対応） */
   function parseHypothesesFromAi(raw) {
     const text = (raw || '').replace(/\r\n/g, '\n').trim();
     if (!text) return { hypotheses: [], decisionCandidates: [] };
     const hypotheses = [];
     const decisionCandidates = [];
-    let category = '仮説';
+    let category = '論点';
     let inDecision = false;
     let n = 0;
     const lines = text.split('\n');
@@ -524,7 +524,7 @@ ${note}`;
         continue;
       }
       let body = '';
-      let m = line.match(/^(?:仮説|候補)\s*\d+\s*[:：]\s*(.+)$/);
+      let m = line.match(/^(?:論点|仮説|候補)\s*\d+\s*[:：]\s*(.+)$/);
       if (m) body = m[1].trim();
       if (!body) {
         m = line.match(/^\d+\s*[\.\)、．]\s*(.+)$/);
@@ -542,10 +542,10 @@ ${note}`;
         hypotheses.push({ id: `hyp-${hypotheses.length + 1}`, category, text: body });
       }
     }
-    // 見出しなしのフォールバック: ある程度の長さの行を仮説扱い
+    // 見出しなしのフォールバック
     if (!hypotheses.length && !decisionCandidates.length) {
       text.split('\n').map((l) => l.trim()).filter((l) => l.length >= 12 && !/^#{1,3}\s/.test(l)).slice(0, 12).forEach((body, i) => {
-        hypotheses.push({ id: `hyp-${i + 1}`, category: '仮説', text: body.replace(/^[*-・]\s*/, '') });
+        hypotheses.push({ id: `hyp-${i + 1}`, category: '論点', text: body.replace(/^[*-・]\s*/, '') });
       });
     }
     return { hypotheses, decisionCandidates };
@@ -596,13 +596,13 @@ ${note}`;
     if (u.judgment >= HYPOGEN_LIMIT_JUDGMENT) {
       return {
         ok: false,
-        reason: `この判断では仮説を出し直せる回数が上限（${HYPOGEN_LIMIT_JUDGMENT}回）です。文脈を直すか、自分のAIを使うか、別の判断でお試しください。`
+        reason: `この判断では論点を出し直せる回数が上限（${HYPOGEN_LIMIT_JUDGMENT}回）です。文脈を直すか、自分のAIを使うか、別の判断でお試しください。`
       };
     }
     if (u.day >= HYPOGEN_LIMIT_DAY) {
       return {
         ok: false,
-        reason: `本日の仮説生成が上限（${HYPOGEN_LIMIT_DAY}回）です。明日またお試しいただくか、自分のAIをご利用ください。`
+        reason: `本日の論点提示が上限（${HYPOGEN_LIMIT_DAY}回）です。明日またお試しいただくか、自分のAIをご利用ください。`
       };
     }
     return { ok: true, remainingJudgment: HYPOGEN_LIMIT_JUDGMENT - u.judgment };
@@ -668,7 +668,7 @@ ${note}`;
     if (!builtinAiAllowed()) {
       return {
         ok: false,
-        reason: '外部AIへの送信に同意していないため、内蔵の仮説生成は使えません。自分のAIを使う方法へ。',
+        reason: '外部AIへの送信に同意していないため、内蔵の論点提示は使えません。自分のAIを使う方法へ。',
         code: 'NO_CONSENT'
       };
     }
@@ -722,7 +722,7 @@ ${note}`;
     } catch (_) {
       return {
         ok: false,
-        reason: 'いまは仮説を出せません。自分のAIを使う方法（A）をご利用ください。',
+        reason: 'いまは論点を示せません。自分のAIを使う方法（A）をご利用ください。',
         code: 'NETWORK',
         retryable: true
       };
@@ -742,7 +742,7 @@ ${note}`;
       }
       return {
         ok: false,
-        reason: (data && data.reason) || 'いまは仮説を出せません。自分のAIを使う方法（A）へ。',
+        reason: (data && data.reason) || 'いまは論点を示せません。自分のAIを使う方法（A）へ。',
         code: (data && data.code) || 'ERROR',
         retryable
       };
@@ -753,7 +753,7 @@ ${note}`;
     if (!state.hypotheses.length && !state.decisionCandidates.length) {
       return {
         ok: false,
-        reason: '仮説の形式を読み取れませんでした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
+        reason: '論点の形式を読み取れませんでした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
         code: 'PARSE_EMPTY',
         retryable: true
       };
@@ -774,15 +774,15 @@ ${note}`;
       <section class="space-y-4 fade-in">
         ${prog}
         <p class="q-title">自分のAIへ渡す（非常口）</p>
-        <p class="q-help">判断文脈をコピーし、任意のAIに貼ってください。返ってきた仮説を次で判定します。最適案は求めない依頼文です。</p>
+        <p class="q-help">判断文脈をコピーし、任意のAIに貼ってください。返ってきた論点を次で判定します。最適案は求めない依頼文です。</p>
         <div class="mirror-summary">
           <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
         </div>
         <div class="flex flex-col gap-2">
           <button type="button" id="btn-copy-ai" class="btn btn-primary w-full">AIへ渡す文面をコピー</button>
-          <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。返ってきた仮説を次で貼り付けます。</span>
-          <button type="button" id="btn-return" class="btn btn-ghost w-full">仮説が返ってきたら、判定する</button>
-          ${builtinAiAllowed() ? `<button type="button" id="btn-back-b" class="btn btn-ghost w-full">内蔵の仮説生成に戻る</button>` : ''}
+          <span id="copy-ai-toast" class="hidden text-xs text-center text-[hsl(var(--primary))]">コピーしました。返ってきた論点を次で貼り付けます。</span>
+          <button type="button" id="btn-return" class="btn btn-ghost w-full">論点が返ってきたら、判定する</button>
+          ${builtinAiAllowed() ? `<button type="button" id="btn-back-b" class="btn btn-ghost w-full">内蔵の論点提示に戻る</button>` : ''}
         </div>
       </section>`;
     document.getElementById('btn-copy-ai').onclick = () => copyText(buildAiPassText(), 'copy-ai-toast');
@@ -940,7 +940,7 @@ ${note}`;
     if (!phase) return '';
     const items = [
       { id: 'think', label: '考えている' },
-      { id: 'judge', label: '仮説を判定' },
+      { id: 'judge', label: '論点を判定' },
       { id: 'reflect', label: '振り返る' }
     ];
     return `<nav class="phase-nav" aria-label="画面の移動">
@@ -949,7 +949,7 @@ ${note}`;
         const current = it.id === phase;
         const cls = `phase-item${current ? ' is-current' : ''}${reachable ? ' is-reachable' : ''}`;
         const title = reachable
-          ? (it.id === 'think' ? '考えているに戻り、内容を修正できます。直すと仮説は無効になります。' : `${it.label}へ移動`)
+          ? (it.id === 'think' ? '考えているに戻り、内容を修正できます。直すと論点は無効になります。' : `${it.label}へ移動`)
           : 'まだ到達していません';
         return `
         <button type="button" class="${cls}" data-phase="${it.id}" ${reachable ? '' : 'disabled'} title="${escapeHtml(title)}">${escapeHtml(it.label)}</button>
@@ -971,8 +971,8 @@ ${note}`;
       8: '⑥ 強く効いていること／引き受ける範囲',
       9: 'いま言葉にしたものを見る',
       10: '問い返す型',
-      13: '仮説を示す',
-      14: '仮説を判定する',
+      13: '論点を示す',
+      14: '論点を判定する',
       15: '判断文脈を見比べる',
       16: '判断の変化を振り返る',
       11: '私はこう判断する',
@@ -1614,9 +1614,9 @@ ${note}`;
             答えを求める前に、置いたものを自分で確認してください。
           </p>
           <p class="text-xs text-[hsl(var(--muted-fg))] leading-relaxed px-1 -mt-2 opacity-90">
-            次は、この判断文脈を前提に<strong>仮説</strong>を出します（答え・最適案ではありません）。
+            次は、この判断文脈を前提に<strong>論点</strong>を示します（答え・最適案ではありません）。
           </p>
-          <button type="button" id="btn-pass" class="btn btn-primary w-full">仮説を判定するへ</button>
+          <button type="button" id="btn-pass" class="btn btn-primary w-full">論点を判定するへ</button>
         </section>`;
       document.getElementById('btn-pass').onclick = () => {
         ensureJudgmentSessionId();
@@ -1647,7 +1647,7 @@ ${note}`;
       return;
     }
 
-    // 仮説を示す（B主経路 / A非常口）
+    // 論点を示す（B主経路 / A非常口）
     if (step === 13) {
       snapshotBeforePass();
       refreshHypothesesStaleFlag();
@@ -1660,26 +1660,26 @@ ${note}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">ここまでに、あなたが言葉にした判断文脈</p>
-          <p class="q-help">仮説は答えではありません。判断文脈に照らして、採る／捨てるための見立てです。</p>
+          <p class="q-help">論点は答えではありません。気づいていなかった点を、判断文脈に照らして採る／捨てるためのものです。振り返りと問いの更新につながります。</p>
           <div class="mirror-summary">
             <pre class="compare-body" style="white-space:pre-wrap">${escapeHtml(formatContextParts(parts))}</pre>
           </div>
           ${state.hypothesesStale ? `
-            <p class="q-help" style="color:hsl(var(--warning, 38 92% 50%));">判断文脈が変わったため、以前の仮説は無効です。出し直すか、自分のAIを使ってください。</p>
+            <p class="q-help" style="color:hsl(var(--warning, 38 92% 50%));">判断文脈が変わったため、以前の論点は無効です。出し直すか、自分のAIを使ってください。</p>
           ` : ''}
           ${err ? `<p class="invite-error" role="alert">${escapeHtml(err)}</p>` : ''}
           <div class="flex flex-col gap-2">
             ${allowB ? `
               <button type="button" id="btn-gen-b" class="btn btn-primary w-full" ${busy ? 'disabled' : ''}>
-                ${busy ? '仮説を生成しています…' : (state.hypotheses.length && !state.hypothesesStale ? '仮説を出し直す' : '仮説を示す')}
+                ${busy ? '論点を探しています…' : (state.hypotheses.length && !state.hypothesesStale ? '論点を出し直す' : '論点を示す')}
               </button>
               <p class="text-xs text-center text-[hsl(var(--muted-fg))]">この判断 ${usage.judgment}/${HYPOGEN_LIMIT_JUDGMENT} 回 · 本日 ${usage.day}/${HYPOGEN_LIMIT_DAY} 回</p>
             ` : `
-              <p class="q-help">内蔵の仮説生成は、データ送信に同意した方のみ使えます。下の「自分のAIを使う」で進められます。</p>
+              <p class="q-help">内蔵の論点提示は、データ送信に同意した方のみ使えます。下の「自分のAIを使う」で進められます。</p>
             `}
             <button type="button" id="btn-path-a" class="btn btn-ghost w-full">自分のAIを使う（A）</button>
             ${state.hypotheses.length && !state.hypothesesStale ? `
-              <button type="button" id="btn-to-judge" class="btn btn-ghost w-full">すでに出ている仮説を判定する</button>
+              <button type="button" id="btn-to-judge" class="btn btn-ghost w-full">すでに出ている論点を判定する</button>
             ` : ''}
           </div>
         </section>`;
@@ -1702,7 +1702,7 @@ ${note}`;
           const result = await requestBuiltinHypotheses(false);
           state.hypogenBusy = false;
           if (!result.ok) {
-            state.hypogenError = result.reason || '仮説を出せませんでした。';
+            state.hypogenError = result.reason || '論点を示せませんでした。';
             render();
             return;
           }
@@ -1719,11 +1719,11 @@ ${note}`;
       return;
     }
 
-    // 仮説を判定（採否）
+    // 論点を判定（採否）
     if (step === 14) {
       refreshHypothesesStaleFlag();
       if (state.hypothesesStale) {
-        state.hypogenError = '判断文脈が変わったため、仮説は無効です。出し直してください。';
+        state.hypogenError = '判断文脈が変わったため、論点は無効です。出し直してください。';
         step = 13;
         render();
         return;
@@ -1735,19 +1735,19 @@ ${note}`;
       root.innerHTML = `
         <section class="card space-y-4 fade-in">
           ${prog}
-          <p class="q-title">仮説を、あなたが判定する</p>
-          <p class="q-help">仮説は答えではありません。採る・捨てる・残す一言だけを決めるのは、あなたです。</p>
+          <p class="q-title">論点を、あなたが判定する</p>
+          <p class="q-help">論点は答えではありません。採る・捨てる・残す一言だけを決めるのは、あなたです。振り返りと問いの更新のための材料です。</p>
           ${showPaste ? `
           <div>
-            <label class="gap-insight-label" for="field-ai-paste">AIから返ってきた仮説（貼り付け）</label>
-            <p class="q-help">自分のAIから返ってきた本文を貼り、「仮説を読み取る」を押してください。</p>
+            <label class="gap-insight-label" for="field-ai-paste">AIから返ってきた論点（貼り付け）</label>
+            <p class="q-help">自分のAIから返ってきた本文を貼り、「論点を読み取る」を押してください。</p>
             <textarea id="field-ai-paste" class="textarea" rows="8">${escapeHtml(state.aiReplyPaste)}</textarea>
-            <button type="button" id="btn-parse" class="btn btn-ghost w-full mt-2">仮説を読み取る</button>
+            <button type="button" id="btn-parse" class="btn btn-ghost w-full mt-2">論点を読み取る</button>
           </div>
           ` : ''}
           ${hyps.length ? `
             <div>
-              <p class="grow-field-label">刺さった仮説を選ぶ（複数可）</p>
+              <p class="grow-field-label">刺さった論点を選ぶ（複数可）</p>
               <div class="choice-grid" id="hyp-list">
                 ${hyps.map((h) => `
                   <label class="choice-btn${selected.has(h.id) ? ' selected' : ''}" style="display:block;cursor:pointer;text-align:left;">
@@ -1760,15 +1760,15 @@ ${note}`;
             </div>
             <div>
               <p class="grow-field-label">自分の一言（任意）</p>
-              <p class="q-help">採った仮説への補足や、捨てた理由など。空欄でも進めます。</p>
+              <p class="q-help">採った論点への補足や、捨てた理由など。空欄でも進めます。</p>
               <textarea id="field-reflect" class="textarea" rows="2">${escapeHtml(state.reflection.contextChange || '')}</textarea>
             </div>
           ` : `
-            <p class="q-help">まだ仮説がありません。「仮説を示す」に戻るか、上で貼り付けて読み取ってください。</p>
+            <p class="q-help">まだ論点がありません。「論点を示す」に戻るか、上で貼り付けて読み取ってください。</p>
           `}
           <div class="flex flex-col gap-2">
             <button type="button" id="btn-next" class="btn btn-primary w-full" ${hyps.length ? '' : 'disabled'}>判断の持ち上がりへ</button>
-            <button type="button" id="btn-back-gen" class="btn btn-ghost w-full">仮説を示すに戻る</button>
+            <button type="button" id="btn-back-gen" class="btn btn-ghost w-full">論点を示すに戻る</button>
           </div>
         </section>`;
 
@@ -1829,7 +1829,7 @@ ${note}`;
         <section class="card space-y-4 fade-in">
           ${prog}
           <p class="q-title">最初に置いた「判断しようとしていること」は、<br>いまも同じですか。</p>
-          <p class="q-help">AIの候補は仮説です。採る・直す・同じまま進む、をあなたが決めてください。</p>
+          <p class="q-help">AIの候補は論点です。採る・直す・同じまま進む、をあなたが決めてください。</p>
           <div class="mirror-summary">
             <p class="compare-label">最初に置いた判断</p>
             <p class="font-semibold">「${escapeHtml(initial || '（未記入）')}」</p>
@@ -1895,10 +1895,10 @@ ${note}`;
         <section class="space-y-4 fade-in">
           ${prog}
           <p class="q-title">判断文脈を更新する</p>
-          <p class="q-help">仮説を見る前と、採否のあとを見比べます。最終の言葉は、あなたが整えてください。</p>
+          <p class="q-help">論点を見る前と、採否のあとを見比べます。最終の言葉は、あなたが整えてください。</p>
           <div class="compare-grid">
             <div class="compare-col">
-              <p class="compare-label">仮説を見る前</p>
+              <p class="compare-label">論点を見る前</p>
               <pre class="compare-body">${escapeHtml(before)}</pre>
             </div>
             <div class="compare-col compare-col-edit">

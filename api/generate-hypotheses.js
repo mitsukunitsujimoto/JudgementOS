@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(503).json({
       ok: false,
-      reason: '仮説生成がまだ設定されていません。自分のAIを使う方法（A）をご利用ください。',
+      reason: '論点の提示がまだ設定されていません。自分のAIを使う方法（A）をご利用ください。',
       code: 'NOT_CONFIGURED'
     });
   }
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
   if (!body.securityConsent) {
     return res.status(403).json({
       ok: false,
-      reason: '外部AIへの送信に同意していないため、仮説を生成できません。',
+      reason: '外部AIへの送信に同意していないため、論点を提示できません。',
       code: 'NO_CONSENT'
     });
   }
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
   } catch {
     return res.status(502).json({
       ok: false,
-      reason: 'いまは仮説を出せません。しばらくして再度お試しいただくか、自分のAIを使う方法（A）へ。',
+      reason: 'いまは論点を示せません。しばらくして再度お試しいただくか、自分のAIを使う方法（A）へ。',
       code: 'NETWORK',
       retryable: true
     });
@@ -105,8 +105,8 @@ export default async function handler(req, res) {
     return res.status(502).json({
       ok: false,
       reason: retryable
-        ? 'いまは仮説を出せません。自動で一度だけ再試行するか、自分のAIを使う方法（A）へ。'
-        : '仮説を生成できませんでした。自分のAIを使う方法（A）をご利用ください。',
+        ? 'いまは論点を示せません。自動で一度だけ再試行するか、自分のAIを使う方法（A）へ。'
+        : '論点を提示できませんでした。自分のAIを使う方法（A）をご利用ください。',
       code: 'UPSTREAM',
       retryable,
       // 本文・プロンプトは返さない。運用確認用に短いコードのみ
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
   } catch {
     return res.status(502).json({
       ok: false,
-      reason: 'いまは仮説を出せません。自分のAIを使う方法（A）へ。',
+      reason: 'いまは論点を示せません。自分のAIを使う方法（A）へ。',
       code: 'PARSE',
       retryable: true
     });
@@ -131,7 +131,7 @@ export default async function handler(req, res) {
   if (!text) {
     return res.status(502).json({
       ok: false,
-      reason: '仮説が空でした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
+      reason: '論点が空でした。もう一度お試しいただくか、自分のAIを使う方法（A）へ。',
       code: 'EMPTY',
       retryable: true
     });
