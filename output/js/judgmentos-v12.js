@@ -100,7 +100,7 @@
 【まだ考えていない決定事項・選択肢】
 論点1: （一文）
 
-【いま判断しようとしていることが持ち上がるとしたら】
+【入口の判断が、本当に問うべき判断に変わるとしたら】
 候補1: （一文）
 候補2: （一文）`;
 
@@ -529,7 +529,7 @@ ${note}`;
       const cat = line.match(/^【\s*([^】]+?)\s*】$/);
       if (cat) {
         category = cat[1].trim();
-        inDecision = /持ち上が|判断しようとしていること/.test(category);
+        inDecision = /持ち上が|本当に問うべき|判断しようとしていること|入口の判断/.test(category);
         continue;
       }
       let body = '';
@@ -1780,7 +1780,7 @@ ${note}`;
             <p class="q-help">まだ論点がありません。「論点を示す」に戻るか、上で貼り付けて読み取ってください。</p>
           `}
           <div class="flex flex-col gap-2">
-            <button type="button" id="btn-next" class="btn btn-primary w-full" ${hyps.length ? '' : 'disabled'}>判断の持ち上がりへ</button>
+            <button type="button" id="btn-next" class="btn btn-primary w-full" ${hyps.length ? '' : 'disabled'}>本当に問うべき判断へ</button>
             <button type="button" id="btn-back-gen" class="btn btn-ghost w-full">論点を示すに戻る</button>
           </div>
         </section>`;
@@ -1849,7 +1849,7 @@ ${note}`;
           </div>
           ${candidates.length ? `
             <div>
-              <p class="grow-field-label">AIが示した、持ち上がりの候補</p>
+              <p class="grow-field-label">AIが示した、本当に問うべき判断の候補</p>
               <div class="choice-grid" id="decision-cands">
                 ${candidates.map((c) => `
                   <button type="button" class="choice-btn${state.selectedDecisionCandidate === c.id ? ' selected' : ''}" data-cid="${escapeHtml(c.id)}">${escapeHtml(c.text)}</button>
@@ -1888,7 +1888,7 @@ ${note}`;
         if (initial && v !== initial) {
           state.contextAfterText = `${base}
 
-【掘り下げ後に持ち上がった判断】
+【掘り下げ後の、本当に問うべき判断】
 最初：「${initial}」
 いま：「${v}」`;
         } else {
