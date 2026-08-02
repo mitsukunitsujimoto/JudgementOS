@@ -1,5 +1,9 @@
 import { validateInvite } from '../lib/monitor-invites.js';
-import { buildHypothesisUserPrompt, HYPOTHESIS_SYSTEM } from '../lib/hypothesis-prompt.js';
+import {
+  buildHypothesisUserPrompt,
+  HYPOTHESIS_SYSTEM,
+  normalizeRontenLabels
+} from '../lib/hypothesis-prompt.js';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -127,7 +131,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const text = (data?.choices?.[0]?.message?.content || '').trim();
+  const text = normalizeRontenLabels((data?.choices?.[0]?.message?.content || '').trim());
   if (!text) {
     return res.status(502).json({
       ok: false,

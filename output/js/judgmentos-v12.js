@@ -82,6 +82,7 @@
 目的は、気づいていない論点を掘り起こし、振り返りと問いの更新に使える材料を渡すことです。決めるのは私です。
 
 必ず次の形式だけで返してください。前置きや長い解説は不要です。各見出しの下に論点を1〜3個。
+番号付きの行は必ず「論点1:」「論点2:」と書くこと。「仮説」という語は使わない（「仮説1:」も禁止）。
 
 【見落としている前提】
 論点1: （一文）
@@ -102,6 +103,14 @@
 【いま判断しようとしていることが持ち上がるとしたら】
 候補1: （一文）
 候補2: （一文）`;
+
+  /** モデル／貼り付けの旧表記を論点に揃える */
+  function normalizeRontenLabels(raw) {
+    return String(raw || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/仮説(\s*\d+\s*[:：])/g, '論点$1')
+      .replace(/^仮説(\s*[:：])/gm, '論点$1');
+  }
 
   const DEMO = {
     background: '来期のAI投資を、半年以内に効果を示せという圧力の中で承認するかどうか、現場から急かされている。',
@@ -552,6 +561,7 @@ ${note}`;
   }
 
   function applyAiPasteParse(source) {
+    state.aiReplyPaste = normalizeRontenLabels(state.aiReplyPaste);
     const parsed = parseHypothesesFromAi(state.aiReplyPaste);
     state.hypotheses = parsed.hypotheses;
     state.decisionCandidates = parsed.decisionCandidates;
@@ -748,7 +758,7 @@ ${note}`;
       };
     }
 
-    state.aiReplyPaste = data.text || '';
+    state.aiReplyPaste = normalizeRontenLabels(data.text || '');
     applyAiPasteParse('b');
     if (!state.hypotheses.length && !state.decisionCandidates.length) {
       return {
@@ -1727,6 +1737,9 @@ ${note}`;
         step = 13;
         render();
         return;
+      }
+      if (state.aiReplyPaste && /仮説\s*\d*\s*[:：]/.test(state.aiReplyPaste)) {
+        state.aiReplyPaste = normalizeRontenLabels(state.aiReplyPaste);
       }
       if (!state.hypotheses.length && state.aiReplyPaste.trim()) applyAiPasteParse(state.hypothesesSource || 'a');
       const hyps = state.hypotheses || [];
