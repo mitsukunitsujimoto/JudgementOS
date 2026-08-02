@@ -1645,25 +1645,23 @@ ${change}`;
     });
   });
 
+  /** 履歴はブラウザ内の保存を見るだけ。招待は新規判断の入口だけにかける */
+  function openHistoryView(fromLanding) {
+    const Access = window.JudgmentOSAccess;
+    if (Access && Access.isAuthorized()) Access.touch('history');
+    if (fromLanding) enterWorkspace();
+    viewMode = 'history';
+    render();
+  }
+
   const btnHistory = document.getElementById('btn-open-history');
   if (btnHistory) {
-    btnHistory.addEventListener('click', () => {
-      withAccess('history', () => {
-        enterWorkspace();
-        viewMode = 'history';
-        render();
-      });
-    });
+    btnHistory.addEventListener('click', () => openHistoryView(true));
   }
 
   const btnHeaderHistory = document.getElementById('btn-header-history');
   if (btnHeaderHistory) {
-    btnHeaderHistory.addEventListener('click', () => {
-      withAccess('history', () => {
-        viewMode = 'history';
-        render();
-      });
-    });
+    btnHeaderHistory.addEventListener('click', () => openHistoryView(false));
   }
 
   updateHistoryButton();
