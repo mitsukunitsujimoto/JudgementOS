@@ -677,17 +677,38 @@ ${note}`;
     const contextText = formatContextParts(state.contextBeforeParts || buildContextParts());
     const Access = window.JudgmentOSAccess;
     const profile = Access && Access.getProfile ? Access.getProfile() : null;
-    const inviteCode = (Access && Access.getInviteCode && Access.getInviteCode())
+    let inviteCode = (Access && Access.getInviteCode && Access.getInviteCode())
       || (profile && profile.inviteCode)
       || '';
-    const inviteId = (Access && Access.getInviteId && Access.getInviteId())
+    let inviteId = (Access && Access.getInviteId && Access.getInviteId())
       || (profile && profile.inviteId)
-      || (isDevMode() ? 'dev' : '');
+      || '';
+
+    // ?dev=1 や旧データで id/code が食い違うと API が拒否するため揃える
+    if (isDevMode() && (!inviteCode || inviteId === 'dev' || !inviteId)) {
+      inviteCode = inviteCode || 'JOS-MONITOR-001';
+      inviteId = 'monitor-001';
+    }
+    if (!inviteCode && inviteId && inviteId !== 'dev' && window.JudgmentOSInviteCodes) {
+      const byId = window.JudgmentOSInviteCodes.findById(inviteId);
+      if (byId && byId.code) inviteCode = byId.code;
+    }
+    if (inviteCode && window.JudgmentOSInviteCodes) {
+      const hit = window.JudgmentOSInviteCodes.findByCode(inviteCode);
+      if (hit && hit.id) inviteId = hit.id;
+    }
+    if (!inviteCode) {
+      return {
+        ok: false,
+        reason: '招待情報を確認できません。トップから招待コードで入り直すか、?dev=1 でお試しください。',
+        code: 'INVITE_MISSING'
+      };
+    }
 
     const payload = {
       contextText,
-      inviteCode: inviteCode || (isDevMode() ? 'JOS-MONITOR-001' : ''),
-      inviteId: inviteId || 'monitor-001',
+      inviteCode,
+      inviteId,
       securityConsent: true
     };
 
