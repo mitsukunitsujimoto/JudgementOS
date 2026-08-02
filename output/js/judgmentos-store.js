@@ -241,6 +241,21 @@
     return entry ? { theme, entry } : null;
   }
 
+  /** 全テーマ横断で、作成日時が最新の判断ログ1件 */
+  function getLatestEntry() {
+    const store = getStore();
+    let best = null;
+    store.themes.forEach((theme) => {
+      (theme.entries || []).forEach((entry) => {
+        if (!entry) return;
+        if (!best || String(entry.createdAt || '') > String(best.entry.createdAt || '')) {
+          best = { theme, entry };
+        }
+      });
+    });
+    return best;
+  }
+
   function formatDateJa(iso) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -255,6 +270,7 @@
     listThemesForUi,
     getTheme,
     getEntry,
+    getLatestEntry,
     formatDateJa,
     normalizeTitle,
     setParticipant,

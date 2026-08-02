@@ -219,6 +219,27 @@
       border: 1px solid hsl(var(--border)); border-radius: 999px;
       padding: 0.2rem 0.55rem; background: hsl(var(--muted) / 0.25);
     }
+    .change-pair { display: flex; flex-direction: column; gap: 0.75rem; }
+    @media (min-width: 560px) {
+      .change-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    }
+    .change-card {
+      border-radius: var(--radius); padding: 1rem 1.1rem;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--card));
+    }
+    .change-card-past {
+      border-color: hsl(var(--border));
+      background: hsl(var(--muted) / 0.2);
+    }
+    .change-card-now {
+      border-color: hsl(var(--primary) / 0.55);
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.14) 0%, hsl(var(--primary) / 0.05) 100%);
+    }
+    .change-kicker {
+      font-size: 0.75rem; font-weight: 700; color: hsl(var(--foreground));
+      margin: 0.15rem 0 0.5rem; line-height: 1.4;
+    }
     .landing {
       min-height: 100vh; display: flex; flex-direction: column;
       justify-content: center; align-items: center;

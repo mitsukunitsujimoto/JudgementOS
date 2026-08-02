@@ -196,7 +196,8 @@
     introBusy: false,
     introFetchStarted: false,
     introEditAchieve: false,
-    introEditProtect: false
+    introEditProtect: false,
+    introChange: null // { previousYou, nowSuggestion, source, pastDate } | null
   };
 
   const INTRO_CATEGORIES = [
@@ -1097,6 +1098,103 @@ ${note}`;
     state.decisionInitial = state.decision;
   }
 
+  function buildPastLogSummaryLocal(packed) {
+    if (!packed || !packed.entry) return '';
+    const entry = packed.entry;
+    const g = entry.criteriaGrowth || {};
+    const themeTitle = (packed.theme && packed.theme.title) || entry.theme || '';
+    return [
+      themeTitle ? `テーマ: ${themeTitle}` : '',
+      entry.achieve ? `実現したいこと: ${entry.achieve}` : '',
+      entry.protect ? `守りたいもの: ${entry.protect}` : '',
+      entry.constraints ? `制約: ${entry.constraints}` : '',
+      g.criteriaChange ? `判断基準の変化: ${g.criteriaChange}` : '',
+      g.truePurpose ? `本当の目的: ${g.truePurpose}` : '',
+      g.nowMe ? `当時の自分: ${g.nowMe}` : '',
+      g.firstMe ? `最初の自分: ${g.firstMe}` : '',
+      (entry.contextAfter || entry.contextBefore)
+        ? `判断文脈:\n${String(entry.contextAfter || entry.contextBefore).slice(0, 1200)}`
+        : ''
+    ].filter(Boolean).join('\n');
+  }
+
+  function getLatestPastLog() {
+    const Store = window.JudgmentOSStore;
+    if (!Store || typeof Store.getLatestEntry !== 'function') return null;
+    return Store.getLatestEntry();
+  }
+
+  function mockStructureChangeLocal(pastSummary) {
+    const pastLine = String(pastSummary || '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(' ');
+    return {
+      previousYou: pastLine
+        ? `以前のあなたは、次のような軸で考えていました。${pastLine}`
+        : '以前のあなたは、そのときの判断文脈のなかで、実現と守るのバランスを探っていました。',
+      nowSuggestion: (state.achieve && state.protect)
+        ? `今のあなたは、「${state.achieve}」を目指しつつ、「${state.protect}」を崩さないことを、よりはっきり言葉にしようとしているようです。`
+        : '今のあなたは、前回より自分の言葉で軸を言い直そうとしているようです。'
+    };
+  }
+
+  async function requestStructureChange(pastSummary) {
+    const Access = window.JudgmentOSAccess;
+    const profile = Access && Access.getProfile ? Access.getProfile() : null;
+    const cat = introCategory();
+    const payload = {
+      pastSummary,
+      currentDump: state.introDump,
+      realization: state.achieve,
+      protection: state.protect,
+      categoryLabel: cat ? `${cat.title}（${cat.hint}）` : '',
+      inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
+      inviteId: (Access && Access.getInviteId && Access.getInviteId()) || (profile && profile.inviteId) || '',
+      securityConsent: !!(Access && Access.canUseBuiltinAi && Access.canUseBuiltinAi())
+    };
+    try {
+      const res = await fetch('/api/structure-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && data.previous_you && data.now_suggestion) {
+        return {
+          previousYou: data.previous_you,
+          nowSuggestion: data.now_suggestion,
+          source: data.source || 'model'
+        };
+      }
+    } catch (_) { /* fall through */ }
+    return { ...mockStructureChangeLocal(pastSummary), source: 'mock' };
+  }
+
+  async function runIntroPipeline() {
+    const extracted = await requestStructureIntro();
+    applyIntroExtraction(extracted);
+    state.introChange = null;
+    const past = getLatestPastLog();
+    if (past && past.entry) {
+      const pastSummary = buildPastLogSummaryLocal(past);
+      if (pastSummary.trim()) {
+        const change = await requestStructureChange(pastSummary);
+        const Store = window.JudgmentOSStore;
+        state.introChange = {
+          previousYou: change.previousYou,
+          nowSuggestion: change.nowSuggestion,
+          source: change.source || '',
+          pastDate: Store && past.entry.createdAt
+            ? Store.formatDateJa(past.entry.createdAt)
+            : ''
+        };
+      }
+    }
+  }
+
   function bindSpeechMic(textarea, btn) {
     if (!textarea || !btn) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1175,7 +1273,8 @@ ${note}`;
       activeThemeId: null, activeEntryId: null, browseThemeId: null,
       introCategoryId: '', introDump: '', introExtractSource: '',
       introConstraintTags: [], introBusy: false, introFetchStarted: false,
-      introEditAchieve: false, introEditProtect: false
+      introEditAchieve: false, introEditProtect: false,
+      introChange: null
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -1685,21 +1784,24 @@ ${note}`;
       return;
     }
 
-    // —— 導入UX STEP3: 自動構造化（ローディング）——
+    // —— 導入UX STEP3: 自動構造化（＋過去があれば変化抽出）——
     if (step === 103) {
+      const pastPacked = getLatestPastLog();
+      const hasPast = !!(pastPacked && pastPacked.entry);
       root.innerHTML = `
         <section class="card space-y-4 fade-in extract-loading" aria-live="polite">
           ${prog}
           <div class="extract-spinner" aria-hidden="true"></div>
-          <p class="q-title" style="text-align:center;margin-bottom:0">思考を分類中...</p>
-          <p class="q-help" style="text-align:center;margin-bottom:0">実現したいことと、守りたいものを抜き出しています。</p>
+          <p class="q-title" style="text-align:center;margin-bottom:0">${hasPast ? '変化を読み取り中...' : '思考を分類中...'}</p>
+          <p class="q-help" style="text-align:center;margin-bottom:0">${hasPast
+            ? '前回の判断ログと、いまの言葉を見比べています。'
+            : '実現したいことと、守りたいものを抜き出しています。'}</p>
         </section>`;
       if (!state.introFetchStarted) {
         state.introFetchStarted = true;
         state.introBusy = true;
-        requestStructureIntro().then((extracted) => {
+        runIntroPipeline().then(() => {
           if (step !== 103) return;
-          applyIntroExtraction(extracted);
           state.introBusy = false;
           state.introFetchStarted = false;
           state.introEditAchieve = false;
@@ -1711,14 +1813,34 @@ ${note}`;
       return;
     }
 
-    // —— 導入UX STEP4: 映し返し（15秒で届く）——
+    // —— 導入UX STEP4: 映し返し（過去ログがあれば変化の提示）——
     if (step === 104) {
       const tags = state.introConstraintTags || [];
+      const change = state.introChange;
+      const primaryLabel = change ? 'この変化を認めて進める' : 'この軸で進める';
       root.innerHTML = `
         <section class="space-y-4 fade-in reveal-in">
           ${prog}
-          <p class="q-title">この2つのバランスを取ることが、今回のテーマですね？</p>
-          <p class="q-help">AIが吐き出しから抜き出した軸です。違うところだけ直して進んでください。</p>
+          ${change ? `
+            <p class="q-title">以前の軸と、今のあなた</p>
+            <p class="q-help">残してある判断ログと、今回の言葉を見比べた映し返しです。${change.pastDate ? `（前回: ${escapeHtml(change.pastDate)}）` : ''}</p>
+            <div class="change-pair">
+              <div class="change-card change-card-past reveal-card">
+                <p class="axis-label">以前の軸</p>
+                <p class="change-kicker">以前のあなた</p>
+                <p class="axis-body">${escapeHtml(change.previousYou)}</p>
+              </div>
+              <div class="change-card change-card-now reveal-card reveal-card-delay">
+                <p class="axis-label">今のAIからの提示</p>
+                <p class="change-kicker">今のあなたは、こうでは？</p>
+                <p class="axis-body">${escapeHtml(change.nowSuggestion)}</p>
+              </div>
+            </div>
+            <p class="q-help" style="margin-top:0.25rem">あわせて、今回抜き出した軸も確認できます。</p>
+          ` : `
+            <p class="q-title">この2つのバランスを取ることが、今回のテーマですね？</p>
+            <p class="q-help">AIが吐き出しから抜き出した軸です。違うところだけ直して進んでください。</p>
+          `}
           <div class="axis-pair">
             <div class="axis-card reveal-card">
               <p class="axis-label">実現したいこと</p>
@@ -1741,7 +1863,7 @@ ${note}`;
               <div class="tag-row">${tags.map((t) => `<span class="soft-tag">${escapeHtml(t)}</span>`).join('')}</div>
             </div>
           ` : ''}
-          <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>この軸で進める</button>
+          <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>${escapeHtml(primaryLabel)}</button>
           <button type="button" id="btn-redump" class="btn btn-ghost w-full">吐き出しに戻る</button>
         </section>`;
       const editA = document.getElementById('btn-edit-achieve');
@@ -1775,11 +1897,21 @@ ${note}`;
         if (state.introConstraintTags.length && !state.criteriaWant.trim()) {
           state.criteriaWant = state.introConstraintTags.join('／');
         }
+        if (state.introChange && state.introChange.nowSuggestion) {
+          if (!state.criteriaGrowth) state.criteriaGrowth = emptyCriteriaGrowth();
+          if (!state.criteriaGrowth.nowMe) {
+            state.criteriaGrowth.nowMe = state.introChange.nowSuggestion;
+          }
+          if (!state.criteriaGrowth.firstMe && state.introChange.previousYou) {
+            state.criteriaGrowth.firstMe = state.introChange.previousYou;
+          }
+        }
         syncThemeFromBackground();
         step = 6;
         render();
       };
       document.getElementById('btn-redump').onclick = () => {
+        state.introChange = null;
         step = 102;
         render();
       };
