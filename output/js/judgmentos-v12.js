@@ -197,7 +197,10 @@
     introFetchStarted: false,
     introEditAchieve: false,
     introEditProtect: false,
-    introChange: null // { previousYou, nowSuggestion, source, pastDate } | null
+    introChange: null, // { previousYou, nowSuggestion, source, pastDate } | null
+    changeSummary: null, // { headline, beforeSummary, afterSummary, criteriaShift, takeaway, source }
+    changeSummaryBusy: false,
+    changeSummaryStarted: false
   };
 
   const INTRO_CATEGORIES = [
@@ -217,7 +220,7 @@
   let viewMode = 'flow'; // flow | history | theme
 
   // 101–104: 低摩擦導入 → ⑥以降。旧①–⑤は履歴復帰用に残す
-  const STEP_ORDER = [101, 102, 103, 104, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 11, 12, 1, 2, 3, 4, 5];
+  const STEP_ORDER = [101, 102, 103, 104, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -245,7 +248,7 @@
     }
     // 旧 id 互換
     if (phaseId === 'pass' || phaseId === 'return') return phaseEntryStep('judge');
-    if (phaseId === 'reflect' || phaseId === 'grow') return hasReachedStep(16) ? 16 : 15;
+    if (phaseId === 'reflect' || phaseId === 'grow') return hasReachedStep(18) || hasReachedStep(16) ? (hasReachedStep(18) ? 18 : 16) : 15;
     return 101;
   }
 
@@ -958,7 +961,7 @@ ${note}`;
     if (viewMode === 'history' || viewMode === 'theme') return null;
     if (step >= 1 && step <= 10) return 'think';
     if (step === 13 || step === 14 || step === 17) return 'judge';
-    if (step === 15 || step === 16 || step === 11 || step === 12) return 'reflect';
+    if (step === 15 || step === 16 || step === 18 || step === 11 || step === 12) return 'reflect';
     return 'think';
   }
 
@@ -1006,6 +1009,7 @@ ${note}`;
       14: '論点を判定する',
       15: '判断文脈を見比べる',
       16: '判断の変化を振り返る',
+      18: '思考の変化サマリー',
       11: '私はこう判断する',
       12: '一段深くなった'
     };
@@ -1236,6 +1240,81 @@ ${note}`;
     };
   }
 
+  async function requestSummarizeChange() {
+    const Access = window.JudgmentOSAccess;
+    const profile = Access && Access.getProfile ? Access.getProfile() : null;
+    const g = state.criteriaGrowth || emptyCriteriaGrowth();
+    const payload = {
+      theme: state.theme,
+      achieve: state.achieve,
+      protect: state.protect,
+      firstMe: g.firstMe || '',
+      nowMe: g.nowMe || '',
+      criteriaChange: g.criteriaChange || '',
+      truePurpose: g.truePurpose || '',
+      inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
+      inviteId: (Access && Access.getInviteId && Access.getInviteId()) || (profile && profile.inviteId) || '',
+      securityConsent: !!(Access && Access.canUseBuiltinAi && Access.canUseBuiltinAi())
+    };
+    const localMock = () => {
+      const first = (payload.firstMe || '').trim();
+      const now = (payload.nowMe || '').trim();
+      const change = (payload.criteriaChange || '').trim();
+      const purpose = (payload.truePurpose || '').trim();
+      return {
+        headline: change
+          ? (change.length > 42 ? `${change.slice(0, 40)}…` : change)
+          : '判断の軸が、言葉として残せるところまで近づいた',
+        beforeSummary: first
+          ? `以前のあなたは、次のように考えていました。${first}`
+          : '以前のあなたは、まだ判断の軸を十分には言葉にしていませんでした。',
+        afterSummary: now
+          ? `今のあなたは、次のように考えるようになっています。${now}`
+          : '今のあなたは、実現したいことと守りたいものを並べて見られるようになっています。',
+        criteriaShift: change
+          ? `いちばん大きく変わったのは、次の判断基準です。${change}`
+          : '判断の重みの置き方が、以前よりはっきりしてきています。',
+        takeaway: purpose
+          ? `次に提案やAIの答えを見るとき、「${purpose}」に照らして問い返す。`
+          : '次に提案やAIの答えを見るとき、今日残した判断基準で一度問い返す。',
+        source: 'mock'
+      };
+    };
+    try {
+      const res = await fetch('/api/summarize-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && data.headline && data.before_summary && data.after_summary) {
+        return {
+          headline: data.headline,
+          beforeSummary: data.before_summary,
+          afterSummary: data.after_summary,
+          criteriaShift: data.criteria_shift || data.headline,
+          takeaway: data.takeaway || '',
+          source: data.source || 'model'
+        };
+      }
+    } catch (_) { /* fall through */ }
+    return localMock();
+  }
+
+  function persistChangeSummary(summary) {
+    const Store = window.JudgmentOSStore;
+    if (!Store || !summary) return;
+    const growth = Object.assign({}, state.criteriaGrowth || emptyCriteriaGrowth(), {
+      changeSummary: summary
+    });
+    state.criteriaGrowth = growth;
+    if (state.activeThemeId && state.activeEntryId) {
+      Store.updateEntry(state.activeThemeId, state.activeEntryId, {
+        criteriaGrowth: growth
+      });
+    }
+  }
+
   function nextAfterContextUpdate() {
     snapshotBeforePass();
     return 13;
@@ -1274,7 +1353,8 @@ ${note}`;
       introCategoryId: '', introDump: '', introExtractSource: '',
       introConstraintTags: [], introBusy: false, introFetchStarted: false,
       introEditAchieve: false, introEditProtect: false,
-      introChange: null
+      introChange: null,
+      changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -2483,9 +2563,97 @@ ${note}`;
         state.criteriaGrowth.criteriaChange = (document.getElementById('field-criteria-change').value || '').trim();
         state.criteriaGrowth.truePurpose = (document.getElementById('field-true-purpose').value || '').trim();
         keepCriteriaGrowth();
+        state.changeSummary = null;
+        state.changeSummaryBusy = true;
+        state.changeSummaryStarted = false;
+        step = 18;
+        render();
+      };
+      return;
+    }
+
+    // 思考の変化サマリー（振り返り直後 · 印刷可）
+    if (step === 18) {
+      const s = state.changeSummary;
+      if (!s) {
+        root.innerHTML = `
+          <section class="card space-y-4 fade-in extract-loading" aria-live="polite">
+            ${prog}
+            <div class="extract-spinner" aria-hidden="true"></div>
+            <p class="q-title" style="text-align:center;margin-bottom:0">思考の変化をまとめています…</p>
+            <p class="q-help" style="text-align:center;margin-bottom:0">あなたが書いた振り返りから、印刷用のサマリーを作ります。</p>
+          </section>`;
+        if (!state.changeSummaryStarted) {
+          state.changeSummaryStarted = true;
+          requestSummarizeChange().then((summary) => {
+            if (step !== 18) return;
+            state.changeSummary = summary;
+            state.changeSummaryBusy = false;
+            persistChangeSummary(summary);
+            render();
+          });
+        }
+        return;
+      }
+
+      const Access = window.JudgmentOSAccess;
+      const who = Access && Access.isAuthorized() ? Access.getDisplayName() : '';
+      const when = new Date();
+      const dateLabel = `${when.getFullYear()}/${when.getMonth() + 1}/${when.getDate()}`;
+      root.innerHTML = `
+        <section class="space-y-4 fade-in">
+          ${prog}
+          <div class="no-print flex flex-col sm:flex-row gap-2">
+            <button type="button" id="btn-print-summary" class="btn btn-primary w-full">このサマリーを印刷する</button>
+            <button type="button" id="btn-to-outro" class="btn btn-ghost w-full">続けて余韻へ</button>
+          </div>
+          <article class="print-sheet change-summary-sheet" aria-label="思考の変化サマリー">
+            <header class="print-sheet-head">
+              <p class="print-kicker">JudgmentOS · 思考の変化サマリー</p>
+              <h2 class="print-title">${escapeHtml(s.headline)}</h2>
+              <p class="print-meta">${escapeHtml(state.theme || '（テーマ）')}${who ? ` · ${escapeHtml(who)}` : ''} · ${escapeHtml(dateLabel)}</p>
+            </header>
+            <div class="print-compare">
+              <div class="print-col print-col-past">
+                <p class="print-label">以前の考え方</p>
+                <p class="print-body">${escapeHtml(s.beforeSummary)}</p>
+              </div>
+              <div class="print-col print-col-now">
+                <p class="print-label">今の考え方</p>
+                <p class="print-body">${escapeHtml(s.afterSummary)}</p>
+              </div>
+            </div>
+            <div class="print-block">
+              <p class="print-label">判断基準の変化</p>
+              <p class="print-body print-emphasis">${escapeHtml(s.criteriaShift)}</p>
+            </div>
+            ${(state.criteriaGrowth.truePurpose || '').trim() ? `
+              <div class="print-block">
+                <p class="print-label">本当の目的</p>
+                <p class="print-body">${escapeHtml(state.criteriaGrowth.truePurpose.trim())}</p>
+              </div>
+            ` : ''}
+            <div class="print-block print-takeaway">
+              <p class="print-label">次に問い返すときの一文</p>
+              <p class="print-body">${escapeHtml(s.takeaway)}</p>
+            </div>
+            <footer class="print-foot">
+              AIの答えが変わったのではありません。あなた自身の判断基準が、言葉として残りました。
+            </footer>
+          </article>
+          <div class="no-print flex flex-col gap-2">
+            <button type="button" id="btn-to-outro-2" class="btn btn-primary w-full">この変化を携えて進む</button>
+          </div>
+        </section>`;
+      const goOutro = () => {
         step = 12;
         render();
       };
+      document.getElementById('btn-print-summary').onclick = () => {
+        window.print();
+      };
+      document.getElementById('btn-to-outro').onclick = goOutro;
+      document.getElementById('btn-to-outro-2').onclick = goOutro;
       return;
     }
 

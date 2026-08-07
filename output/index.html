@@ -240,6 +240,77 @@
       font-size: 0.75rem; font-weight: 700; color: hsl(var(--foreground));
       margin: 0.15rem 0 0.5rem; line-height: 1.4;
     }
+    .print-sheet {
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      background: hsl(var(--card));
+      padding: 1.25rem 1.25rem 1.5rem;
+    }
+    .print-sheet-head { margin-bottom: 1.1rem; padding-bottom: 0.85rem; border-bottom: 1px solid hsl(var(--border)); }
+    .print-kicker {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em;
+      color: hsl(var(--primary)); margin-bottom: 0.45rem;
+    }
+    .print-title {
+      font-size: 1.15rem; font-weight: 700; line-height: 1.45;
+      color: hsl(var(--foreground)); margin: 0 0 0.4rem;
+    }
+    .print-meta { font-size: 0.75rem; color: hsl(var(--muted-fg)); margin: 0; }
+    .print-compare {
+      display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.85rem;
+    }
+    @media (min-width: 560px) {
+      .print-compare { grid-template-columns: 1fr 1fr; }
+    }
+    .print-col {
+      border-radius: calc(var(--radius) - 2px);
+      padding: 0.85rem 0.95rem;
+      border: 1px solid hsl(var(--border));
+    }
+    .print-col-past { background: hsl(var(--muted) / 0.22); }
+    .print-col-now {
+      border-color: hsl(var(--primary) / 0.45);
+      background: linear-gradient(180deg, hsl(var(--primary) / 0.12) 0%, hsl(var(--primary) / 0.04) 100%);
+    }
+    .print-block {
+      margin-top: 0.75rem; padding-top: 0.75rem;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .print-label {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
+      color: hsl(var(--muted-fg)); margin: 0 0 0.35rem;
+    }
+    .print-body {
+      font-size: 0.875rem; line-height: 1.75;
+      color: hsl(var(--foreground)); margin: 0;
+    }
+    .print-emphasis { font-weight: 600; }
+    .print-takeaway .print-body {
+      border-left: 2px solid hsl(var(--primary) / 0.55);
+      padding-left: 0.75rem;
+    }
+    .print-foot {
+      margin-top: 1rem; padding-top: 0.85rem;
+      border-top: 1px solid hsl(var(--border));
+      font-size: 0.75rem; line-height: 1.65; color: hsl(var(--muted-fg));
+    }
+    @media print {
+      body { background: #fff !important; color: #111 !important; }
+      .workspace-header, .phase-nav, .step-back, .step-progress, .no-print,
+      #btn-print-summary, #btn-to-outro, #btn-to-outro-2 { display: none !important; }
+      .shell { max-width: none; padding: 0; margin: 0; }
+      .print-sheet {
+        border: none; border-radius: 0; padding: 0;
+        background: #fff; color: #111;
+        box-shadow: none;
+      }
+      .print-col-past, .print-col-now, .print-sheet-head, .print-block, .print-foot {
+        break-inside: avoid;
+      }
+      .print-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .print-title { font-size: 1.35rem; }
+      .print-body { font-size: 11pt; line-height: 1.7; }
+    }
     .landing {
       min-height: 100vh; display: flex; flex-direction: column;
       justify-content: center; align-items: center;
