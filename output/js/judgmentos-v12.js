@@ -198,6 +198,9 @@
     introEditAchieve: false,
     introEditProtect: false,
     introChange: null, // { previousYou, nowSuggestion, source, pastDate } | null
+    introDigDone: false,
+    introDigFocusId: '',
+    introDigNote: '',
     changeSummary: null, // { headline, beforeSummary, afterSummary, criteriaShift, takeaway, source }
     changeSummaryBusy: false,
     changeSummaryStarted: false
@@ -210,6 +213,28 @@
     { id: 'vague', title: 'とにかくモヤモヤしている', hint: 'テーマがまだ定まっていない' }
   ];
 
+  /** 映し返し後に1回だけ回す「掘る場所」 */
+  const INTRO_DIG_FOCUSES = [
+    {
+      id: 'realize',
+      title: '実現したいことが、まだふわっとしている',
+      hint: '向かいたい姿が、施策や数字の話に戻ってしまう',
+      prompt: '「本当はこうなっていてほしい」を、施策名を使わずに一文で書いてください。'
+    },
+    {
+      id: 'protect',
+      title: '守りたいものが、後回しになっている',
+      hint: '大切なものが見えていても、判断の前面に出ていない',
+      prompt: 'この判断で崩したくないものを、人・関係・文化などの言葉で一文にしてください。'
+    },
+    {
+      id: 'who',
+      title: '誰の何に向き合っているかがぼやけている',
+      hint: '相手や現場が見えないまま、打ち手の話になっている',
+      prompt: 'いちばん影響を受ける人は誰で、その人にとって何がかかっているか、一文で書いてください。'
+    }
+  ];
+
   const HYPOGEN_KEY = 'judgmentos.v14.hypogen';
   const HYPOGEN_LIMIT_JUDGMENT = 3;
   const HYPOGEN_LIMIT_DAY = 10;
@@ -219,8 +244,8 @@
   let concernDraft = '';
   let viewMode = 'flow'; // flow | history | theme
 
-  // 101–104: 低摩擦導入 → ⑥以降。旧①–⑤は履歴復帰用に残す
-  const STEP_ORDER = [101, 102, 103, 104, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
+  // 101–104 → 105–107（掘る循環1周）→ ⑥以降。旧①–⑤は履歴復帰用に残す
+  const STEP_ORDER = [101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -994,6 +1019,9 @@ ${note}`;
       102: '頭の中を出す',
       103: '思考を分類中',
       104: '映し返し',
+      105: '掘る場所を選ぶ',
+      106: '少しだけ掘る',
+      107: '軸を見なおす',
       1: '① いま判断しようとしていること',
       2: '② 背景',
       3: '③ 本来実現したいこと',
@@ -1018,6 +1046,70 @@ ${note}`;
 
   function introCategory() {
     return INTRO_CATEGORIES.find((c) => c.id === state.introCategoryId) || null;
+  }
+
+  function introDigFocus() {
+    return INTRO_DIG_FOCUSES.find((f) => f.id === state.introDigFocusId) || null;
+  }
+
+  function finishIntroIntoCriteria() {
+    if (state.introConstraintTags.length && !state.criteriaWant.trim()) {
+      state.criteriaWant = state.introConstraintTags.join('／');
+    }
+    if (state.introChange && state.introChange.nowSuggestion) {
+      if (!state.criteriaGrowth) state.criteriaGrowth = emptyCriteriaGrowth();
+      if (!state.criteriaGrowth.nowMe) {
+        state.criteriaGrowth.nowMe = state.introChange.nowSuggestion;
+      }
+      if (!state.criteriaGrowth.firstMe && state.introChange.previousYou) {
+        state.criteriaGrowth.firstMe = state.introChange.previousYou;
+      }
+    }
+    if (state.introDigNote) {
+      const focus = introDigFocus();
+      const tag = focus ? `【掘り下げ: ${focus.title}】\n${state.introDigNote}` : state.introDigNote;
+      if (!state.background.includes(state.introDigNote)) {
+        state.background = [state.background.trim(), tag].filter(Boolean).join('\n\n');
+      }
+    }
+    syncThemeFromBackground();
+    step = 6;
+    render();
+  }
+
+  function applyDigNoteToAxis() {
+    const note = (state.introDigNote || '').trim();
+    if (!note) return;
+    if (state.introDigFocusId === 'realize') state.achieve = note;
+    if (state.introDigFocusId === 'protect') state.protect = note;
+    if (state.introDigFocusId === 'who') {
+      const line = note.slice(0, 120);
+      if (!state.decision.trim() || state.decision.length < 8) state.decision = line;
+      else if (!state.decision.includes(line.slice(0, 20))) {
+        state.decision = `${state.decision.trim()}／${line}`;
+      }
+    }
+  }
+
+  function balanceBoardHtml() {
+    const a = (state.achieve || '').trim();
+    const p = (state.protect || '').trim();
+    return `
+      <div class="balance-board" aria-hidden="true">
+        <div class="balance-pan">
+          <p class="balance-pan-label">実現</p>
+          <p class="balance-pan-text">${escapeHtml(a ? (a.length > 56 ? `${a.slice(0, 54)}…` : a) : '（未設定）')}</p>
+        </div>
+        <div class="balance-center">
+          <div class="balance-beam"></div>
+          <div class="balance-fulcrum"></div>
+          <p class="balance-caption">この緊張を見る</p>
+        </div>
+        <div class="balance-pan">
+          <p class="balance-pan-label">守る</p>
+          <p class="balance-pan-text">${escapeHtml(p ? (p.length > 56 ? `${p.slice(0, 54)}…` : p) : '（未設定）')}</p>
+        </div>
+      </div>`;
   }
 
   function mockStructureIntroLocal() {
@@ -1354,6 +1446,7 @@ ${note}`;
       introConstraintTags: [], introBusy: false, introFetchStarted: false,
       introEditAchieve: false, introEditProtect: false,
       introChange: null,
+      introDigDone: false, introDigFocusId: '', introDigNote: '',
       changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false
     });
     concernDraft = '';
@@ -1921,6 +2014,7 @@ ${note}`;
             <p class="q-title">この2つのバランスを取ることが、今回のテーマですね？</p>
             <p class="q-help">AIが吐き出しから抜き出した軸です。違うところだけ直して進んでください。</p>
           `}
+          ${balanceBoardHtml()}
           <div class="axis-pair">
             <div class="axis-card reveal-card">
               <p class="axis-label">実現したいこと</p>
@@ -1943,7 +2037,12 @@ ${note}`;
               <div class="tag-row">${tags.map((t) => `<span class="soft-tag">${escapeHtml(t)}</span>`).join('')}</div>
             </div>
           ` : ''}
-          <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>${escapeHtml(primaryLabel)}</button>
+          ${!state.introDigDone ? `
+            <button type="button" id="btn-dig" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>いちばんぼやけているところを掘る</button>
+            <button type="button" id="btn-next" class="btn btn-ghost w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>${escapeHtml(primaryLabel)}（掘らずに進む）</button>
+          ` : `
+            <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.achieve.trim() && state.protect.trim() ? '' : 'disabled'}>${escapeHtml(primaryLabel)}</button>
+          `}
           <button type="button" id="btn-redump" class="btn btn-ghost w-full">吐き出しに戻る</button>
         </section>`;
       const editA = document.getElementById('btn-edit-achieve');
@@ -1972,27 +2071,163 @@ ${note}`;
           render();
         };
       }
+      const btnDig = document.getElementById('btn-dig');
+      if (btnDig) {
+        btnDig.onclick = () => {
+          if (!state.achieve.trim() || !state.protect.trim()) return;
+          step = 105;
+          render();
+        };
+      }
       document.getElementById('btn-next').onclick = () => {
         if (!state.achieve.trim() || !state.protect.trim()) return;
-        if (state.introConstraintTags.length && !state.criteriaWant.trim()) {
-          state.criteriaWant = state.introConstraintTags.join('／');
-        }
-        if (state.introChange && state.introChange.nowSuggestion) {
-          if (!state.criteriaGrowth) state.criteriaGrowth = emptyCriteriaGrowth();
-          if (!state.criteriaGrowth.nowMe) {
-            state.criteriaGrowth.nowMe = state.introChange.nowSuggestion;
-          }
-          if (!state.criteriaGrowth.firstMe && state.introChange.previousYou) {
-            state.criteriaGrowth.firstMe = state.introChange.previousYou;
-          }
-        }
-        syncThemeFromBackground();
-        step = 6;
-        render();
+        finishIntroIntoCriteria();
       };
       document.getElementById('btn-redump').onclick = () => {
         state.introChange = null;
         step = 102;
+        render();
+      };
+      return;
+    }
+
+    // —— 映し返し後: 掘る場所を選ぶ（最大1周）——
+    if (step === 105) {
+      root.innerHTML = `
+        <section class="card space-y-4 fade-in">
+          ${prog}
+          <p class="q-title">いま一番ぼやけているのは、どれですか？</p>
+          <p class="q-help">答えを選ぶのではなく、<strong>いま掘る場所</strong>を選びます。1つだけ。</p>
+          ${balanceBoardHtml()}
+          <div class="theme-card-grid" id="dig-focus-grid">
+            ${INTRO_DIG_FOCUSES.map((f) => `
+              <button type="button" class="theme-card${state.introDigFocusId === f.id ? ' selected' : ''}" data-fid="${escapeHtml(f.id)}">
+                <span class="theme-card-title">${escapeHtml(f.title)}</span>
+                <span class="theme-card-hint">${escapeHtml(f.hint)}</span>
+              </button>
+            `).join('')}
+          </div>
+          <button type="button" id="btn-skip-dig" class="btn btn-ghost w-full">掘らずに進む</button>
+        </section>`;
+      root.querySelectorAll('#dig-focus-grid .theme-card').forEach((btn) => {
+        btn.onclick = () => {
+          state.introDigFocusId = btn.getAttribute('data-fid') || '';
+          step = 106;
+          render();
+        };
+      });
+      document.getElementById('btn-skip-dig').onclick = () => finishIntroIntoCriteria();
+      return;
+    }
+
+    // —— 少しだけ掘る ——
+    if (step === 106) {
+      const focus = introDigFocus();
+      if (!focus) {
+        step = 105;
+        render();
+        return;
+      }
+      root.innerHTML = `
+        <section class="card space-y-3 fade-in">
+          ${prog}
+          <p class="q-title">${escapeHtml(focus.title)}</p>
+          <p class="q-help">${escapeHtml(focus.prompt)}</p>
+          <textarea id="field-dig-note" class="textarea" rows="4" placeholder="一文で構いません。">${escapeHtml(state.introDigNote)}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full" ${state.introDigNote.trim().length >= 4 ? '' : 'disabled'}>軸に戻して見なおす</button>
+          <button type="button" id="btn-back-dig" class="btn btn-ghost w-full">掘る場所を選びなおす</button>
+        </section>`;
+      const ta = document.getElementById('field-dig-note');
+      const next = document.getElementById('btn-next');
+      if (ta) {
+        ta.oninput = () => {
+          state.introDigNote = ta.value;
+          if (next) next.disabled = ta.value.trim().length < 4;
+        };
+      }
+      if (next) {
+        next.onclick = () => {
+          const v = (ta?.value || '').trim();
+          if (v.length < 4) {
+            ta?.focus();
+            return;
+          }
+          state.introDigNote = v;
+          applyDigNoteToAxis();
+          state.introDigDone = true;
+          state.introEditAchieve = false;
+          state.introEditProtect = false;
+          step = 107;
+          render();
+        };
+      }
+      document.getElementById('btn-back-dig').onclick = () => {
+        step = 105;
+        render();
+      };
+      return;
+    }
+
+    // —— 掘ったあとの再映し返し（ミニ図つき）——
+    if (step === 107) {
+      const focus = introDigFocus();
+      root.innerHTML = `
+        <section class="space-y-4 fade-in reveal-in">
+          ${prog}
+          <p class="q-title">掘ったあと、軸はどう見えますか？</p>
+          <p class="q-help">選んだ場所の言葉を軸に反映しました。違うところだけ直して進んでください。</p>
+          ${balanceBoardHtml()}
+          ${focus && state.introDigNote ? `
+            <div class="dig-echo">
+              <p class="axis-label">いま掘ったこと</p>
+              <p class="change-kicker">${escapeHtml(focus.title)}</p>
+              <p class="axis-body">「${escapeHtml(state.introDigNote)}」</p>
+            </div>
+          ` : ''}
+          <div class="axis-pair">
+            <div class="axis-card reveal-card">
+              <p class="axis-label">実現したいこと</p>
+              ${state.introEditAchieve
+                ? `<textarea id="field-edit-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>`
+                : `<p class="axis-body">「${escapeHtml(state.achieve || '（未抽出）')}」</p>`}
+              <button type="button" id="btn-edit-achieve" class="btn btn-ghost w-full mt-2">${state.introEditAchieve ? '反映する' : '微修正'}</button>
+            </div>
+            <div class="axis-card reveal-card reveal-card-delay">
+              <p class="axis-label">守りたいもの</p>
+              ${state.introEditProtect
+                ? `<textarea id="field-edit-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>`
+                : `<p class="axis-body">「${escapeHtml(state.protect || '（未抽出）')}」</p>`}
+              <button type="button" id="btn-edit-protect" class="btn btn-ghost w-full mt-2">${state.introEditProtect ? '反映する' : '微修正'}</button>
+            </div>
+          </div>
+          <button type="button" id="btn-next" class="btn btn-primary w-full">この軸で進める</button>
+          <button type="button" id="btn-redig" class="btn btn-ghost w-full">掘る場所を変えずに言い直す</button>
+        </section>`;
+      const editA = document.getElementById('btn-edit-achieve');
+      const editP = document.getElementById('btn-edit-protect');
+      if (editA) {
+        editA.onclick = () => {
+          if (state.introEditAchieve) {
+            const v = (document.getElementById('field-edit-achieve')?.value || '').trim();
+            if (v) state.achieve = v;
+            state.introEditAchieve = false;
+          } else state.introEditAchieve = true;
+          render();
+        };
+      }
+      if (editP) {
+        editP.onclick = () => {
+          if (state.introEditProtect) {
+            const v = (document.getElementById('field-edit-protect')?.value || '').trim();
+            if (v) state.protect = v;
+            state.introEditProtect = false;
+          } else state.introEditProtect = true;
+          render();
+        };
+      }
+      document.getElementById('btn-next').onclick = () => finishIntroIntoCriteria();
+      document.getElementById('btn-redig').onclick = () => {
+        step = 106;
         render();
       };
       return;
