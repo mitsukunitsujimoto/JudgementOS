@@ -1,18 +1,29 @@
 /**
- * JudgmentOS Version 1.5（導入UX＝低摩擦）
- * 建付け: AIと向き合う → 判断基準を明確に → 必要な問いに答える（答えは出さない）
+ * JudgmentOS Version 2.0 第一段階（既定UI）
+ * 見せる体験: 話す → 自分の基準が見える → AIに渡せる
+ * 内部に残す: 実現×守る、制約、映し返し（確認）、掘る（なぜ守るか）、論点（核心の材料）、判断文脈、振り返り相当
  *
- * 導入: テーマ選択 → 吐き出し（音声／殴り書き）→ 自動構造化 → 映し返し
- * → いちばん大切にしたいこと → … → 論点を判定 → 振り返る
+ * 残す: structure-intro / hypotheses / store / 招待・同意
+ * UIから隠す: 映し返し・掘る・論点・判断文脈・振り返りの工程名
+ * 統合: 多数ステップを対話5問＋3層アウトプットへ
+ * 新設: infer-principle API、Layer1-3
  *
- * 旧フロー（気になること〜ギャップ問い）に戻す:
- *   - ?flow=legacy で judgmentos-v12.legacy.js を読み込む（index.html）
+ * ?flow=classic で 1.5 画面（工程名つき）
+ * ?flow=legacy で judgmentos-v12.legacy.js
  */
 (function () {
   'use strict';
 
   const INCLUDE_REPLY_PATTERN_IN_FLOW = false;
-  const APP_FLOW = 'v14';
+  const APP_FLOW = 'v20';
+
+  function useJos20Ui() {
+    try {
+      return new URLSearchParams(window.location.search).get('flow') !== 'classic';
+    } catch (_) {
+      return true;
+    }
+  }
 
   /**
    * 将来拡張 — シナリオ別・問い返す型ライブラリ
@@ -203,7 +214,14 @@
     introDigNote: '',
     changeSummary: null, // { headline, beforeSummary, afterSummary, criteriaShift, takeaway, source }
     changeSummaryBusy: false,
-    changeSummaryStarted: false
+    changeSummaryStarted: false,
+    principle: '',
+    principleEdited: '',
+    principleFeedback: '',
+    handoffText: '',
+    judgmentCore: '',
+    jos20Busy: false,
+    jos20Started: false
   };
 
   const INTRO_CATEGORIES = [
@@ -239,13 +257,13 @@
   const HYPOGEN_LIMIT_JUDGMENT = 3;
   const HYPOGEN_LIMIT_DAY = 10;
 
-  let step = 101;
-  let farthestStep = 101;
+  let step = 201;
+  let farthestStep = 201;
   let concernDraft = '';
   let viewMode = 'flow'; // flow | history | theme
 
   // 101–104 → 105–107（掘る循環1周）→ ⑥以降。旧①–⑤は履歴復帰用に残す
-  const STEP_ORDER = [101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
+  const STEP_ORDER = [201, 202, 203, 204, 205, 206, 207, 208, 101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -303,7 +321,7 @@
         if (!id || !canGoToPhase(id)) return;
         // 「考えている」はいつでも導入の先頭へ戻り、書き直せる
         if (id === 'think') {
-          step = 101;
+          step = useJos20Ui() ? 201 : 101;
           render();
           return;
         }
@@ -1015,6 +1033,14 @@ ${note}`;
 
   function progressLabel() {
     const map = {
+      201: '話してみる',
+      202: '整理しています',
+      203: '向かいたいこと',
+      204: '守りたいこと',
+      205: 'なぜ守るか',
+      206: '動かせない条件',
+      207: '基準を言葉にしています',
+      208: '今回の判断',
       101: 'テーマを選ぶ',
       102: '頭の中を出す',
       103: '思考を分類中',
@@ -1491,12 +1517,14 @@ ${note}`;
       introEditAchieve: false, introEditProtect: false,
       introChange: null,
       introDigDone: false, introDigFocusId: '', introDigNote: '',
-      changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false
+      changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false,
+      principle: '', principleEdited: '', principleFeedback: '',
+      handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false
     });
     concernDraft = '';
     viewMode = 'flow';
-    step = 101;
-    farthestStep = 101;
+    step = useJos20Ui() ? 201 : 101;
+    farthestStep = step;
   }
 
   function keepGrownContext() {
@@ -1641,6 +1669,13 @@ ${note}`;
     state.contextAfterText = entry.contextAfter || entry.contextBefore || '';
     state.newJudgment = entry.newJudgment || '';
     state.criteriaGrowth = Object.assign(emptyCriteriaGrowth(), entry.criteriaGrowth || {});
+    state.principle = entry.principle || '';
+    state.principleEdited = entry.principleEdited || entry.principle || '';
+    state.principleFeedback = entry.principleFeedback || '';
+    state.handoffText = entry.handoffText || '';
+    state.judgmentCore = entry.judgmentCore || '';
+    state.introDump = entry.concerns && entry.concerns[0] ? String(entry.concerns[0]) : (entry.theme || '');
+    state.introDigNote = entry.whyProtect || '';
   }
 
   function enterWorkspace() {
@@ -1896,6 +1931,402 @@ ${note}`;
     }
   }
 
+  function jos20StageHtml(n) {
+    const items = [
+      { id: 1, label: '話す' },
+      { id: 2, label: '基準が見える' },
+      { id: 3, label: 'AIに渡せる' }
+    ];
+    return `<div class="jos20-stages" aria-label="いまの段階">
+      ${items.map((it) => `<span class="jos20-stage${n === it.id ? ' is-current' : ''}${n > it.id ? ' is-done' : ''}">${escapeHtml(it.label)}</span>`).join('<span class="jos20-stage-gap" aria-hidden="true">·</span>')}
+    </div>`;
+  }
+
+  function jos20Shell(stage, inner) {
+    return `
+      <section class="jos20-card space-y-4 fade-in">
+        ${jos20StageHtml(stage)}
+        ${inner}
+      </section>`;
+  }
+
+  function persistJos20Entry() {
+    const Store = window.JudgmentOSStore;
+    if (!Store) return;
+    syncThemeFromBackground();
+    const principle = (state.principleEdited || state.principle || '').trim();
+    const growth = Object.assign({}, state.criteriaGrowth || emptyCriteriaGrowth(), {
+      nowMe: principle,
+      criteriaChange: state.judgmentCore || '',
+      truePurpose: state.protect || ''
+    });
+    state.criteriaGrowth = growth;
+    const payload = {
+      jos20: true,
+      theme: state.theme,
+      concerns: state.concerns.slice(),
+      achieve: state.achieve,
+      protect: state.protect,
+      constraints: state.constraints,
+      whyProtect: state.introDigNote,
+      judgmentCore: state.judgmentCore,
+      principle,
+      principleEdited: principle,
+      principleFeedback: state.principleFeedback,
+      handoffText: state.handoffText,
+      gapQuestions: [],
+      gapInsights: [],
+      contextBefore: formatContextParts(state.contextBeforeParts || buildContextParts()),
+      contextBeforeParts: state.contextBeforeParts || buildContextParts(),
+      contextAfter: state.handoffText,
+      newJudgment: principle,
+      criteriaGrowth: growth
+    };
+    if (state.activeThemeId && state.activeEntryId) {
+      Store.updateEntry(state.activeThemeId, state.activeEntryId, payload);
+      return;
+    }
+    const result = Store.appendEntry(payload);
+    state.activeThemeId = result.themeId;
+    state.activeEntryId = result.entryId;
+  }
+
+  async function requestInferPrinciple() {
+    const Access = window.JudgmentOSAccess;
+    const profile = Access && Access.getProfile ? Access.getProfile() : null;
+    const ronten = (state.hypotheses || []).slice(0, 6).map((h) => h.text).filter(Boolean).join('\n');
+    const payload = {
+      dump: state.introDump,
+      achieve: state.achieve,
+      protect: state.protect,
+      whyProtect: state.introDigNote,
+      constraints: state.constraints,
+      ronten,
+      inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
+      inviteId: (Access && Access.getInviteId && Access.getInviteId()) || (profile && profile.inviteId) || '',
+      securityConsent: builtinAiAllowed()
+    };
+    try {
+      const res = await fetch('/api/infer-principle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && data.principle && data.handoff) {
+        return {
+          principle: data.principle,
+          core: data.core || '',
+          handoff: data.handoff,
+          source: data.source || 'model'
+        };
+      }
+    } catch (_) { /* fall through */ }
+    const protect = state.protect || '崩したくないもの';
+    const achieve = state.achieve || '向かいたい変化';
+    return {
+      principle: `今回の対話からは、あなたは「${protect}」を損なわない範囲で、「${achieve}」へ進もうとしているように見えます。`,
+      core: `「${achieve}」と「${protect}」の両立が、今回の判断の核です。`,
+      handoff: `私は今回の判断において、短期的な収益性だけでなく、次を重視しています。
+実現したいこと：${achieve}
+守りたいもの：${protect}
+${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
+以下のテーマを検討する際には、この判断基準を前提として、複数の選択肢を示してください。
+各選択肢について、
+・期待できる成果
+・失う可能性のあるもの
+・主なリスク
+・長期的な信頼への影響
+を整理してください。
+最終判断は私が行います。`,
+      source: 'mock'
+    };
+  }
+
+  async function runJos20Synthesize() {
+    if (state.jos20Started) return;
+    state.jos20Started = true;
+    state.jos20Busy = true;
+    state.introDigFocusId = 'protect';
+    applyDigNoteToAxis();
+    if (state.introConstraintTags.length && !state.constraints.trim()) {
+      state.constraints = state.introConstraintTags.join('／');
+    }
+    if (state.constraints.trim() && !state.criteriaWant.trim()) {
+      state.criteriaWant = state.constraints.trim();
+    }
+    state.criteriaCore = [state.achieve, state.protect].filter(Boolean).join('／');
+    state.criteriaMust = state.protect;
+    state.weightResolve = state.introDigNote
+      ? `守る理由：${state.introDigNote}`
+      : '';
+    syncThemeFromBackground();
+    snapshotBeforePass();
+    try {
+      if (builtinAiAllowed()) {
+        try {
+          await requestBuiltinHypotheses(false);
+        } catch (_) { /* 論点は内部材料 */ }
+      }
+      const inferred = await requestInferPrinciple();
+      state.principle = inferred.principle;
+      state.principleEdited = inferred.principle;
+      state.judgmentCore = inferred.core
+        || ((state.hypotheses[0] && state.hypotheses[0].text) ? state.hypotheses[0].text : state.criteriaCore);
+      state.handoffText = inferred.handoff;
+      persistJos20Entry();
+    } catch (_) {
+      const inferred = await requestInferPrinciple();
+      state.principle = inferred.principle;
+      state.principleEdited = inferred.principle;
+      state.judgmentCore = inferred.core || state.criteriaCore;
+      state.handoffText = inferred.handoff;
+      persistJos20Entry();
+    }
+    state.jos20Busy = false;
+    step = 208;
+    render();
+  }
+
+  function bindJos20TextNext(fieldId, assign, nextStep, minLen) {
+    const ta = document.getElementById(fieldId);
+    const next = document.getElementById('btn-next');
+    const need = minLen == null ? 2 : minLen;
+    const sync = () => {
+      if (next) next.disabled = !((ta && ta.value.trim().length >= need));
+    };
+    if (ta) {
+      ta.oninput = () => {
+        assign(ta.value);
+        sync();
+      };
+      bindSpeechMic(ta, document.getElementById('btn-mic'));
+    }
+    sync();
+    if (next) {
+      next.onclick = () => {
+        const v = (ta?.value || '').trim();
+        if (v.length < need) {
+          ta?.focus();
+          return;
+        }
+        assign(v);
+        step = nextStep;
+        render();
+      };
+    }
+  }
+
+  function renderJos20(root) {
+    if (step === 201) {
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">今、どんなことが気になっていますか？</p>
+        <p class="q-help">まとまっていなくて構いません。案件の話で大丈夫です。</p>
+        <textarea id="field-intro-dump" class="textarea textarea-dump" rows="6" placeholder="例）売上は伸ばしたいが、儲け主義に見られてブランドを損ねたくない">${escapeHtml(state.introDump)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>次へ</button>
+        </div>
+      `);
+      bindJos20TextNext('field-intro-dump', (v) => { state.introDump = v; }, 202, 4);
+      return true;
+    }
+
+    if (step === 202) {
+      root.innerHTML = jos20Shell(1, `
+        <div class="extract-spinner" aria-hidden="true"></div>
+        <p class="q-title" style="text-align:center;margin-bottom:0">話の軸を整えています…</p>
+        <p class="q-help" style="text-align:center;margin-bottom:0">答えは出しません。</p>
+      `);
+      if (!state.introFetchStarted) {
+        state.introFetchStarted = true;
+        if (!state.introCategoryId) state.introCategoryId = 'vague';
+        runIntroPipeline().then(() => {
+          step = 203;
+          render();
+        }).catch(() => {
+          step = 203;
+          render();
+        });
+      }
+      return true;
+    }
+
+    if (step === 203) {
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">このことで、実現したいことは何ですか？</p>
+        <p class="q-help">今この判断で、向かいたい変化・到達したい姿です。違うところは直してください。</p>
+        <textarea id="field-achieve" class="textarea" rows="4">${escapeHtml(state.achieve)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+        </div>
+      `);
+      bindJos20TextNext('field-achieve', (v) => { state.achieve = v; }, 204, 2);
+      return true;
+    }
+
+    if (step === 204) {
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">それでも、失いたくないもの・守りたいものはありますか？</p>
+        <p class="q-help">変化を進めるときに、崩したくないもの・そう見られたくないものです。</p>
+        <textarea id="field-protect" class="textarea" rows="4">${escapeHtml(state.protect)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+        </div>
+      `);
+      bindJos20TextNext('field-protect', (v) => { state.protect = v; }, 205, 2);
+      return true;
+    }
+
+    if (step === 205) {
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">なぜ、それは守りたいのでしょう？</p>
+        <p class="q-help">一文で構いません。わからなければ、感じていることで大丈夫です。</p>
+        <textarea id="field-why" class="textarea" rows="4">${escapeHtml(state.introDigNote)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+        </div>
+        <button type="button" id="btn-skip" class="btn btn-ghost w-full">今は飛ばす</button>
+      `);
+      bindJos20TextNext('field-why', (v) => { state.introDigNote = v; }, 206, 2);
+      const skip = document.getElementById('btn-skip');
+      if (skip) {
+        skip.onclick = () => {
+          step = 206;
+          render();
+        };
+      }
+      return true;
+    }
+
+    if (step === 206) {
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">判断するうえで、動かせない条件はありますか？</p>
+        <p class="q-help">予算、期限、規程、人数など。なければ「特にない」で進められます。</p>
+        <textarea id="field-constraints" class="textarea" rows="3" placeholder="特にない、でも構いません">${escapeHtml(state.constraints)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary">基準を見る</button>
+        </div>
+      `);
+      const ta = document.getElementById('field-constraints');
+      const next = document.getElementById('btn-next');
+      bindSpeechMic(ta, document.getElementById('btn-mic'));
+      if (ta) {
+        ta.oninput = () => { state.constraints = ta.value; };
+      }
+      if (next) {
+        next.onclick = () => {
+          state.constraints = (ta?.value || '').trim();
+          state.jos20Started = false;
+          step = 207;
+          render();
+        };
+      }
+      return true;
+    }
+
+    if (step === 207) {
+      root.innerHTML = jos20Shell(2, `
+        <div class="extract-spinner" aria-hidden="true"></div>
+        <p class="q-title" style="text-align:center;margin-bottom:0">判断の基準を言葉にしています…</p>
+        <p class="q-help" style="text-align:center;margin-bottom:0">決めるのは、あなたです。</p>
+      `);
+      runJos20Synthesize();
+      return true;
+    }
+
+    if (step === 208) {
+      const principle = state.principleEdited || state.principle;
+      root.innerHTML = jos20Shell(3, `
+        <p class="q-title">自分の基準が見えました</p>
+        <p class="q-help">答えをもらったのではありません。何で決めるかが、言葉になっています。</p>
+
+        <div class="layer-card">
+          <p class="layer-kicker">今回の判断</p>
+          <dl class="layer-dl">
+            <div><dt>実現したいこと</dt><dd>${escapeHtml(state.achieve || '（未記入）')}</dd></div>
+            <div><dt>守りたいもの</dt><dd>${escapeHtml(state.protect || '（未記入）')}</dd></div>
+            <div><dt>主な条件</dt><dd>${escapeHtml(state.constraints || '特になし')}</dd></div>
+            <div><dt>判断の核心</dt><dd>${escapeHtml(state.judgmentCore || '（整理中）')}</dd></div>
+          </dl>
+        </div>
+
+        <div class="layer-card layer-card-accent">
+          <p class="layer-kicker">私の判断原則</p>
+          ${state.principleFeedback === 'edit' ? `
+            <textarea id="field-principle" class="textarea" rows="5">${escapeHtml(principle)}</textarea>
+            <button type="button" id="btn-save-principle" class="btn btn-primary w-full mt-2">この言葉にする</button>
+          ` : `
+            <p class="layer-principle">${escapeHtml(principle)}</p>
+            <div class="fb-row">
+              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'yes' ? ' is-on' : ''}" data-fb="yes">その通り</button>
+              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'diff' ? ' is-on' : ''}" data-fb="diff">少し違う</button>
+              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'edit' ? ' is-on' : ''}" data-fb="edit">修正したい</button>
+            </div>
+          `}
+        </div>
+
+        <div class="layer-card">
+          <p class="layer-kicker">この判断基準をAIに渡す</p>
+          <p class="q-help" style="margin-bottom:0.5rem">ChatGPTなどへ、そのまま貼れます。最終判断はあなたが行います。</p>
+          <textarea id="field-handoff" class="ai-prompt-box" rows="10">${escapeHtml(state.handoffText)}</textarea>
+          <button type="button" id="btn-copy-handoff" class="btn btn-primary w-full mt-2">コピーする</button>
+          <span id="copy-handoff-toast" class="hidden text-xs text-center text-[hsl(var(--primary))] block mt-2">コピーしました</span>
+        </div>
+
+        <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
+      `);
+      root.querySelectorAll('[data-fb]').forEach((btn) => {
+        btn.onclick = () => {
+          const fb = btn.getAttribute('data-fb');
+          if (fb === 'edit') {
+            state.principleFeedback = 'edit';
+            render();
+            return;
+          }
+          state.principleFeedback = fb;
+          persistJos20Entry();
+          render();
+        };
+      });
+      const saveP = document.getElementById('btn-save-principle');
+      if (saveP) {
+        saveP.onclick = () => {
+          const v = (document.getElementById('field-principle')?.value || '').trim();
+          if (v) {
+            state.principleEdited = v;
+            state.principle = v;
+          }
+          state.principleFeedback = 'edit-saved';
+          persistJos20Entry();
+          render();
+        };
+      }
+      const ho = document.getElementById('field-handoff');
+      if (ho) {
+        ho.oninput = () => { state.handoffText = ho.value; };
+      }
+      const copy = document.getElementById('btn-copy-handoff');
+      if (copy) {
+        copy.onclick = () => {
+          state.handoffText = (document.getElementById('field-handoff')?.value || state.handoffText);
+          persistJos20Entry();
+          copyText(state.handoffText, 'copy-handoff-toast');
+        };
+      }
+      document.getElementById('btn-home').onclick = () => {
+        goLanding();
+      };
+      return true;
+    }
+
+    return false;
+  }
+
   function render() {
     renderInner();
     if (viewMode === 'flow') {
@@ -1915,6 +2346,11 @@ ${note}`;
       return;
     }
     const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
+
+    if (useJos20Ui() && step >= 201 && step <= 208) {
+      renderJos20(root);
+      return;
+    }
 
     // —— 導入UX STEP1: テーマ選択（ワンタップ）——
     if (step === 101) {
@@ -3111,17 +3547,20 @@ ${note}`;
         const packed = Store.getEntry(theme.id, btn.dataset.entry);
         if (!packed) return;
         loadEntryIntoState(packed.theme, packed.entry);
-        // 続き：文脈は残っているが判断基準未完なら基準へ。完了済みなら余韻へ。
-        const done = hasCriteriaReflection(packed.entry.criteriaGrowth);
-        if (packed.entry.contextAfter && !done) {
-          state.contextAfterText = packed.entry.contextAfter;
-          step = 16;
-        } else if (done) {
-          step = 12;
-        } else if (packed.entry.contextBefore) {
-          step = 13;
+        if (packed.entry.jos20 || packed.entry.handoffText || packed.entry.principle) {
+          step = 208;
         } else {
-          step = packed.entry.achieve ? 7 : 1;
+          const done = hasCriteriaReflection(packed.entry.criteriaGrowth);
+          if (packed.entry.contextAfter && !done) {
+            state.contextAfterText = packed.entry.contextAfter;
+            step = 16;
+          } else if (done) {
+            step = 12;
+          } else if (packed.entry.contextBefore) {
+            step = 13;
+          } else {
+            step = packed.entry.achieve ? 7 : 1;
+          }
         }
         viewMode = 'flow';
         render();
@@ -3160,6 +3599,10 @@ ${note}`;
     btnHeaderHistory.addEventListener('click', () => openHistoryView(false));
   }
 
+  if (!useJos20Ui()) {
+    step = 101;
+    farthestStep = 101;
+  }
   updateHistoryButton();
   updateParticipantChip();
 })();

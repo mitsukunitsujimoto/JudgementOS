@@ -186,7 +186,14 @@
       contextAfter: payload.contextAfter || '',
       contextAfterParts: payload.contextAfterParts || null,
       newJudgment: payload.newJudgment || '',
-      criteriaGrowth: payload.criteriaGrowth || null
+      criteriaGrowth: payload.criteriaGrowth || null,
+      jos20: payload.jos20 || false,
+      judgmentCore: payload.judgmentCore || '',
+      principle: payload.principle || '',
+      principleFeedback: payload.principleFeedback || '',
+      principleEdited: payload.principleEdited || '',
+      handoffText: payload.handoffText || '',
+      whyProtect: payload.whyProtect || ''
     };
     theme.entries.push(entry);
     theme.updatedAt = now;
