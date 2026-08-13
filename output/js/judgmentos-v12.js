@@ -1091,6 +1091,48 @@ ${note}`;
     }
   }
 
+  /** 画面上で意味が切れないよう、主要語の定義を明示する */
+  function axisWordDefsHtml(opts) {
+    const showMirror = !opts || opts.mirror !== false;
+    const showDig = opts && opts.dig;
+    return `
+      <aside class="term-defs" role="note" aria-label="ことばの意味">
+        <p class="term-defs-heading">ことばの意味</p>
+        <dl class="term-defs-dl">
+          <div>
+            <dt>実現したいこと</dt>
+            <dd>今この判断で、向かいたい変化・到達したい姿</dd>
+          </div>
+          <div>
+            <dt>守りたいもの</dt>
+            <dd>その変化を進めるときに、崩したくないもの・失いたくないもの・そう見られたくないもの</dd>
+          </div>
+          ${showMirror ? `
+          <div>
+            <dt>映し返し</dt>
+            <dd>吐き出した言葉を、答えや最適案ではなく、「実現」と「守る」の二軸に整理して見せ返すこと</dd>
+          </div>` : ''}
+          ${showDig ? `
+          <div>
+            <dt>掘る</dt>
+            <dd>ふわっとしている一点だけを短く言葉にし、上の二軸をはっきりさせること。全部を深くする作業ではない</dd>
+          </div>` : ''}
+        </dl>
+      </aside>`;
+  }
+
+  function axisLabelAchieveHtml() {
+    return `
+      <p class="axis-label">実現したいこと</p>
+      <p class="axis-def">今この判断で、向かいたい変化・到達したい姿</p>`;
+  }
+
+  function axisLabelProtectHtml() {
+    return `
+      <p class="axis-label">守りたいもの</p>
+      <p class="axis-def">その変化を進めるときに、崩したくないもの・失いたくないもの・そう見られたくないもの</p>`;
+  }
+
   function balanceBoardHtml() {
     const a = (state.achieve || '').trim();
     const p = (state.protect || '').trim();
@@ -1098,6 +1140,7 @@ ${note}`;
       <div class="balance-board" aria-hidden="true">
         <div class="balance-pan">
           <p class="balance-pan-label">実現</p>
+          <p class="balance-pan-hint">向かいたい変化</p>
           <p class="balance-pan-text">${escapeHtml(a ? (a.length > 56 ? `${a.slice(0, 54)}…` : a) : '（未設定）')}</p>
         </div>
         <div class="balance-center">
@@ -1107,6 +1150,7 @@ ${note}`;
         </div>
         <div class="balance-pan">
           <p class="balance-pan-label">守る</p>
+          <p class="balance-pan-hint">崩したくないもの</p>
           <p class="balance-pan-text">${escapeHtml(p ? (p.length > 56 ? `${p.slice(0, 54)}…` : p) : '（未設定）')}</p>
         </div>
       </div>`;
@@ -1923,8 +1967,9 @@ ${note}`;
         <section class="card space-y-3 fade-in">
           ${prog}
           <p class="q-title">頭の中にあることを、そのまま出してください。</p>
-          <p class="q-help">${cat ? `テーマ: ${escapeHtml(cat.title)} — ` : ''}まとまっていなくて構いません。</p>
-          <textarea id="field-intro-dump" class="textarea textarea-dump" rows="7" placeholder="まとまっていなくて構いません。頭の中にあることをそのまま喋るか、箇条書きで打ってください。">${escapeHtml(state.introDump)}</textarea>
+          <p class="q-help">${cat ? `テーマ: ${escapeHtml(cat.title)} — ` : ''}まとまっていなくて構いません。次の画面で、次の二軸に整理して<strong>映し返し</strong>ます。</p>
+          ${axisWordDefsHtml()}
+          <textarea id="field-intro-dump" class="textarea textarea-dump" rows="7" placeholder="例）売上は伸ばしたいが、儲け主義に見られてブランドを損ねたくない、など。頭の中をそのまま。">${escapeHtml(state.introDump)}</textarea>
           <div class="dump-actions">
             <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
             <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>これで分類する</button>
@@ -1968,7 +2013,7 @@ ${note}`;
           <p class="q-title" style="text-align:center;margin-bottom:0">${hasPast ? '変化を読み取り中...' : '思考を分類中...'}</p>
           <p class="q-help" style="text-align:center;margin-bottom:0">${hasPast
             ? '前回の判断ログと、いまの言葉を見比べています。'
-            : '実現したいことと、守りたいものを抜き出しています。'}</p>
+            : '「実現」（向かいたい変化）と「守る」（崩したくないもの）を抜き出しています。'}</p>
         </section>`;
       if (!state.introFetchStarted) {
         state.introFetchStarted = true;
@@ -1996,7 +2041,8 @@ ${note}`;
           ${prog}
           ${change ? `
             <p class="q-title">以前の軸と、今のあなた</p>
-            <p class="q-help">残してある判断ログと、今回の言葉を見比べた映し返しです。${change.pastDate ? `（前回: ${escapeHtml(change.pastDate)}）` : ''}</p>
+            <p class="q-help">残してある判断ログと、今回の言葉を見比べた<strong>映し返し</strong>です。${change.pastDate ? `（前回: ${escapeHtml(change.pastDate)}）` : ''}</p>
+            ${axisWordDefsHtml()}
             <div class="change-pair">
               <div class="change-card change-card-past reveal-card">
                 <p class="axis-label">以前の軸</p>
@@ -2012,19 +2058,20 @@ ${note}`;
             <p class="q-help" style="margin-top:0.25rem">あわせて、今回抜き出した軸も確認できます。</p>
           ` : `
             <p class="q-title">この2つのバランスを取ることが、今回のテーマですね？</p>
-            <p class="q-help">AIが吐き出しから抜き出した軸です。違うところだけ直して進んでください。</p>
+            <p class="q-help">これは<strong>映し返し</strong>です。吐き出しを「実現」と「守る」に整理して見せています。答えや最適案ではありません。違うところだけ直して進んでください。</p>
+            ${axisWordDefsHtml()}
           `}
           ${balanceBoardHtml()}
           <div class="axis-pair">
             <div class="axis-card reveal-card">
-              <p class="axis-label">実現したいこと</p>
+              ${axisLabelAchieveHtml()}
               ${state.introEditAchieve
                 ? `<textarea id="field-edit-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>`
                 : `<p class="axis-body">「${escapeHtml(state.achieve || '（未抽出）')}」</p>`}
               <button type="button" id="btn-edit-achieve" class="btn btn-ghost w-full mt-2">${state.introEditAchieve ? '反映する' : '微修正'}</button>
             </div>
             <div class="axis-card reveal-card reveal-card-delay">
-              <p class="axis-label">守りたいもの</p>
+              ${axisLabelProtectHtml()}
               ${state.introEditProtect
                 ? `<textarea id="field-edit-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>`
                 : `<p class="axis-body">「${escapeHtml(state.protect || '（未抽出）')}」</p>`}
@@ -2098,6 +2145,7 @@ ${note}`;
           ${prog}
           <p class="q-title">いま一番ぼやけているのは、どれですか？</p>
           <p class="q-help">答えを選ぶのではなく、<strong>いま掘る場所</strong>を選びます。1つだけ。</p>
+          ${axisWordDefsHtml({ mirror: false, dig: true })}
           ${balanceBoardHtml()}
           <div class="theme-card-grid" id="dig-focus-grid">
             ${INTRO_DIG_FOCUSES.map((f) => `
@@ -2175,7 +2223,8 @@ ${note}`;
         <section class="space-y-4 fade-in reveal-in">
           ${prog}
           <p class="q-title">掘ったあと、軸はどう見えますか？</p>
-          <p class="q-help">選んだ場所の言葉を軸に反映しました。違うところだけ直して進んでください。</p>
+          <p class="q-help">選んだ場所の言葉を軸に反映した<strong>映し返し</strong>です。違うところだけ直して進んでください。</p>
+          ${axisWordDefsHtml()}
           ${balanceBoardHtml()}
           ${focus && state.introDigNote ? `
             <div class="dig-echo">
@@ -2186,14 +2235,14 @@ ${note}`;
           ` : ''}
           <div class="axis-pair">
             <div class="axis-card reveal-card">
-              <p class="axis-label">実現したいこと</p>
+              ${axisLabelAchieveHtml()}
               ${state.introEditAchieve
                 ? `<textarea id="field-edit-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>`
                 : `<p class="axis-body">「${escapeHtml(state.achieve || '（未抽出）')}」</p>`}
               <button type="button" id="btn-edit-achieve" class="btn btn-ghost w-full mt-2">${state.introEditAchieve ? '反映する' : '微修正'}</button>
             </div>
             <div class="axis-card reveal-card reveal-card-delay">
-              <p class="axis-label">守りたいもの</p>
+              ${axisLabelProtectHtml()}
               ${state.introEditProtect
                 ? `<textarea id="field-edit-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>`
                 : `<p class="axis-body">「${escapeHtml(state.protect || '（未抽出）')}」</p>`}
@@ -2274,7 +2323,8 @@ ${note}`;
           ${prog}
           ${trailHtml()}
           <p class="q-title">経営者として、本来実現したいことは何ですか。</p>
-          <p class="q-help">いまの施策や数字の目標ではなく、その先で向かいたい姿を書いてください。大きな言葉（社内融和、地域との共生、再生、社会貢献など）で構いません。施策の目標ではなく、あなたが経営者として本当に向かいたい姿を書いてください。</p>
+          ${axisWordDefsHtml({ mirror: false })}
+          <p class="q-help">施策や数字の目標そのものより、その先で<strong>向かいたい変化・到達したい姿</strong>を書いてください。大きな言葉で構いません。</p>
           <textarea id="field-achieve" class="textarea">${escapeHtml(state.achieve)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
         </section>`;
@@ -2294,7 +2344,8 @@ ${note}`;
           ${prog}
           ${trailHtml()}
           <p class="q-title">守りたいもの、崩したくないものはありますか。</p>
-          <p class="q-help">人・関係・時間・信頼・文化など。大切にしたいことを書く前に、守るものを言葉にしてください。</p>
+          ${axisWordDefsHtml({ mirror: false })}
+          <p class="q-help">実現したい変化を進めるとき、<strong>崩したくないもの・失いたくないもの・そう見られたくないもの</strong>を書いてください。人・関係・信頼・文化・ブランドなど。</p>
           <textarea id="field-protect" class="textarea">${escapeHtml(state.protect)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary w-full">次へ</button>
         </section>`;
@@ -2314,11 +2365,12 @@ ${note}`;
         <section class="space-y-3">
           ${prog}
           <div class="mirror-card fade-in">
-            <p class="mirror-label">いまの言葉を並べて見る</p>
-            <p>あなたは</p>
+            <p class="mirror-label">いまの言葉を並べて見る（映し返し）</p>
+            ${axisWordDefsHtml()}
+            <p>あなたは、実現したいこととして</p>
             <p class="quote">「${escapeHtml(m.achieve)}」</p>
             <p>と考えています。</p>
-            <p class="mt-3">一方で、</p>
+            <p class="mt-3">一方で、守りたいものとして</p>
             <p class="quote">「${escapeHtml(m.protect)}」</p>
             <p>と考えています。</p>
             <p class="mt-4">この二つを両立させながら考えることが、<br>今回の判断の核になりそうです。</p>

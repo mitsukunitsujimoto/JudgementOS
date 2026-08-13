@@ -206,7 +206,35 @@
     }
     .axis-label {
       font-size: 0.625rem; font-weight: 700; letter-spacing: 0.08em;
-      color: hsl(var(--primary)); margin-bottom: 0.5rem;
+      color: hsl(var(--primary)); margin-bottom: 0.25rem;
+    }
+    .axis-def {
+      font-size: 0.6875rem; line-height: 1.55; font-weight: 500;
+      color: hsl(var(--muted-fg)); margin: 0 0 0.65rem;
+    }
+    .term-defs {
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--muted) / 0.22);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin: 0 0 0.75rem;
+    }
+    .term-defs-heading {
+      font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em;
+      color: hsl(var(--muted-fg)); margin: 0 0 0.55rem;
+    }
+    .term-defs-dl { margin: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+    .term-defs-dl dt {
+      font-size: 0.8125rem; font-weight: 700; color: hsl(var(--foreground));
+      margin: 0 0 0.15rem;
+    }
+    .term-defs-dl dd {
+      font-size: 0.75rem; line-height: 1.6; color: hsl(var(--muted-fg));
+      margin: 0;
+    }
+    .balance-pan-hint {
+      font-size: 0.625rem; line-height: 1.35; color: hsl(var(--muted-fg));
+      margin: -0.1rem 0 0.35rem;
     }
     .axis-body {
       font-size: 0.9375rem; font-weight: 600; line-height: 1.7;
@@ -670,18 +698,21 @@
 
     <div class="screen-card">
       <h3>画面③ · 実現したいこと</h3>
+      <p><strong>定義：</strong>今この判断で、向かいたい変化・到達したい姿</p>
       <p>問い：そのテーマについて、あなたは何を実現したいですか。</p>
       <p class="muted">解決策ではなく、向かいたい方向を、あなたの言葉で書きます。</p>
     </div>
 
     <div class="screen-card">
       <h3>画面④ · 守りたいもの</h3>
+      <p><strong>定義：</strong>その変化を進めるときに、崩したくないもの・失いたくないもの・そう見られたくないもの</p>
       <p>問い：それを進める中で、何を守りたいですか。</p>
-      <p class="muted">人・関係・時間・信頼・文化など。崩したくないものを書きます。</p>
+      <p class="muted">人・関係・時間・信頼・文化・ブランドなど。</p>
     </div>
 
     <div class="screen-card">
       <h3>画面 · 映し返し</h3>
+      <p><strong>定義：</strong>吐き出した言葉を、答えや最適案ではなく、「実現」と「守る」の二軸に整理して見せ返すこと</p>
       <p>あなたは「（実現したいこと）」と考えています。<br>
       一方で、「（守りたいもの）」と考えています。<br>
       この二つを両立させながら考えることが、今回のテーマになりそうです。</p>
