@@ -227,7 +227,11 @@
     jos20Started: false,
     jos20AskCount: 0,
     jos20AskKind: '',
-    jos20WhyAsked: false
+    jos20WhyAsked: false,
+    jos20BoundaryAsked: false,
+    jos20BoundaryQuestion: '',
+    jos20BoundaryAnswer: '',
+    jos20DetectStarted: false
   };
 
   const INTRO_CATEGORIES = [
@@ -269,7 +273,7 @@
   let viewMode = 'flow'; // flow | history | theme
 
   // 101–104 → 105–107（掘る循環1周）→ ⑥以降。旧①–⑤は履歴復帰用に残す
-  const STEP_ORDER = [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
+  const STEP_ORDER = [201, 202, 203, 204, 205, 211, 206, 207, 208, 209, 210, 101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -1044,6 +1048,7 @@ ${note}`;
       203: '向かいたいこと',
       204: '守りたいこと',
       205: 'なぜ守るか',
+      211: '一つ確認',
       206: '動かせない条件',
       207: '基準を言葉にしています',
       208: '判断原則',
@@ -1528,7 +1533,9 @@ ${note}`;
       changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false,
       principle: '', principleEdited: '', principleFeedback: '',
       handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false,
-      jos20AskCount: 0, jos20AskKind: '', jos20WhyAsked: false
+      jos20AskCount: 0, jos20AskKind: '', jos20WhyAsked: false,
+      jos20BoundaryAsked: false, jos20BoundaryQuestion: '', jos20BoundaryAnswer: '',
+      jos20DetectStarted: false
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -1685,6 +1692,7 @@ ${note}`;
     state.judgmentCore = entry.judgmentCore || '';
     state.introDump = entry.concerns && entry.concerns[0] ? String(entry.concerns[0]) : (entry.theme || '');
     state.introDigNote = entry.whyProtect || '';
+    state.jos20BoundaryAnswer = entry.boundary || '';
   }
 
   function enterWorkspace() {
@@ -1978,6 +1986,7 @@ ${note}`;
       protect: state.protect,
       constraints: state.constraints,
       whyProtect: state.introDigNote,
+      boundary: state.jos20BoundaryAnswer,
       judgmentCore: state.judgmentCore,
       principle,
       principleEdited: principle,
@@ -2009,6 +2018,7 @@ ${note}`;
       achieve: state.achieve,
       protect: state.protect,
       whyProtect: state.introDigNote,
+      boundary: state.jos20BoundaryAnswer,
       constraints: state.constraints,
       ronten,
       inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
@@ -2049,6 +2059,43 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
 を整理してください。
 最終判断は私が行います。`,
       source: 'mock'
+    };
+  }
+
+  async function requestDetectBoundary() {
+    const Access = window.JudgmentOSAccess;
+    const profile = Access && Access.getProfile ? Access.getProfile() : null;
+    const payload = {
+      dump: state.introDump,
+      achieve: state.achieve,
+      protect: state.protect,
+      whyProtect: state.introDigNote,
+      inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
+      inviteId: (Access && Access.getInviteId && Access.getInviteId()) || (profile && profile.inviteId) || '',
+      securityConsent: builtinAiAllowed()
+    };
+    try {
+      const res = await fetch('/api/detect-boundary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok) {
+        return {
+          needsQuestion: !!data.needs_question,
+          question: String(data.question || '').trim()
+        };
+      }
+    } catch (_) { /* fall through */ }
+    const blob = `${state.introDump} ${state.achieve} ${state.protect} ${state.introDigNote}`;
+    if (/失われ.*なら|選ばない|たとえ.{0,12}でも|譲れない/.test(blob)) {
+      return { needsQuestion: false, question: '' };
+    }
+    const protect = state.protect || '守りたいもの';
+    return {
+      needsQuestion: !jos20Thin(state.achieve) && !jos20Thin(state.protect),
+      question: `一つだけ確認させてください。すべてを同時には満たせないとしたら、「${protect}」が失われる選択はしない、ということでよいですか。違うなら、失われたら選ばないものは何でしょう？`
     };
   }
 
@@ -2133,12 +2180,9 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     if (
       !jos20Thin(state.achieve)
       && !jos20Thin(state.protect)
-      && !String(state.introDigNote || '').trim()
-      && !jos20HasReasonCue()
-      && !state.jos20WhyAsked
-      && asks < 2
+      && !state.jos20BoundaryAsked
     ) {
-      step = 205;
+      step = 211;
       render();
       return;
     }
@@ -2317,6 +2361,69 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
       return true;
     }
 
+    if (step === 211) {
+      const waiting = state.jos20DetectStarted && !state.jos20BoundaryQuestion && !state.jos20BoundaryAsked;
+      if (!state.jos20BoundaryQuestion && !state.jos20DetectStarted) {
+        root.innerHTML = jos20Shell(1, `
+          <div class="extract-spinner" aria-hidden="true"></div>
+          <p class="q-title" style="text-align:center;margin-bottom:0">話を見つめています…</p>
+          <p class="q-help" style="text-align:center;margin-bottom:0">答えは出しません。</p>
+        `);
+        state.jos20DetectStarted = true;
+        requestDetectBoundary().then((det) => {
+          if (det && det.needsQuestion && det.question) {
+            state.jos20BoundaryQuestion = det.question;
+            render();
+            return;
+          }
+          state.jos20BoundaryAsked = true;
+          state.jos20Started = false;
+          step = 207;
+          render();
+        }).catch(() => {
+          state.jos20BoundaryAsked = true;
+          state.jos20Started = false;
+          step = 207;
+          render();
+        });
+        return true;
+      }
+      if (waiting) {
+        root.innerHTML = jos20Shell(1, `
+          <div class="extract-spinner" aria-hidden="true"></div>
+          <p class="q-title" style="text-align:center;margin-bottom:0">話を見つめています…</p>
+        `);
+        return true;
+      }
+      root.innerHTML = jos20Shell(1, `
+        <p class="q-title">一つだけ確認させてください。</p>
+        <p class="q-help">${escapeHtml(state.jos20BoundaryQuestion)}</p>
+        <textarea id="field-boundary" class="textarea" rows="4" placeholder="失われたら選ばないこと、で構いません">${escapeHtml(state.jos20BoundaryAnswer)}</textarea>
+        <div class="dump-actions">
+          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
+          <button type="button" id="btn-next" class="btn btn-primary">進む</button>
+        </div>
+        <button type="button" id="btn-skip" class="btn btn-ghost w-full">今は飛ばす</button>
+      `);
+      const ta = document.getElementById('field-boundary');
+      bindSpeechMic(ta, document.getElementById('btn-mic'));
+      const doneBoundary = (v) => {
+        state.jos20BoundaryAnswer = v;
+        if (v && !state.introDigNote.trim()) state.introDigNote = v;
+        state.jos20BoundaryAsked = true;
+        state.jos20Started = false;
+        step = 207;
+        render();
+      };
+      document.getElementById('btn-next').onclick = () => {
+        const v = (ta?.value || '').trim();
+        if (v.length < 2) { ta?.focus(); return; }
+        doneBoundary(v);
+      };
+      document.getElementById('btn-skip').onclick = () => doneBoundary('');
+      return true;
+    }
+
     if (step === 206) {
       jos20FillConstraintsQuietly();
       state.jos20Started = false;
@@ -2467,7 +2574,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     }
     const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
 
-    if (useJos20Ui() && step >= 201 && step <= 210) {
+    if (useJos20Ui() && step >= 201 && step <= 211) {
       renderJos20(root);
       return;
     }

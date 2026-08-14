@@ -193,7 +193,8 @@
       principleFeedback: payload.principleFeedback || '',
       principleEdited: payload.principleEdited || '',
       handoffText: payload.handoffText || '',
-      whyProtect: payload.whyProtect || ''
+      whyProtect: payload.whyProtect || '',
+      boundary: payload.boundary || ''
     };
     theme.entries.push(entry);
     theme.updatedAt = now;

@@ -1,10 +1,10 @@
 import { validateInvite } from '../lib/monitor-invites.js';
 import {
-  buildInferPrincipleSystem,
-  buildInferPrincipleUser,
-  mockInferPrinciple,
-  parseInferPrincipleJson
-} from '../lib/infer-principle.js';
+  buildDetectBoundarySystem,
+  buildDetectBoundaryUser,
+  mockDetectBoundary,
+  parseDetectBoundaryJson
+} from '../lib/detect-boundary.js';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -33,16 +33,13 @@ export default async function handler(req, res) {
     dump: String(body.dump || '').trim().slice(0, 8000),
     achieve: String(body.achieve || '').trim().slice(0, 2000),
     protect: String(body.protect || '').trim().slice(0, 2000),
-    whyProtect: String(body.whyProtect || '').trim().slice(0, 2000),
-    boundary: String(body.boundary || '').trim().slice(0, 2000),
-    constraints: String(body.constraints || '').trim().slice(0, 2000),
-    ronten: String(body.ronten || '').trim().slice(0, 4000)
+    whyProtect: String(body.whyProtect || '').trim().slice(0, 2000)
   };
 
   const mock = () => ({
     ok: true,
     source: 'mock',
-    ...mockInferPrinciple(payload)
+    ...mockDetectBoundary(payload)
   });
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -68,12 +65,12 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.4,
-        max_tokens: 900,
+        temperature: 0.3,
+        max_tokens: 400,
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: buildInferPrincipleSystem() },
-          { role: 'user', content: buildInferPrincipleUser(payload) }
+          { role: 'system', content: buildDetectBoundarySystem() },
+          { role: 'user', content: buildDetectBoundaryUser(payload) }
         ]
       })
     });
@@ -90,15 +87,15 @@ export default async function handler(req, res) {
     return res.status(200).json(mock());
   }
 
-  const parsed = parseInferPrincipleJson(data?.choices?.[0]?.message?.content || '');
+  const parsed = parseDetectBoundaryJson(data?.choices?.[0]?.message?.content || '');
   if (!parsed) return res.status(200).json(mock());
 
   return res.status(200).json({
     ok: true,
     source: 'model',
     model,
-    principle: parsed.principle,
-    core: parsed.core,
-    handoff: parsed.handoff
+    needs_question: parsed.needs_question,
+    question: parsed.question,
+    reason: parsed.reason
   });
 }
