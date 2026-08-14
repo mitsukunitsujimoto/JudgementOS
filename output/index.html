@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="何を決めるか、より。何で決めるか。JudgmentOSは答えを決めません。大切にしている判断の基準を見つけ、AIに渡せます。">
-  <meta property="og:title" content="JudgmentOS — 何で決めるか">
-  <meta property="og:description" content="今、気になっていることを話してください。答えは決めません。何を大切にして判断しているのかを、一緒に見つけます。">
-  <title>JudgmentOS — 何で決めるか</title>
+  <meta name="description" content="何を決めるか、より、「何で」決めるか。JudgmentOSは答えを決めません。あなたの言葉から判断の基準を見つけ、AIに渡せます。">
+  <meta property="og:title" content="JudgmentOS — 「何で」決めるか">
+  <meta property="og:description" content="今、気になっていることを、あなたの言葉で聞かせてください。答えは決めません。">
+  <title>JudgmentOS — 「何で」決めるか</title>
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <script>document.documentElement.classList.add('js');</script>
@@ -672,13 +672,12 @@
   <article id="reader-doc" class="reader-doc" lang="ja">
     <p class="brand">JUDGMENT OS</p>
     <h1>JudgmentOS</h1>
-    <p><strong>何を決めるか、より。何で決めるか。</strong></p>
-    <p>今、気になっていることを話してください。JOSは答えを決めません。あなたが何を大切にして判断しているのかを、一緒に見つけます。</p>
-    <p>話し終わると、次の3つが残ります。</p>
+    <p><strong>何を決めるか、より、「何で」決めるか。</strong></p>
+    <p>今、気になっていることを、あなたの言葉で聞かせてください。話しても、書いても大丈夫です。JOSは答えを決めません。あなたが何を大切にして判断しようとしているのかを、一緒に見つけます。</p>
+    <p>体験は三つだけです。伝える → 基準が見える → AIに渡せる。</p>
     <ol>
-      <li>今回の判断（実現したいこと、守りたいもの、条件、核心）</li>
-      <li>私の判断原則</li>
-      <li>AIに渡す判断基準（コピーして使えます。最終判断はあなたが行います）</li>
+      <li>あなたの判断原則（実現したいこと × 守りたいもの。ぶつかるときは境界まで）</li>
+      <li>AIに渡す文（衝突する点も明示するよう求める。最終判断はあなた）</li>
     </ol>
     <p>対話アプリを使うには、JavaScriptが有効なブラウザで開いてください。<br>
     URL: https://judgement-os-five.vercel.app/</p>
@@ -688,14 +687,15 @@
   <section id="screen-landing" class="landing fade-in" aria-label="JudgmentOS">
     <div class="landing-inner">
       <p class="landing-logo">JUDGMENT OS</p>
-      <h1 class="landing-title">何を決めるか、より。<br>何で決めるか。</h1>
+      <h1 class="landing-title">何を決めるか、より、<br>「何で」決めるか。</h1>
       <p class="landing-promise" style="margin-top:1.25rem">
-        今、気になっていることを話してください。<br>
+        今、気になっていることを、<br>
+        あなたの言葉で聞かせてください。<br><br>
         JOSは答えを決めません。<br>
-        あなたが何を大切にして判断しているのかを、一緒に見つけます。
+        あなたが何を大切にして判断しようとしているのかを、一緒に見つけます。
       </p>
       <div class="landing-actions">
-        <button type="button" id="btn-enter" class="btn btn-primary btn-landing">話してみる</button>
+        <button type="button" id="btn-enter" class="btn btn-primary btn-landing">始めてみる</button>
         <button type="button" id="btn-open-history" class="btn btn-ghost hidden">これまでの記録</button>
       </div>
     </div>
@@ -706,8 +706,8 @@
       <p class="landing-logo">JUDGMENT OS</p>
       <h1 class="landing-title" style="font-size:1.35rem">データの扱い</h1>
       <p class="landing-promise text-left" style="margin-top:1rem; max-width:26rem; margin-left:auto; margin-right:auto;">
-        話した内容は、判断の軸を整理するために外部のAIへ送ることがあります。答えや最終判断は出しません。<br><br>
-        送りたくない場合は「送らない」を選んでください。会話はそのまま進められます。
+        伝えた内容は、判断の軸を整理するために外部のAIへ送ることがあります。答えや最終判断は出しません。<br><br>
+        送りたくない場合は「送らない」を選んでください。そのまま進められます。
       </p>
       <div class="landing-actions" style="margin-top:1.5rem;">
         <button type="button" id="btn-security-accept" class="btn btn-primary btn-landing">同意して進む</button>

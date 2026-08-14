@@ -1,11 +1,11 @@
 /**
  * JudgmentOS Version 2.0 第一段階（既定UI）
- * 見せる体験: 話す → 自分の基準が見える → AIに渡せる
+ * 見せる体験: 伝える → 基準が見える → AIに渡せる
  * 内部に残す: 実現×守る、制約、映し返し（確認）、掘る（なぜ守るか）、論点（核心の材料）、判断文脈、振り返り相当
  *
  * 残す: structure-intro / hypotheses / store / 招待・同意
  * UIから隠す: 映し返し・掘る・論点・判断文脈・振り返りの工程名
- * 会話へ吸収: 映し返し（203の自然な返し）、掘る（曖昧なときだけ205）
+ * 会話へ吸収: 映し返し（203の自然な返し）、軸が薄いときだけ204、基準がぶつかるときだけ211
  * 裏側へ: 論点抽出・制約タグ・structure-intro
  * 任意化: 振り返り（210）
  * 統合: 固定5問を可変フォローへ。クライマックス＝判断原則→AIに渡す
@@ -1043,7 +1043,7 @@ ${note}`;
 
   function progressLabel() {
     const map = {
-      201: '話してみる',
+      201: '伝える',
       202: '整理しています',
       203: '向かいたいこと',
       204: '守りたいこと',
@@ -1950,7 +1950,7 @@ ${note}`;
 
   function jos20StageHtml(n) {
     const items = [
-      { id: 1, label: '話す' },
+      { id: 1, label: '伝える' },
       { id: 2, label: '基準が見える' },
       { id: 3, label: 'AIに渡せる' }
     ];
@@ -2046,17 +2046,18 @@ ${note}`;
     return {
       principle: `今回の対話からは、あなたは「${protect}」を損なわない範囲で、「${achieve}」へ進もうとしているように見えます。`,
       core: `「${achieve}」と「${protect}」の両立が、今回の判断の核です。`,
-      handoff: `私は今回の判断において、短期的な収益性だけでなく、次を重視しています。
+      handoff: `私は今回の判断において、次を重視しています。
 実現したいこと：${achieve}
 守りたいもの：${protect}
-${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
-以下のテーマを検討する際には、この判断基準を前提として、複数の選択肢を示してください。
+${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20BoundaryAnswer}\n` : ''}${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
+この判断基準を前提として、複数の選択肢を示してください。
 各選択肢について、
 ・期待できる成果
 ・失う可能性のあるもの
 ・主なリスク
 ・長期的な信頼への影響
-を整理してください。
+を比較してください。
+また、私の判断基準と衝突する点があれば、それも明示してください。
 最終判断は私が行います。`,
       source: 'mock'
     };
@@ -2089,13 +2090,21 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
       }
     } catch (_) { /* fall through */ }
     const blob = `${state.introDump} ${state.achieve} ${state.protect} ${state.introDigNote}`;
-    if (/失われ.*なら|選ばない|たとえ.{0,12}でも|譲れない/.test(blob)) {
+    if (/失われ.*なら|選ばない|たとえ.{0,12}でも|譲れない|収益.{0,8}だけ|一貫性を失/.test(blob)) {
+      return { needsQuestion: false, question: '' };
+    }
+    const gain = /収益|売上|利益|成長|拡大|スピード|効率|成果|価格|売却|伸ば/.test(blob);
+    const keep = /信頼|一貫|雇用|社員|顧客|ブランド|貢献|尊厳|文化|関係|安全|社会|還元/.test(blob);
+    const conflictCue = /(どちらも|両方|悩んで|迷って|両立|トレード)/.test(blob);
+    const bothAxes = !jos20Thin(state.achieve) && !jos20Thin(state.protect)
+      && String(state.achieve).slice(0, 20) !== String(state.protect).slice(0, 20);
+    if (!(conflictCue || (gain && keep) || bothAxes)) {
       return { needsQuestion: false, question: '' };
     }
     const protect = state.protect || '守りたいもの';
     return {
-      needsQuestion: !jos20Thin(state.achieve) && !jos20Thin(state.protect),
-      question: `一つだけ確認させてください。すべてを同時には満たせないとしたら、「${protect}」が失われる選択はしない、ということでよいですか。違うなら、失われたら選ばないものは何でしょう？`
+      needsQuestion: true,
+      question: `すべてを同時には満たせないとしたら、「${protect}」が失われる選択はしない、ということでよいですか。違うなら、失われたら選ばないものは何でしょう？`
     };
   }
 
@@ -2223,12 +2232,12 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
   function renderJos20(root) {
     if (step === 201) {
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">今、どんなことが気になっていますか？</p>
-        <p class="q-help">まとまっていなくて構いません。案件の話で大丈夫です。</p>
+        <p class="q-title">今、気になっていることは何ですか？</p>
+        <p class="q-help">まとまっていなくても構いません。<strong>話しても、書いても大丈夫です。</strong></p>
         <textarea id="field-intro-dump" class="textarea textarea-dump" rows="6" placeholder="例）売上は伸ばしたいが、儲け主義に見られてブランドを損ねたくない">${escapeHtml(state.introDump)}</textarea>
         <div class="dump-actions">
           <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>話し終わる</button>
+          <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>この内容で進む</button>
         </div>
       `);
       bindJos20TextNext('field-intro-dump', (v) => { state.introDump = v; }, 202, 4);
@@ -2238,7 +2247,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     if (step === 202) {
       root.innerHTML = jos20Shell(1, `
         <div class="extract-spinner" aria-hidden="true"></div>
-        <p class="q-title" style="text-align:center;margin-bottom:0">話の軸を整えています…</p>
+        <p class="q-title" style="text-align:center;margin-bottom:0">言葉を整えています…</p>
         <p class="q-help" style="text-align:center;margin-bottom:0">答えは出しません。</p>
       `);
       if (!state.introFetchStarted) {
@@ -2258,7 +2267,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     if (step === 203) {
       const editing = state.introEditAchieve || state.introEditProtect;
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">今のお話から、こう見えます</p>
+        <p class="q-title">今の内容から、こう見えます</p>
         <p class="q-help">答えではありません。向かいたいことと、失いたくないことの両立です。</p>
         ${editing ? `
           <label class="field-label">向かいたいこと</label>
@@ -2495,7 +2504,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     if (step === 209) {
       root.innerHTML = jos20Shell(3, `
         <p class="q-title">AIに渡す</p>
-        <p class="q-help">この判断基準を前提に、選択肢を出してもらう文です。最終判断はあなたが行います。</p>
+        <p class="q-help">判断基準を前提に、選択肢・成果・失うもの・リスク・長期の信頼、そして基準と衝突する点まで出してもらう文です。最終判断はあなたが行います。</p>
         <textarea id="field-handoff" class="ai-prompt-box" rows="12">${escapeHtml(state.handoffText)}</textarea>
         <button type="button" id="btn-copy-handoff" class="btn btn-primary w-full mt-2">コピーする</button>
         <span id="copy-handoff-toast" class="hidden text-xs text-center text-[hsl(var(--primary))] block mt-2">コピーしました</span>

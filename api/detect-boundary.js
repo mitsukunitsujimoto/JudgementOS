@@ -3,7 +3,8 @@ import {
   buildDetectBoundarySystem,
   buildDetectBoundaryUser,
   mockDetectBoundary,
-  parseDetectBoundaryJson
+  parseDetectBoundaryJson,
+  heuristicTension
 } from '../lib/detect-boundary.js';
 
 const CORS_HEADERS = {
@@ -90,12 +91,22 @@ export default async function handler(req, res) {
   const parsed = parseDetectBoundaryJson(data?.choices?.[0]?.message?.content || '');
   if (!parsed) return res.status(200).json(mock());
 
+  let needs = parsed.needs_question;
+  let question = parsed.question;
+  let reason = parsed.reason;
+  if (!needs && heuristicTension(payload)) {
+    const fallback = mockDetectBoundary(payload);
+    needs = fallback.needs_question;
+    question = fallback.question;
+    reason = 'heuristic_override';
+  }
+
   return res.status(200).json({
     ok: true,
     source: 'model',
     model,
-    needs_question: parsed.needs_question,
-    question: parsed.question,
-    reason: parsed.reason
+    needs_question: needs,
+    question,
+    reason
   });
 }
