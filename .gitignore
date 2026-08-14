@@ -1,5 +1,6 @@
 output/*.html
 !output/index.html
+!output/jos-explained.html
 !output/judgment-structure-demo.html
 !output/premise-illumination.html
 !output/submission.html

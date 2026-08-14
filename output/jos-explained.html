@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="JudgmentOS 2.0 — 「何で」決めるか">
+  <meta property="og:description" content="伝える → 基準が見える → AIに渡せる。実現したいこと × 守りたいもの。基準がぶつかるときだけ、一問深める。">
+  <meta property="og:type" content="article">
+  <title>JudgmentOS 2.0 第一段階</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="message-circle" class="w-4 h-4"></i>
+    2.0 第一段階
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-5">
+    JudgmentOS 2.0<br>
+    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">何を決めるか、より、「何で」決めるか。</span>
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    価値観診断でも、プロンプト作成ツールでもない。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-10">
+  <div class="text-center mb-8">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-3 leading-snug">
+      今、気になっていることを、<br class="sm:hidden">
+      <span class="text-ads-accent-light">あなたの言葉で伝える</span>
+    </p>
+    <p class="text-sm text-ads-muted max-w-lg mx-auto leading-relaxed">
+      何を決めるか、より。<strong class="text-slate-800">「何で」決めるか。</strong><br>
+      話しても、書いても大丈夫です。JOSは答えを決めません。深さを、利用者に背負わせません。
+    </p>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-stretch gap-2 md:gap-0 mb-8">
+    <div class="flex-1 rounded-2xl border-2 border-blue-300 bg-blue-50/60 p-5 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white font-black text-lg flex items-center justify-center mx-auto mb-3">1</div>
+      <p class="font-black text-slate-900 text-lg mb-1">伝える</p>
+      <p class="text-xs text-ads-muted leading-relaxed">気になっていることを、自分の言葉で</p>
+    </div>
+    <div class="hidden md:flex items-center px-2 text-ads-dim"><i data-lucide="chevrons-right" class="w-6 h-6"></i></div>
+    <div class="flex md:hidden justify-center text-ads-dim py-1"><i data-lucide="chevrons-down" class="w-6 h-6"></i></div>
+    <div class="flex-1 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-5 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white font-black text-lg flex items-center justify-center mx-auto mb-3">2</div>
+      <p class="font-black text-slate-900 text-lg mb-1">基準が見える</p>
+      <p class="text-xs text-ads-muted leading-relaxed">実現したいこと × 守りたいもの → あなたの判断原則</p>
+    </div>
+    <div class="hidden md:flex items-center px-2 text-ads-dim"><i data-lucide="chevrons-right" class="w-6 h-6"></i></div>
+    <div class="flex md:hidden justify-center text-ads-dim py-1"><i data-lucide="chevrons-down" class="w-6 h-6"></i></div>
+    <div class="flex-1 rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 p-5 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-lg flex items-center justify-center mx-auto mb-3">3</div>
+      <p class="font-black text-slate-900 text-lg mb-1">AIに渡せる</p>
+      <p class="text-xs text-ads-muted leading-relaxed">コピーして、最終判断は自分</p>
+    </div>
+  </div>
+
+  <p class="text-center text-xs font-bold tracking-[0.18em] text-ads-dim mb-4">終わったあと、手元に残る3つ</p>
+  <div class="grid sm:grid-cols-3 gap-3">
+    <div class="rounded-xl bg-white border border-ads-border p-4 text-center">
+      <p class="font-bold text-slate-900 text-sm">今回の判断</p>
+      <p class="text-[11px] text-ads-muted mt-1 leading-relaxed">実現・守る・条件・核心</p>
+    </div>
+    <div class="rounded-xl bg-white border border-ads-border p-4 text-center">
+      <p class="font-bold text-slate-900 text-sm">あなたの判断原則</p>
+      <p class="text-[11px] text-ads-muted mt-1 leading-relaxed">案件の話から、JOSが言語化</p>
+    </div>
+    <div class="rounded-xl bg-white border border-ads-border p-4 text-center">
+      <p class="font-bold text-slate-900 text-sm">AIに渡す文</p>
+      <p class="text-[11px] text-ads-muted mt-1 leading-relaxed">ワンクリックでコピー</p>
+    </div>
+  </div>
+</div>
+
+<section class="mb-12">
+  <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-5 text-center">中核：実現したいこと × 守りたいもの</h2>
+  <p class="text-sm text-ads-muted text-center mb-6 max-w-lg mx-auto leading-relaxed">
+    「判断原則を書いてください」とは聞きません。伝えた内容から、この二つを見つけます。
+  </p>
+  <div class="grid md:grid-cols-2 gap-3 mb-4">
+    <div class="rounded-xl border border-blue-200 bg-blue-50/50 p-5">
+      <p class="text-xs font-bold tracking-[0.14em] text-blue-700 mb-2">実現したいこと</p>
+      <p class="text-sm text-slate-700 leading-relaxed">今この判断で、向かいたい変化・到達したい姿</p>
+    </div>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5">
+      <p class="text-xs font-bold tracking-[0.14em] text-emerald-700 mb-2">守りたいもの</p>
+      <p class="text-sm text-slate-700 leading-relaxed">その変化を進めるときに、崩したくないもの・失いたくないもの・そう見られたくないもの</p>
+    </div>
+  </div>
+  <div class="rounded-xl border border-ads-border bg-white p-4">
+    <p class="text-[10px] font-bold tracking-[0.18em] text-ads-dim mb-2">たとえ</p>
+    <p class="text-sm text-slate-700 leading-relaxed">売上を20％上げたい。ただし「儲け主義になった」と見られるような、自社ブランドの棄損は避けたい。</p>
+  </div>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-5 text-center">1. 伝える — 話しても、書いても大丈夫です</h2>
+  <div class="space-y-2">
+    <div class="rounded-xl border border-ads-border bg-white px-4 py-3 text-sm text-slate-800">今、気になっていることは何ですか？（まとまっていなくても構いません）</div>
+    <div class="rounded-xl border border-dashed border-ads-border bg-ads-surface px-4 py-3 text-sm text-slate-700">JOSが返す：「○○を実現したい一方で、△△は失いたくないように見えます。」</div>
+    <div class="rounded-xl border-2 border-amber-200 bg-amber-50/50 px-4 py-3 text-sm text-slate-800"><strong>基準がぶつかるときだけ、一問深める。</strong>「一つだけ確認させてください。」（失われたら選ばないこと。順位づけではない）</div>
+  </div>
+  <p class="text-xs text-ads-muted text-center mt-4 leading-relaxed">質問をたくさんするから深いのではありません。必要な一問をするから深い。境界がすでに見えていれば、追加の質問はしません。</p>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-5 text-center">2–3. 基準が見え、AIに渡せる</h2>
+  <div class="space-y-3">
+    <div class="rounded-xl border border-ads-border bg-ads-surface p-5">
+      <p class="text-xs font-bold tracking-[0.14em] text-ads-accent mb-2">LAYER 1 · 今回の判断</p>
+      <p class="text-sm text-slate-700 leading-relaxed">実現したいこと／守りたいもの／主な条件／判断の核心。長文にはしません。</p>
+    </div>
+    <div class="rounded-xl border-2 border-ads-accent/25 bg-ads-accent/5 p-5">
+      <p class="text-xs font-bold tracking-[0.14em] text-ads-accent mb-2">LAYER 2 · あなたの判断原則</p>
+      <p class="text-sm text-slate-700 leading-relaxed mb-3">クライマックスはここです。「その通り／少し違う」。振り返りは、このあと任意です。</p>
+      <p class="text-xs text-ads-muted leading-relaxed">例：十分な収益は目指す。ただし、収益性だけを理由に、これまでの一貫性を失う選択はしない。</p>
+    </div>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5">
+      <p class="text-xs font-bold tracking-[0.14em] text-emerald-700 mb-2">LAYER 3 · この判断基準をAIに渡す</p>
+      <p class="text-sm text-slate-700 leading-relaxed">ChatGPTなどへそのまま貼れる文。選択肢・成果・失うもの・リスク・長期の信頼に加え、<strong class="text-slate-800">本人の判断基準と衝突する点も明示</strong>させます。<strong class="text-slate-800">最終判断は私が行います</strong>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-xl font-black text-slate-900 mb-4 text-center">利用者が勉強しなくてよいこと</h2>
+  <p class="text-sm text-ads-muted text-center mb-5 max-w-lg mx-auto leading-relaxed">
+    深さは減らしていません。工程名として見せないだけです。
+  </p>
+  <div class="rounded-2xl border border-ads-border bg-ads-surface p-5">
+    <p class="text-xs font-bold tracking-[0.14em] text-ads-dim mb-3">内側で動いている（画面には出さない）</p>
+    <p class="text-sm text-slate-600 leading-relaxed">テーマ判定／実現したいこと × 守りたいもの／映し返し／基準がぶつかるときだけ一問深める／論点・判断文脈の形成／AIに渡す文／任意の振り返り</p>
+  </div>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-xl font-black text-slate-900 mb-4 text-center">やっていないこと</h2>
+  <div class="space-y-2">
+    <div class="flex gap-3 rounded-xl border border-ads-border bg-white px-4 py-3">
+      <i data-lucide="bot-off" class="w-5 h-5 text-ads-dim shrink-0 mt-0.5"></i>
+      <div>
+        <p class="text-sm font-bold text-slate-900">正解・最終判断を出さない</p>
+        <p class="text-xs text-ads-muted">決めるのは本人。AIは整える役。</p>
+      </div>
+    </div>
+    <div class="flex gap-3 rounded-xl border border-ads-border bg-white px-4 py-3">
+      <i data-lucide="scan-face" class="w-5 h-5 text-ads-dim shrink-0 mt-0.5"></i>
+      <div>
+        <p class="text-sm font-bold text-slate-900">性格診断にしない</p>
+        <p class="text-xs text-ads-muted">具体的な経営テーマの話から、基準を見つける。</p>
+      </div>
+    </div>
+    <div class="flex gap-3 rounded-xl border border-ads-border bg-white px-4 py-3">
+      <i data-lucide="book-open" class="w-5 h-5 text-ads-dim shrink-0 mt-0.5"></i>
+      <div>
+        <p class="text-sm font-bold text-slate-900">内部構造を勉強させない</p>
+        <p class="text-xs text-ads-muted">「今、何を話せばよいか」だけが分かれば進める。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mb-8">
+  <h2 class="text-xl font-black text-slate-900 mb-4 text-center">いまから使うなら</h2>
+  <div class="rounded-2xl border border-ads-border bg-ads-surface p-5 space-y-3">
+    <div class="flex gap-3 text-sm text-slate-700 items-start">
+      <span class="w-6 h-6 rounded-md bg-ads-accent text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+      <span>「始めてみる」を押す</span>
+    </div>
+    <div class="flex gap-3 text-sm text-slate-700 items-start">
+      <span class="w-6 h-6 rounded-md bg-ads-accent text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+      <span>今のテーマを、話しても書いても伝える</span>
+    </div>
+    <div class="flex gap-3 text-sm text-slate-700 items-start">
+      <span class="w-6 h-6 rounded-md bg-ads-accent text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+      <span>あなたの判断原則を確認し、AIに渡す文をコピーする</span>
+    </div>
+  </div>
+  <p class="text-center text-xs text-ads-dim mt-5 leading-relaxed">
+    アプリ: <a class="text-ads-accent-light underline underline-offset-2" href="https://judgement-os-five.vercel.app">judgement-os-five.vercel.app</a><br>
+    図解: <a class="text-ads-accent-light underline underline-offset-2" href="https://judgement-os-five.vercel.app/jos-explained">judgement-os-five.vercel.app/jos-explained</a>
+    ／ <a class="text-ads-accent-light underline underline-offset-2" href="https://diagram-jos-explained.surge.sh">diagram-jos-explained.surge.sh</a><br>
+    本図解は JudgmentOS 2.0 第一段階に基づきます。
+  </p>
+</section>
+
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
