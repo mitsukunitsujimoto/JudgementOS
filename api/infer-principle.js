@@ -69,7 +69,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model,
         temperature: 0.4,
-        max_tokens: 900,
+        max_tokens: 1200,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildInferPrincipleSystem() },

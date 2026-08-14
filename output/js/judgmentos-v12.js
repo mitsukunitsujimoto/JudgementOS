@@ -1197,6 +1197,14 @@ ${note}`;
 
   function mockStructureIntroLocal() {
     const text = String(state.introDump || '').replace(/\s+/g, ' ').trim();
+    const bits = text.split(/ただし|一方で|けれど|しかし|が、/);
+    if (bits.length >= 2 && bits[0].trim().length >= 4 && bits[1].trim().length >= 4) {
+      return {
+        realization: bits[0].trim().slice(0, 180),
+        protection: bits.slice(1).join(' ').trim().slice(0, 180),
+        constraints_recommend: ['時間軸']
+      };
+    }
     const snippet = text.length > 48 ? `${text.slice(0, 48)}…` : text;
     const id = state.introCategoryId;
     const table = {
@@ -2042,22 +2050,34 @@ ${note}`;
       }
     } catch (_) { /* fall through */ }
     const protect = state.protect || '崩したくないもの';
-    const achieve = state.achieve || '向かいたい変化';
+    let achieve = state.achieve || '向かいたい変化';
+    const avoidOnly = /失いたくない|避けたい|失敗したくない|維持したい|壊したくない|落としたくない/.test(achieve)
+      && !/実現|伸ば|つくる|貢献|目指|使う|成立/.test(achieve);
+    if (avoidOnly && state.introDump.trim()) achieve = state.introDump.replace(/\s+/g, ' ').trim().slice(0, 120);
+    const theme = (state.introDump.split(/\n/).map((l) => l.trim()).find(Boolean) || '今回の判断').slice(0, 160);
     return {
-      principle: `今回の対話からは、あなたは「${protect}」を損なわない範囲で、「${achieve}」へ進もうとしているように見えます。`,
-      core: `「${achieve}」と「${protect}」の両立が、今回の判断の核です。`,
-      handoff: `私は今回の判断において、次を重視しています。
-実現したいこと：${achieve}
-守りたいもの：${protect}
-${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20BoundaryAnswer}\n` : ''}${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
-この判断基準を前提として、複数の選択肢を示してください。
-各選択肢について、
+      principle: `今回の対話からは、あなたは「${achieve}」を実現しようとしているように見えます。その際、「${protect}」は安易に犠牲にしない。${state.jos20BoundaryAnswer ? `また、「${state.jos20BoundaryAnswer}」を超える選択は採らない、という線があるように見えます。` : ''}`,
+      core: `進む方向は「${achieve}」。進み方として「${protect}」を安易に犠牲にしない。`,
+      handoff: `私は、${theme}について判断しようとしています。
+
+この判断によって実現したいのは、次です。
+${achieve}
+
+その実現に向かう過程で、次は安易に失いたくありません（これは目的ではなく、進み方です）。
+${protect}
+
+${state.jos20BoundaryAnswer ? `また、次は境界条件です。ここを超える選択は採りません／継続しません（目的ではありません）。
+${state.jos20BoundaryAnswer}
+` : ''}${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
+これらを前提として、上記の実現したいことに向かう複数の選択肢を提示してください。
+「避けたい状況を避けるため」の選択肢だけに寄せないでください。
+それぞれについて、
 ・期待できる成果
 ・失う可能性のあるもの
-・主なリスク
+・主要なリスク
 ・長期的な信頼への影響
 を比較してください。
-また、私の判断基準と衝突する点があれば、それも明示してください。
+また、私の判断基準や境界条件と衝突する点があれば明示してください。
 最終判断は私が行います。`,
       source: 'mock'
     };
@@ -2153,6 +2173,14 @@ ${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20
     render();
   }
 
+  function jos20LooksLikeAvoidancePurpose(s) {
+    const t = String(s || '');
+    if (!t.trim()) return true;
+    const avoid = /失いたくない|避けたい|失敗したくない|維持したい|壊したくない|落としたくない|取りたくない|犠牲にしたくない|崩したくない|継続できない/;
+    const purpose = /実現|伸ば|つくる|つくり|提供|成立|使う|貢献|向か|目指|到達|生み|広げ|市場|事業/;
+    return avoid.test(t) && !purpose.test(t);
+  }
+
   function jos20Thin(s) {
     const t = String(s || '').replace(/\s+/g, ' ').trim();
     if (t.length < 16) return true;
@@ -2170,11 +2198,12 @@ ${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20
     }
   }
 
-  /** 追加質問は「基準がまだ曖昧なときだけ」。最大2問。 */
+  /** 追加質問は必要なときだけ。工程は増やさない。最大2問＋境界の一問。 */
   function jos20GoNextTalkOrSynthesize() {
     jos20FillConstraintsQuietly();
     const asks = state.jos20AskCount || 0;
-    if (jos20Thin(state.achieve) && asks < 2 && state.jos20AskKind !== 'realize') {
+    const purposeWeak = jos20Thin(state.achieve) || jos20LooksLikeAvoidancePurpose(state.achieve);
+    if (purposeWeak && asks < 2 && state.jos20AskKind !== 'realize') {
       state.jos20AskKind = 'realize';
       step = 204;
       render();
@@ -2268,7 +2297,7 @@ ${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20
       const editing = state.introEditAchieve || state.introEditProtect;
       root.innerHTML = jos20Shell(1, `
         <p class="q-title">今の内容から、こう見えます</p>
-        <p class="q-help">答えではありません。向かいたいことと、失いたくないことの両立です。</p>
+        <p class="q-help">答えではありません。進む方向と、安易に失いたくないことです。守ること自体が目的ではありません。</p>
         ${editing ? `
           <label class="field-label">向かいたいこと</label>
           <textarea id="field-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>
@@ -2283,7 +2312,7 @@ ${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20
             </p>
             ${state.judgmentCore ? '' : ''}
           </div>
-          <p class="q-help" style="margin-top:0.5rem">判断の中心は、この両立にありそうです。</p>
+          <p class="q-help" style="margin-top:0.5rem">実現したいことが方向を決め、守りたいものが進み方を決めます。</p>
           <button type="button" id="btn-ok" class="btn btn-primary w-full">この理解で進む</button>
           <button type="button" id="btn-edit" class="btn btn-ghost w-full">少し違う</button>
         `}
@@ -2311,12 +2340,19 @@ ${state.jos20BoundaryAnswer ? `失われたら選ばないこと：${state.jos20
 
     if (step === 204) {
       const realize = state.jos20AskKind === 'realize';
+      const hijack = realize && jos20LooksLikeAvoidancePurpose(state.achieve);
+      const avoidCue = /避け|失敗したくない|落としたくない/.test(String(state.achieve || ''));
+      const title = !realize
+        ? 'それでも、失いたくないものはありますか？'
+        : (hijack && avoidCue)
+          ? 'それを避けた先で、何を実現したいのでしょう？'
+          : hijack
+            ? 'それを守りながら、本当は何を実現したいのでしょう？'
+            : '向かいたいことは、もう少し言うと何ですか？';
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">${realize
-          ? '向かいたいことは、もう少し言うと何ですか？'
-          : 'それでも、失いたくないものはありますか？'}</p>
-        <p class="q-help">工程ではありません。いまの話を、もう一文だけはっきりさせます。</p>
-        <textarea id="field-follow" class="textarea" rows="4">${escapeHtml(realize ? state.achieve : state.protect)}</textarea>
+        <p class="q-title">${title}</p>
+        <p class="q-help">工程ではありません。守ること自体を目的にしないための、一文です。</p>
+        <textarea id="field-follow" class="textarea" rows="4" placeholder="${realize ? '例）社会に貢献しながら、持続可能な事業を成立させたい' : ''}">${escapeHtml(hijack ? '' : (realize ? state.achieve : state.protect))}</textarea>
         <div class="dump-actions">
           <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
           <button type="button" id="btn-next" class="btn btn-primary">進む</button>
