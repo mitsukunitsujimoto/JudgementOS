@@ -194,7 +194,8 @@
       principleEdited: payload.principleEdited || '',
       handoffText: payload.handoffText || '',
       whyProtect: payload.whyProtect || '',
-      boundary: payload.boundary || ''
+      boundary: payload.boundary || '',
+      judgmentStructure: payload.judgmentStructure || null
     };
     theme.entries.push(entry);
     theme.updatedAt = now;

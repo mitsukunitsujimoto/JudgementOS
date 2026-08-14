@@ -36,7 +36,8 @@ export default async function handler(req, res) {
     whyProtect: String(body.whyProtect || '').trim().slice(0, 2000),
     boundary: String(body.boundary || '').trim().slice(0, 2000),
     constraints: String(body.constraints || '').trim().slice(0, 2000),
-    ronten: String(body.ronten || '').trim().slice(0, 4000)
+    ronten: String(body.ronten || '').trim().slice(0, 4000),
+    structure: body.structure && typeof body.structure === 'object' ? body.structure : null
   };
 
   const mock = () => ({

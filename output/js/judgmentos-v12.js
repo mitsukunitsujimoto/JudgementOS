@@ -231,7 +231,8 @@
     jos20BoundaryAsked: false,
     jos20BoundaryQuestion: '',
     jos20BoundaryAnswer: '',
-    jos20DetectStarted: false
+    jos20DetectStarted: false,
+    judgmentStructure: null
   };
 
   const INTRO_CATEGORIES = [
@@ -1197,47 +1198,38 @@ ${note}`;
 
   function mockStructureIntroLocal() {
     const text = String(state.introDump || '').replace(/\s+/g, ' ').trim();
-    const bits = text.split(/ただし|一方で|けれど|しかし|が、/);
-    if (bits.length >= 2 && bits[0].trim().length >= 4 && bits[1].trim().length >= 4) {
+    if (/反発されたくない|失敗したくない/.test(text) && !/実現|事業|貢献|伸ば|立ち上げ/.test(text)) {
       return {
-        realization: bits[0].trim().slice(0, 180),
-        protection: bits.slice(1).join(' ').trim().slice(0, 180),
-        constraints_recommend: ['時間軸']
+        realization: '',
+        protection: '',
+        constraints_recommend: [],
+        structure: {
+          desiredOutcome: '',
+          protectedValues: [],
+          boundaryConditions: [],
+          needsFollowup: true,
+          followupReason: 'desired_outcome_missing',
+          followupQuestion: 'それを避けた先で、本当は何を実現したいのでしょう？'
+        }
       };
     }
-    const snippet = text.length > 48 ? `${text.slice(0, 48)}…` : text;
-    const id = state.introCategoryId;
-    const table = {
-      strategy: {
-        realization: snippet
-          ? `${snippet}を踏まえ、将来の打ち手を自分の基準で決められる状態にしたい`
-          : '投資や撤退の判断を、数字だけでなく自分の基準で決められる状態にしたい',
-        protection: '現場の判断責任と、安易な拡大・縮小で失われる信頼',
-        constraints_recommend: ['予算の上限', '撤退の条件', '時間軸']
-      },
-      org: {
-        realization: snippet
-          ? `${snippet}を整理し、人と組織の意思決定が噛み合う形にしたい`
-          : '人と組織の意思決定が噛み合い、衝突が建設的になる状態にしたい',
-        protection: '一人ひとりの尊厳と、チームの信頼関係',
-        constraints_recommend: ['役割の明確さ', '評価の公正', '対話の時間']
-      },
-      ai_dissonance: {
-        realization: snippet
-          ? `「${snippet}」という違和感を言葉にし、問い返せる判断軸を持ちたい`
-          : 'AIや提案の答えに飲み込まれず、自分の問い返しができる状態にしたい',
-        protection: '判断を引き受ける人の責任と、答え依存にしない文化',
-        constraints_recommend: ['説明可能性', '最終判断者', '前提の共有']
-      },
-      vague: {
-        realization: snippet
-          ? `${snippet}の奥にある、本当に向かいたい姿をはっきりさせたい`
-          : 'モヤモヤの奥にある、本当に向かいたい姿をはっきりさせたい',
-        protection: '焦って結論を急がず、自分の感覚を粗末にしないこと',
-        constraints_recommend: ['今は決めなくてよい範囲', '最低限守りたいこと']
+    const bits = text.split(/ただし|一方で|けれど|しかし|が、/);
+    const head = (bits[0] || text).trim();
+    const tail = bits.slice(1).join(' ').trim();
+    const boundary = /継続できない|採らない|赤字|欺|貢献だけ/.test(tail);
+    return {
+      realization: head.slice(0, 180),
+      protection: (!boundary && /損ないたくない|失いたくない|離れたくない/.test(tail)) ? tail.slice(0, 180) : '',
+      constraints_recommend: [],
+      structure: {
+        desiredOutcome: head,
+        protectedValues: (!boundary && /損ないたくない|失いたくない|離れたくない/.test(tail)) ? [tail] : [],
+        boundaryConditions: boundary ? [tail] : [],
+        needsFollowup: false,
+        followupReason: null,
+        followupQuestion: null
       }
     };
-    return table[id] || table.vague;
   }
 
   async function requestStructureIntro() {
@@ -1257,11 +1249,12 @@ ${note}`;
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(() => null);
-      if (data && data.ok && data.realization && data.protection) {
+      if (data && data.ok && (data.realization || (data.structure && data.structure.needsFollowup))) {
         return {
-          realization: data.realization,
-          protection: data.protection,
+          realization: data.realization || '',
+          protection: data.protection || '',
           constraints_recommend: Array.isArray(data.constraints_recommend) ? data.constraints_recommend : [],
+          structure: data.structure || null,
           source: data.source || 'model'
         };
       }
@@ -1273,6 +1266,7 @@ ${note}`;
   function applyIntroExtraction(extracted) {
     state.achieve = (extracted.realization || '').trim();
     state.protect = (extracted.protection || '').trim();
+    state.judgmentStructure = extracted.structure || null;
     state.introConstraintTags = (extracted.constraints_recommend || []).slice();
     state.introExtractSource = extracted.source || '';
     const cat = introCategory();
@@ -1543,7 +1537,7 @@ ${note}`;
       handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false,
       jos20AskCount: 0, jos20AskKind: '', jos20WhyAsked: false,
       jos20BoundaryAsked: false, jos20BoundaryQuestion: '', jos20BoundaryAnswer: '',
-      jos20DetectStarted: false
+      jos20DetectStarted: false, judgmentStructure: null
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -1995,6 +1989,7 @@ ${note}`;
       constraints: state.constraints,
       whyProtect: state.introDigNote,
       boundary: state.jos20BoundaryAnswer,
+      judgmentStructure: state.judgmentStructure,
       judgmentCore: state.judgmentCore,
       principle,
       principleEdited: principle,
@@ -2027,6 +2022,7 @@ ${note}`;
       protect: state.protect,
       whyProtect: state.introDigNote,
       boundary: state.jos20BoundaryAnswer,
+      structure: state.judgmentStructure,
       constraints: state.constraints,
       ronten,
       inviteCode: (Access && Access.getInviteCode && Access.getInviteCode()) || (profile && profile.inviteCode) || '',
@@ -2049,36 +2045,27 @@ ${note}`;
         };
       }
     } catch (_) { /* fall through */ }
-    const protect = state.protect || '崩したくないもの';
-    let achieve = state.achieve || '向かいたい変化';
-    const avoidOnly = /失いたくない|避けたい|失敗したくない|維持したい|壊したくない|落としたくない/.test(achieve)
-      && !/実現|伸ば|つくる|貢献|目指|使う|成立/.test(achieve);
-    if (avoidOnly && state.introDump.trim()) achieve = state.introDump.replace(/\s+/g, ' ').trim().slice(0, 120);
+    const o = (state.achieve || (state.judgmentStructure && state.judgmentStructure.desiredOutcome) || '向かいたいこと');
+    let principle = `今回の対話からは、あなたは「${o}」を実現しようとしているように見えます。`;
+    if (state.protect && state.protect.trim()) principle += `その際、「${state.protect}」は安易に犠牲にしない。`;
+    else if (state.jos20BoundaryAnswer) principle += `また、「${state.jos20BoundaryAnswer}」を超える選択は採らない、という線があるように見えます。`;
     const theme = (state.introDump.split(/\n/).map((l) => l.trim()).find(Boolean) || '今回の判断').slice(0, 160);
+    const lines = [`${theme.replace(/。$/, '')}を考えています。`, `私が実現したいのは、${o.replace(/。$/, '')}です。`];
+    if (state.protect && state.protect.trim()) {
+      lines.push(`その実現に向かう過程でも、${state.protect}は安易に失いたくありません。`);
+    }
+    if (state.jos20BoundaryAnswer) {
+      lines.push(`${state.jos20BoundaryAnswer}。`);
+    }
+    lines.push('この目的をできる限り実現できる複数の選択肢を提示してください。それぞれについて、期待できる成果、失うもの、リスク、長期的な信頼への影響を比較してください。');
+    if ((state.protect && state.protect.trim()) || state.jos20BoundaryAnswer) {
+      lines.push('また、私の判断基準や継続可能性と衝突する点があれば明示してください。');
+    }
+    lines.push('最終判断は私が行います。');
     return {
-      principle: `今回の対話からは、あなたは「${achieve}」を実現しようとしているように見えます。その際、「${protect}」は安易に犠牲にしない。${state.jos20BoundaryAnswer ? `また、「${state.jos20BoundaryAnswer}」を超える選択は採らない、という線があるように見えます。` : ''}`,
-      core: `進む方向は「${achieve}」。進み方として「${protect}」を安易に犠牲にしない。`,
-      handoff: `私は、${theme}について判断しようとしています。
-
-この判断によって実現したいのは、次です。
-${achieve}
-
-その実現に向かう過程で、次は安易に失いたくありません（これは目的ではなく、進み方です）。
-${protect}
-
-${state.jos20BoundaryAnswer ? `また、次は境界条件です。ここを超える選択は採りません／継続しません（目的ではありません）。
-${state.jos20BoundaryAnswer}
-` : ''}${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
-これらを前提として、上記の実現したいことに向かう複数の選択肢を提示してください。
-「避けたい状況を避けるため」の選択肢だけに寄せないでください。
-それぞれについて、
-・期待できる成果
-・失う可能性のあるもの
-・主要なリスク
-・長期的な信頼への影響
-を比較してください。
-また、私の判断基準や境界条件と衝突する点があれば明示してください。
-最終判断は私が行います。`,
+      principle,
+      core: `進む方向は「${o}」。`,
+      handoff: lines.join('\n'),
       source: 'mock'
     };
   }
@@ -2209,16 +2196,17 @@ ${state.jos20BoundaryAnswer}
       render();
       return;
     }
-    if (jos20Thin(state.protect) && asks < 2 && state.jos20AskKind !== 'protect') {
-      state.jos20AskKind = 'protect';
-      step = 204;
-      render();
-      return;
-    }
+    const st = state.judgmentStructure || {};
+    const hasBoundary = !!(state.jos20BoundaryAnswer || (st.boundaryConditions && st.boundaryConditions.length));
+    const tensionFollow = st.needsFollowup && st.followupReason === 'criteria_tension_boundary_unclear';
+    const tensionHint = /貢献/.test(`${state.achieve} ${state.introDump}`)
+      && /収益|利益/.test(`${state.achieve} ${state.introDump}`)
+      && /一貫|専門/.test(`${state.achieve} ${state.protect} ${state.introDump}`);
     if (
-      !jos20Thin(state.achieve)
-      && !jos20Thin(state.protect)
+      !purposeWeak
+      && !hasBoundary
       && !state.jos20BoundaryAsked
+      && (tensionFollow || tensionHint)
     ) {
       step = 211;
       render();
@@ -2227,6 +2215,7 @@ ${state.jos20BoundaryAnswer}
     state.jos20Started = false;
     step = 207;
     render();
+    return;
   }
 
   function bindJos20TextNext(fieldId, assign, nextStep, minLen) {
@@ -2295,24 +2284,26 @@ ${state.jos20BoundaryAnswer}
 
     if (step === 203) {
       const editing = state.introEditAchieve || state.introEditProtect;
+      const hasProtect = !!(state.protect && state.protect.trim());
       root.innerHTML = jos20Shell(1, `
         <p class="q-title">今の内容から、こう見えます</p>
-        <p class="q-help">答えではありません。進む方向と、安易に失いたくないことです。守ること自体が目的ではありません。</p>
+        <p class="q-help">答えではありません。実現したいことが、判断の方向です。</p>
         ${editing ? `
           <label class="field-label">向かいたいこと</label>
           <textarea id="field-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>
-          <label class="field-label" style="margin-top:0.75rem">失いたくないこと</label>
+          <label class="field-label" style="margin-top:0.75rem">失いたくないこと（なければ空で構いません）</label>
           <textarea id="field-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>
           <button type="button" id="btn-next" class="btn btn-primary w-full mt-3">直した</button>
         ` : `
           <div class="layer-card">
             <p class="text-sm leading-relaxed text-slate-200">
-              <strong>「${escapeHtml(state.achieve || '（まだ言葉になっていない）')}」</strong>を実現したい一方で、<br>
-              <strong>「${escapeHtml(state.protect || '（まだ言葉になっていない）')}」</strong>は失いたくないように見えます。
+              ${hasProtect
+                ? `<strong>「${escapeHtml(state.achieve || '（まだ言葉になっていない）')}」</strong>を実現したい一方で、<br>
+              <strong>「${escapeHtml(state.protect)}」</strong>は安易に失いたくないように見えます。`
+                : `<strong>「${escapeHtml(state.achieve || '（まだ言葉になっていない）')}」</strong>を実現したいように見えます。`}
             </p>
-            ${state.judgmentCore ? '' : ''}
           </div>
-          <p class="q-help" style="margin-top:0.5rem">実現したいことが方向を決め、守りたいものが進み方を決めます。</p>
+          <p class="q-help" style="margin-top:0.5rem">守ること自体が目的ではありません。</p>
           <button type="button" id="btn-ok" class="btn btn-primary w-full">この理解で進む</button>
           <button type="button" id="btn-edit" class="btn btn-ghost w-full">少し違う</button>
         `}
@@ -2407,6 +2398,11 @@ ${state.jos20BoundaryAnswer}
     }
 
     if (step === 211) {
+      const fromStruct = state.judgmentStructure && state.judgmentStructure.followupQuestion
+        && state.judgmentStructure.followupReason !== 'desired_outcome_missing';
+      if (fromStruct && !state.jos20BoundaryQuestion) {
+        state.jos20BoundaryQuestion = state.judgmentStructure.followupQuestion;
+      }
       const waiting = state.jos20DetectStarted && !state.jos20BoundaryQuestion && !state.jos20BoundaryAsked;
       if (!state.jos20BoundaryQuestion && !state.jos20DetectStarted) {
         root.innerHTML = jos20Shell(1, `
@@ -2454,6 +2450,11 @@ ${state.jos20BoundaryAnswer}
       bindSpeechMic(ta, document.getElementById('btn-mic'));
       const doneBoundary = (v) => {
         state.jos20BoundaryAnswer = v;
+        if (v) {
+          state.judgmentStructure = state.judgmentStructure || {};
+          state.judgmentStructure.boundaryConditions = [v];
+          state.judgmentStructure.needsFollowup = false;
+        }
         if (v && !state.introDigNote.trim()) state.introDigNote = v;
         state.jos20BoundaryAsked = true;
         state.jos20Started = false;
