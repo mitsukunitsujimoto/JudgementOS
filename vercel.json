@@ -12,6 +12,8 @@
     { "source": "/jos-explained", "destination": "/jos-explained.html" },
     { "source": "/jos-explained/", "destination": "/jos-explained.html" },
     { "source": "/explained", "destination": "/jos-explained.html" },
+    { "source": "/grill-me", "destination": "/grill-me.html" },
+    { "source": "/grill-me/", "destination": "/grill-me.html" },
     { "source": "/judgment-structure-demo", "destination": "/judgment-structure-demo.html" },
     { "source": "/judgment-structure-demo/", "destination": "/judgment-structure-demo.html" }
   ]
