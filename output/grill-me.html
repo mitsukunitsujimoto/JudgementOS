@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="グリルミーの仕組み">
+  <meta property="og:description" content="実装の前に、計画の穴を一問ずつ炙り出す「グリルミー」を、身近な例とビジュアルで図解します。">
+  <meta property="og:type" content="article">
+  <title>グリルミーの仕組み</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="messages-square" class="w-4 h-4"></i>
+    開発ツール
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    <span class="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">グリルミー</span>の仕組み
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    「Grill me」と頼むと、AIが計画を容赦なく問い詰めてくる。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  ONE-PAGE SUMMARY                                             -->
+<!-- ============================================================ -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      グリルミー = 計画の穴を<span class="text-ads-accent-light">「一問ずつ」炙る</span>インタビュー
+    </p>
+    <p class="text-sm text-ads-muted">
+      コードを書く前に、決まっていない分岐を全部つぶして、共通理解をつくる
+    </p>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0 mb-8">
+    <div class="flex flex-col items-center w-36 p-3">
+      <div class="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="file-text" class="w-7 h-7 text-blue-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">あなたの計画</div>
+      <div class="text-[11px] text-blue-600/70 mt-0.5">「通知機能が欲しい」</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-16 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-accent tracking-wider">1問ずつ</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center w-40 p-4 bg-orange-500/5 border-2 border-orange-500/20 rounded-2xl">
+      <div class="w-16 h-16 rounded-2xl bg-orange-500/15 border-2 border-orange-500/30 flex items-center justify-center mb-2.5">
+        <i data-lucide="flame" class="w-8 h-8 text-orange-600"></i>
+      </div>
+      <div class="font-bold text-orange-700 text-base">グリルミー</div>
+      <div class="text-[11px] text-ads-muted mt-0.5 mb-2">問い詰め、推奨も出す</div>
+      <div class="text-[10px] text-ads-muted bg-white rounded-lg px-2.5 py-1 border border-ads-border/50">容赦ない聞き役</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-16 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-accent tracking-wider">共通理解</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center w-36 p-3">
+      <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="check-circle" class="w-7 h-7 text-emerald-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">実装スタート</div>
+      <div class="text-[11px] text-emerald-600/70 mt-0.5">前提が揃ってから書く</div>
+    </div>
+  </div>
+
+  <div class="flex justify-center mb-8">
+    <div class="flex items-center gap-2 text-xs text-orange-700 bg-orange-500/5 border border-orange-500/15 rounded-full px-4 py-1.5">
+      <i data-lucide="git-branch" class="w-3.5 h-3.5"></i>
+      決定の枝を、依存関係ごと一つずつ潰していく
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4 mb-6">
+    <div class="flex-1 border-t border-ads-border/50"></div>
+    <div class="text-[11px] text-ads-dim font-medium">こんなときに使われている</div>
+    <div class="flex-1 border-t border-ads-border/50"></div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-2 mb-2">
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="code" class="w-3.5 h-3.5 text-blue-500"></i>
+      実装前の設計確認
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="list-checks" class="w-3.5 h-3.5 text-emerald-500"></i>
+      要件の穴つぶし
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="file-pen" class="w-3.5 h-3.5 text-amber-500"></i>
+      文書の抜け漏れ確認
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="scale" class="w-3.5 h-3.5 text-purple-500"></i>
+      トレードオフの言語化
+    </div>
+  </div>
+</div>
+
+<p class="text-center text-ads-muted mb-16 md:mb-20">
+  ここから先で、この仕組みをひとつずつ丁寧に解説していきます。
+</p>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 1: そもそもグリルミーって何？                         -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-500/10 flex-shrink-0">
+      <i data-lucide="help-circle" class="w-5 h-5 text-orange-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">そもそもグリルミーって何？</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    英語の <strong class="text-slate-900">grill</strong> には、「焼く」以外に <strong class="text-slate-900">「厳しく問い詰める」</strong> という意味があります。就職面接で深く掘られる、記者会見で核心を突かれる、あの感じです。「Grill me」は「私を問い詰めて」という依頼です。
+  </p>
+
+  <p class="mb-8 leading-relaxed">
+    レストランで「何が食べたい？」と聞かれると、頭が真っ白になります。メニューもなく、おすすめもなく、空白だけが置かれるからです。でも「今日のオススメは焼き魚です。理由は旬だから」と出されると、同意するか、別の事情を話すか、決められます。
+  </p>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 md:p-8 mb-8">
+    <h3 class="text-lg font-bold text-slate-900 text-center mb-8">空白の質問と、推奨つきの一問</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold text-red-600 mb-3 flex items-center gap-1.5">
+          <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+          空白を渡される
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4 mb-3">
+          <p class="text-sm text-slate-800">「通知、どうしますか？」</p>
+        </div>
+        <p class="text-xs text-ads-muted leading-relaxed">材料がなく、適当に選ぶか、逆質問で時間が溶ける</p>
+      </div>
+      <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+        <div class="text-xs font-bold text-emerald-600 mb-3 flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+          グリルミーの聞き方
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4 mb-3">
+          <p class="text-sm text-slate-800 mb-2">「誰に出しますか？」</p>
+          <p class="text-xs text-emerald-700 bg-emerald-50 rounded px-2 py-1">推奨: 関係者だけ。全員だと通知疲れが先に来る</p>
+        </div>
+        <p class="text-xs text-ads-muted leading-relaxed">提案に反応するだけ。事情があれば、そのとき初めて口に出せる</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    グリルミーは、TypeScript の教育で知られる <strong class="text-slate-900">Matt Pocock（マット・ポコック）</strong> が作ったエージェントスキルです。中身は驚くほど短く、実体は数行の指示です。この指示を載せるだけで、AIは「すぐコードを書く助手」から「共通理解ができるまで質問を止めない聞き役」に変わります。
+  </p>
+  <p class="text-xs text-ads-dim mb-8">出典: <a href="https://rightcode.co.jp/blogs/56196" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">ライトコード — Matt Pocock の /grill-me を試してみました</a></p>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-ads-accent/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-ads-accent-light"></i>
+      </div>
+      <div>
+        <p class="font-bold text-ads-accent-light mb-1">ここがポイント</p>
+        <p class="text-ads-muted leading-relaxed">
+          グリルミーの主役はAIではありません。<strong class="text-slate-800">決めるのはあなた</strong>です。AIは決定の木（でん・き＝枝分かれする判断の地図）を歩き、推奨と理由を添えて一問ずつ聞きます。あなたは同意するか、事情を言語化するだけ。炙られるのはコードではなく、<strong class="text-slate-800">まだ口にしていなかった前提</strong>です。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 2: もう少し正確に言うと                               -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/10 flex-shrink-0">
+      <i data-lucide="search" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">もう少し正確に言うと</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    レストランのたとえで、聞き方の違いはつかめましたか？ ここから、実際の指示文を見てみます。公式のスキル本体は、ほぼこの3ブロックです。
+  </p>
+
+  <div class="mb-8 rounded-xl overflow-hidden border border-slate-700/50">
+    <div class="flex items-center gap-3 bg-slate-800 px-4 py-2.5">
+      <div class="flex gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-slate-400">
+        <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+        SKILL.md — グリルミーの本体（要約）
+      </div>
+    </div>
+    <pre class="bg-slate-950 p-5 overflow-x-auto text-sm leading-loose"><code><span class="text-slate-500"># 共通理解に達するまで、計画のすべてを容赦なくインタビューせよ</span>
+<span class="text-slate-300">Interview me relentlessly ... until we reach a shared understanding.</span>
+
+<span class="text-slate-500"># 決定の木を枝ごとに降り、依存関係を一つずつ解け</span>
+<span class="text-slate-300">Walk down each branch of the design tree ...</span>
+
+<span class="text-slate-500"># 質問ごとに、推奨する回答も出せ</span>
+<span class="text-emerald-400">For each question, provide your recommended answer.</span>
+
+<span class="text-slate-500"># 質問は一度に一つ。コードを見れば分かることは、聞くな</span>
+<span class="text-amber-400">Ask the questions one at a time.</span>
+<span class="text-blue-400">If a question can be answered by exploring the codebase, explore ...</span></code></pre>
+  </div>
+  <p class="text-xs text-ads-dim -mt-6 mb-8">出典: <a href="https://github.com/mattpocock/skills" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">mattpocock/skills</a>（MIT License）／日本語の整理は <a href="https://rightcode.co.jp/blogs/56196" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">ライトコード解説</a></p>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 mb-8 text-center">
+    <div class="text-xs text-ads-dim font-medium tracking-widest uppercase mb-3">技術的な定義</div>
+    <p class="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
+      グリルミー = 計画や設計の決定木を、<br class="hidden md:block">
+      一枝ずつ解消して共通理解に達するインタビュー
+    </p>
+    <p class="text-xs text-ads-dim mt-3">出典: <a href="https://github.com/mattpocock/skills/blob/16a2a5cd/docs/productivity/grill-me.md" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">mattpocock/skills — grill-me 公式ドキュメント</a></p>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    キーワードは3つです。<strong class="text-slate-900">共通理解</strong>（shared understanding＝お互いが同じ前提で話している状態）、<strong class="text-slate-900">決定木</strong>（design tree＝「Aを決めるとBが決まる」と枝分かれする判断の地図）、<strong class="text-slate-900">推奨回答</strong>（recommended answer＝質問とセットで出る「私ならこうする」）。この3つが揃うと、空白の質問ではなく「提案への反応」になります。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-red-500/10 text-red-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+        BEFORE — 計画モードだけの世界
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span>ざっくり頼むと、AIが<strong class="text-red-700">勝手な仮定で計画を書く</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span>指摘すると別方向にズレ、<strong class="text-red-700">計画 → 実装 → 再計画</strong>が続く</span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span>長文の計画を読み切れず、<strong class="text-red-700">途中で諦める</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span>自分でも詰めていなかった前提が、<strong class="text-red-700">コードになってから発覚</strong></span>
+        </li>
+      </ul>
+      <div class="mt-5 pt-4 border-t border-red-500/10 text-sm text-red-700/70 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+        手戻りが高くつく。トークンも時間も溶ける。
+      </div>
+    </div>
+
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        AFTER — グリルミーがある世界
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span>実装の前に、<strong class="text-emerald-700">分岐を一つずつ言語化する</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span>推奨と理由が先に来るので、<strong class="text-emerald-700">同意か事情かの短い返答</strong>で進む</span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span>質問は短文・一問。長文を読み通す負荷が<strong class="text-emerald-700">最初から小さい</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span>コードを見れば分かることまで<strong class="text-emerald-700">聞かれない</strong></span>
+        </li>
+      </ul>
+      <div class="mt-5 pt-4 border-t border-emerald-500/10 text-sm text-emerald-700/70 flex items-center gap-2">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        認識合わせが終わってから書くので、手戻りが減る。
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 3: 仕組み                                           -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-500/10 flex-shrink-0">
+      <i data-lucide="settings" class="w-5 h-5 text-cyan-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">仕組み — 決定の木を一枝ずつ歩く</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    流れはシンプルです。あなたが計画を出し、AIが一問ずつ問い、あなたが決め、枝が尽きるまで繰り返します。コード生成は、共通理解を確認してからです。
+  </p>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 md:p-8 mb-8">
+    <h3 class="text-lg font-bold text-slate-900 text-center mb-8">グリルミーの4ステップ</h3>
+
+    <div class="flex flex-col md:flex-row items-stretch justify-center gap-3 md:gap-0">
+      <div class="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
+        <div class="w-8 h-8 rounded-full bg-blue-500 text-white text-sm font-bold flex items-center justify-center mx-auto mb-3">1</div>
+        <i data-lucide="megaphone" class="w-6 h-6 text-blue-600 mx-auto mb-2"></i>
+        <div class="font-bold text-blue-700 text-sm mb-1">計画を出す</div>
+        <div class="text-xs text-ads-muted leading-relaxed">作りたいもの・制約・<br>絶対に崩したくない条件<br>を先に渡す</div>
+      </div>
+
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+        <i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i>
+      </div>
+
+      <div class="flex-1 bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 text-center">
+        <div class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center mx-auto mb-3">2</div>
+        <i data-lucide="message-circle-question" class="w-6 h-6 text-orange-600 mx-auto mb-2"></i>
+        <div class="font-bold text-orange-700 text-sm mb-1">一問＋推奨</div>
+        <div class="text-xs text-ads-muted leading-relaxed">今決めるべき枝を1本。<br>選択肢と「私ならこれ」<br>がセットで来る</div>
+      </div>
+
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+        <i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i>
+      </div>
+
+      <div class="flex-1 bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
+        <div class="w-8 h-8 rounded-full bg-purple-500 text-white text-sm font-bold flex items-center justify-center mx-auto mb-3">3</div>
+        <i data-lucide="user-check" class="w-6 h-6 text-purple-600 mx-auto mb-2"></i>
+        <div class="font-bold text-purple-700 text-sm mb-1">あなたが決める</div>
+        <div class="text-xs text-ads-muted leading-relaxed">同意するか、事情を話す。<br>新しい枝が出たら<br>その枝を先に潰す</div>
+      </div>
+
+      <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+        <i data-lucide="chevron-right" class="w-5 h-5 text-ads-dim hidden md:block"></i>
+        <i data-lucide="chevron-down" class="w-5 h-5 text-ads-dim md:hidden"></i>
+      </div>
+
+      <div class="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
+        <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center mx-auto mb-3">4</div>
+        <i data-lucide="handshake" class="w-6 h-6 text-emerald-600 mx-auto mb-2"></i>
+        <div class="font-bold text-emerald-700 text-sm mb-1">共通理解</div>
+        <div class="text-xs text-ads-muted leading-relaxed">未決の枝がなくなったら<br>終了。ここから実装<br>（または文書化）</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    「決定の木を歩く」とは、こういうことです。通知機能ひとつでも、中身は枝分かれしています。上の枝を飛ばして下の枝だけ決めると、あとから全部崩れます。グリルミーは<strong class="text-slate-900">依存するものから先に決める</strong>ので、順序が崩れません。
+  </p>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 md:p-8 mb-8">
+    <h3 class="text-lg font-bold text-slate-900 text-center mb-6">決定の木 — 「通知機能」の例</h3>
+    <p class="text-center text-xs text-ads-dim mb-8">上の枝を決めないと、下の枝は意味を持たない</p>
+
+    <div class="space-y-3">
+      <div class="bg-orange-500/10 border-2 border-orange-500/25 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">1</div>
+          <div class="font-bold text-slate-900 text-sm">誰に出す？（スコープ）</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-white border border-ads-border rounded-lg px-3 py-2 text-ads-muted">全員</div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-emerald-700 font-medium">関係者だけ ← 先に決める</div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim"></i>
+      </div>
+
+      <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 ml-0 md:ml-6">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">2</div>
+          <div class="font-bold text-slate-900 text-sm">いつ出す？（タイミング）</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-white border border-ads-border rounded-lg px-3 py-2 text-ads-muted">即時</div>
+          <div class="bg-white border border-ads-border rounded-lg px-3 py-2 text-ads-muted">1日1回にまとめる</div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim"></i>
+      </div>
+
+      <div class="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 ml-0 md:ml-12">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs font-bold flex items-center justify-center">3</div>
+          <div class="font-bold text-slate-900 text-sm">何で出す？（手段）</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-white border border-ads-border rounded-lg px-3 py-2 text-ads-muted">メール</div>
+          <div class="bg-white border border-ads-border rounded-lg px-3 py-2 text-ads-muted">アプリ内</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
+      </div>
+      <div>
+        <p class="font-bold text-amber-700 mb-1">ちょっと補足: コードを見れば分かることは聞かない</p>
+        <p class="text-ads-muted leading-relaxed text-sm">
+          「今の認証はどうなっている？」のような事実は、リポジトリを読めば分かります。グリルミーはそれを人に聞きません。聞くのは<strong class="text-slate-800">人が決めるべき判断</strong>だけです。事実の確認と意思決定を混ぜないことが、質問が短く鋭くなる理由です。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 4: 実際の画面                                       -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 flex-shrink-0">
+      <i data-lucide="smartphone" class="w-5 h-5 text-amber-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">実際のやり取りは、こう見える</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    言葉だけだと、まだ「厳しい質問」に聞こえるかもしれません。実際のチャットは、もっと短いです。起動はコマンド一発、あとは一問一答です。
+  </p>
+
+  <div class="mb-8 rounded-xl overflow-hidden border border-slate-700/50">
+    <div class="flex items-center gap-3 bg-slate-800 px-4 py-2.5">
+      <div class="flex gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-slate-400">
+        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+        ターミナル — スキルの起動
+      </div>
+    </div>
+    <pre class="bg-slate-950 p-5 overflow-x-auto text-sm leading-loose"><code><span class="text-emerald-400">$</span> npx skills add mattpocock/skills --skill=grill-me
+
+<span class="text-slate-500"># チャット欄でこう頼む</span>
+<span class="text-amber-400">/grill-me</span>  チーム向けの通知機能を足したい</code></pre>
+  </div>
+  <p class="text-xs text-ads-dim -mt-6 mb-8">出典: <a href="https://github.com/mattpocock/skills/blob/16a2a5cd/docs/productivity/grill-me.md" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">mattpocock/skills — 導入コマンド</a></p>
+
+  <p class="mb-6 leading-relaxed">
+    起動したあとの画面は、だいたいこんな会話になります。ポイントは、AIが「選んでください」で止めないことです。推奨と、選ばなかった場合に壊れるものが、同じ吹き出しに入っています。
+  </p>
+
+  <div class="rounded-xl overflow-hidden border border-slate-700/50 mb-8">
+    <div class="flex items-center gap-3 bg-slate-800 px-4 py-2.5">
+      <i data-lucide="messages-square" class="w-3.5 h-3.5 text-slate-400"></i>
+      <span class="text-xs text-slate-400">チャット — グリルミーの一問</span>
+    </div>
+    <div class="bg-slate-900 p-5 space-y-4">
+      <div class="flex justify-end">
+        <div class="max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed">
+          チーム向けの通知機能を足したい。まずは動くものでいい。
+        </div>
+      </div>
+      <div class="flex justify-start">
+        <div class="max-w-[90%] bg-slate-800 border border-slate-700 rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed text-slate-200">
+          <p class="text-[10px] text-orange-400 font-medium tracking-wide mb-2">Q1 / スコープ</p>
+          <p class="mb-3">通知は誰に出しますか？ 全員に出すと、関係ない人の通知疲れが先に来ます。</p>
+          <div class="space-y-1.5 text-xs">
+            <div class="bg-emerald-500/15 border border-emerald-500/30 rounded-lg px-3 py-2 text-emerald-300">推奨 A. その件の関係者だけ — 最初の実装が小さく、撤回しやすい</div>
+            <div class="bg-slate-700/50 rounded-lg px-3 py-2 text-slate-300">B. チーム全員 — 見逃しは減るが、オフにする人が増える</div>
+            <div class="bg-slate-700/50 rounded-lg px-3 py-2 text-slate-300">C. 希望者だけ（オプトイン） — 公平だが、設定画面が先に必要</div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <div class="max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed">
+          Aで。ただしマネージャーには必ず届ける事情がある。
+        </div>
+      </div>
+      <div class="flex justify-start">
+        <div class="max-w-[90%] bg-slate-800 border border-slate-700 rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed text-slate-200">
+          <p class="text-[10px] text-orange-400 font-medium tracking-wide mb-2">Q2 / 例外（いま出た枝を先に潰す）</p>
+          <p>「マネージャーには必ず」は、関係者ルールの例外です。役職で固定しますか、案件ごとに指定しますか？ 推奨は案件ごと。役職固定は、組織変更で壊れます。</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2 text-xs text-slate-500">
+        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+        メッセージを入力…
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-ads-accent/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-ads-accent-light"></i>
+      </div>
+      <div>
+        <p class="font-bold text-ads-accent-light mb-1">「事情」が出た瞬間が本番</p>
+        <p class="text-ads-muted leading-relaxed">
+          上の例で価値があるのは、Aを選んだこと自体ではありません。<strong class="text-slate-800">「マネージャーには必ず」という、自分でも書いていなかった事情</strong>が口に出たことです。実践者はこの感覚を「暗黙に (A) のつもりで考えていたと気付かされる」と書いています。炙り出しているのは相手ではなく、自分の頭の中の未決です。
+        </p>
+        <p class="text-xs text-ads-dim mt-2">出典: <a href="https://rightcode.co.jp/blogs/56196" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">ライトコード — 実際の体験</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 5: 数字と近縁                                       -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 flex-shrink-0">
+      <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">どのくらい聞くのか、何が違うのか</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    「一問ずつ」と聞くと、終わりが見えない感じがします。実際のセッションでは、だいたいこの規模感です。短いわけではありません。ただし長文の計画を何度も読み直すループより、負荷の形が違います。
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 text-center">
+      <div class="text-3xl md:text-4xl font-black text-orange-600 leading-tight mb-2">18〜24</div>
+      <div class="text-sm text-ads-muted">1セッションでよく来る<br>質問の数</div>
+      <p class="text-[10px] text-ads-dim mt-2">出典: <a href="https://www.oflight.co.jp/ja/columns/grill-me-agent-skill-2026-07" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">オブライト — grill-me スキル解説</a></p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 text-center">
+      <div class="text-3xl md:text-4xl font-black text-ads-accent leading-tight mb-2">2〜5</div>
+      <div class="text-sm text-ads-muted">1問あたりの<br>選択肢の数</div>
+      <p class="text-[10px] text-ads-dim mt-2">自由記述を強要せず、提案に反応できる形</p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 text-center">
+      <div class="text-3xl md:text-4xl font-black text-amber-600 leading-tight mb-2">1問</div>
+      <div class="text-sm text-ads-muted">1回の応答で出す<br>質問の上限</div>
+      <p class="text-[10px] text-ads-dim mt-2">一気にチェックリストを投げない、が本体の差別化</p>
+    </div>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    似た名前の道具が隣にあります。混同しやすいので、役割だけ並べます。グリルミー本体は<strong class="text-slate-900">状態を残さない</strong>（stateless＝会話の外にファイルを作らない）のが意図です。残したいなら別スキルに渡します。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="flame" class="w-5 h-5 text-orange-600"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-2">グリルミー</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">今この場で、理解を鋭くする。成果物は会話そのもの。コーディング以外の計画にも使える、単体の入口です。</p>
+      </div>
+    </div>
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="book-marked" class="w-5 h-5 text-blue-600"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-2">grill-with-docs</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">同じインタビューに加え、用語集や ADR（Architectural Decision Record＝後から覆しにくい設計判断の記録）として残す、状態を持つ兄弟です。</p>
+      </div>
+    </div>
+  </div>
+  <p class="text-xs text-ads-dim -mt-6 mb-8">出典: <a href="https://github.com/mattpocock/skills/blob/16a2a5cd/docs/productivity/grill-me.md" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">公式ドキュメント — stateless と grill-with-docs の対比</a></p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="timer" class="w-5 h-5 text-amber-600"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-2">前に払う時間</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">質問フェーズは長く、疲れる、という報告があります。価値は「下流の大きな問題を防ぐ」側にあります。安いのは、コードを書いたあとの手戻りではありません。</p>
+      </div>
+    </div>
+    <div class="flex gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="compass" class="w-5 h-5 text-purple-600"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 mb-2">人間が舵を取る</h3>
+        <p class="text-sm text-ads-muted leading-relaxed">受け身で「OK」だけ返すと、枝が無限に増えることがあります。会話の行き先を決め、重要でない詳細は切る。インタビューというより、対話です。</p>
+        <p class="text-[10px] text-ads-dim mt-2">出典: <a href="https://azukiazusa.dev/en/blog/before-implementation-interview-design-requirements-grill-me" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">azukiazusa — 失敗パターン</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 6: よくある誤解                                      -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500/10 flex-shrink-0">
+      <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">よくある誤解</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    名前が「炙る」なので、攻撃や試験に聞こえやすいです。実際に起きていることは、かなり違います。つまずきやすい3つを、正しい理解に直します。
+  </p>
+
+  <div class="space-y-4">
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">誤解: 「AIに詰められて、答えさせられる試験」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-2">実際は:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              正解を当てる場ではありません。AIは毎回「私ならこうする」を先に出します。あなたは試験を受ける側ではなく、<strong class="text-slate-800">提案を採択する側</strong>です。空白に答えを書く負荷を下げるために、推奨があるのです。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">誤解: 「設計をAIに丸投げするスキル」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-2">実際は:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              うまく使う条件は、人間側が設計の部品をある程度握っていることです。全部「OK」で流すと、重要でない枝まで無限に聞かれます。行き先を決め、切る枝を決めるのは人間です。<strong class="text-slate-800">これはインタビューではなく会話</strong>、と実践記事は強調しています。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+      <div class="flex items-center gap-3 px-6 py-4 bg-red-500/5 border-b border-ads-border/50">
+        <div class="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5 text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-red-700 text-sm">誤解: 「コードを書く前の儀式で、文書には使えない」</h3>
+      </div>
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-emerald-700 mb-2">実際は:</p>
+            <p class="text-sm text-ads-muted leading-relaxed">
+              作者自身、コーディング以外でも使う「いちばん柔軟なスキル」と呼んでいます。文書の抜け漏れ、構成の整理、プロダクトの曖昧な依頼の分解にも使われています。炙る対象はコードではなく、<strong class="text-slate-800">まだ枝が残っている判断</strong>です。
+            </p>
+            <p class="text-xs text-ads-dim mt-2">出典: <a href="https://www.aihero.dev/use-the-grill-me-skill-k029d" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">Matt Pocock — Use The /grill-me Skill</a> ／ <a href="https://rightcode.co.jp/blogs/56196" class="underline decoration-ads-dim/30 hover:text-ads-accent transition-colors">ライトコード（文書作成への応用）</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 7: まとめ                                            -->
+<!-- ============================================================ -->
+<section>
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-ads-accent/10 flex-shrink-0">
+      <i data-lucide="check-circle" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">まとめ — 覚えておきたい3つのこと</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    最後に、この図解で伝えたかったことを3つに絞ります。
+  </p>
+
+  <div class="space-y-4 mb-10">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-orange-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-orange-500 leading-none flex-shrink-0 mt-1">01</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">炙るのは人ではなく、未決の枝</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            グリルミーは攻撃ではありません。自分でも言語化していなかった前提を、一問ずつ表に出す装置です。出てくるのは「詰めていなかった選択肢」です。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-blue-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-blue-500 leading-none flex-shrink-0 mt-1">02</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">一問と推奨が、セットで来る</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            空白の「どうしますか？」ではなく、「私ならA。理由は撤回しやすいから」が先に来ます。あなたは同意するか、事情を話すか。決める権利は、最後まで人間側に残ります。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-emerald-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-emerald-500 leading-none flex-shrink-0 mt-1">03</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">共通理解のあとで、初めて書く</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            計画モードがつまずくのは、仮定が揃わないまま実装に入るからです。グリルミーは、枝が尽きるまでコードを書きません。前に払う時間と、後ろで払う手戻りを、取り替える選択です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center bg-gradient-to-b from-orange-500/5 to-transparent border border-orange-500/10 rounded-xl p-8 md:p-10">
+    <i data-lucide="flame" class="w-8 h-8 text-orange-500 mx-auto mb-4"></i>
+    <p class="text-lg font-bold text-slate-900 mb-3">次に「とりあえず実装して」と言いそうになったら。</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed">
+      その前に、計画を一問だけ炙ってみてください。自分が暗黙に選んでいた枝が、言葉になって返ってくるはずです。コードはそのあとで、まだ間に合います。
+    </p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
