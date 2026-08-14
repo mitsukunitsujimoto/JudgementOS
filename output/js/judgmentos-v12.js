@@ -232,7 +232,9 @@
     jos20BoundaryQuestion: '',
     jos20BoundaryAnswer: '',
     jos20DetectStarted: false,
-    judgmentStructure: null
+    judgmentStructure: null,
+    jos20Error: null,
+    jos20RetryKind: ''
   };
 
   const INTRO_CATEGORIES = [
@@ -1249,8 +1251,12 @@ ${note}`;
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(() => null);
-      if (data && data.ok && (data.realization || (data.structure && data.structure.needsFollowup))) {
+      if (data && data.ok === false) {
+        return { ok: false, code: data.code || 'network', reason: data.reason || '' };
+      }
+      if (data && data.ok && (data.realization || (data.structure && data.structure.needsFollowup) || data.structure)) {
         return {
+          ok: true,
           realization: data.realization || '',
           protection: data.protection || '',
           constraints_recommend: Array.isArray(data.constraints_recommend) ? data.constraints_recommend : [],
@@ -1259,8 +1265,11 @@ ${note}`;
         };
       }
     } catch (_) { /* fall through */ }
-    const m = mockStructureIntroLocal();
-    return { ...m, source: 'mock' };
+    if (allowClientMock()) {
+      const m = mockStructureIntroLocal();
+      return { ok: true, ...m, source: 'mock' };
+    }
+    return { ok: false, code: 'network', reason: 'うまく接続できませんでした。入力内容は残っています。もう一度お試しください。' };
   }
 
   function applyIntroExtraction(extracted) {
@@ -1356,6 +1365,14 @@ ${note}`;
 
   async function runIntroPipeline() {
     const extracted = await requestStructureIntro();
+    if (!extracted || extracted.ok === false) {
+      state.jos20Error = {
+        code: (extracted && extracted.code) || 'network',
+        reason: (extracted && extracted.reason) || 'うまく接続できませんでした。入力内容は残っています。もう一度お試しください。'
+      };
+      state.jos20RetryKind = 'intro';
+      return false;
+    }
     applyIntroExtraction(extracted);
     state.introChange = null;
     const past = getLatestPastLog();
@@ -1374,6 +1391,7 @@ ${note}`;
         };
       }
     }
+    return true;
   }
 
   function bindSpeechMic(textarea, btn) {
@@ -1537,7 +1555,8 @@ ${note}`;
       handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false,
       jos20AskCount: 0, jos20AskKind: '', jos20WhyAsked: false,
       jos20BoundaryAsked: false, jos20BoundaryQuestion: '', jos20BoundaryAnswer: '',
-      jos20DetectStarted: false, judgmentStructure: null
+      jos20DetectStarted: false, judgmentStructure: null,
+      jos20Error: null, jos20RetryKind: ''
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -1961,6 +1980,27 @@ ${note}`;
     </div>`;
   }
 
+  function allowClientMock() {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      if (q.get('demo') === '1' || q.get('mock') === '1') return true;
+      const h = window.location.hostname;
+      return h === 'localhost' || h === '127.0.0.1';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function jos20ErrorCard(stage) {
+    const err = state.jos20Error || {};
+    const msg = err.reason || '判断基準の整理を完了できませんでした。入力内容は残っています。';
+    return jos20Shell(stage, `
+      <p class="q-title">整理できませんでした</p>
+      <p class="q-help">${escapeHtml(msg)}</p>
+      <button type="button" id="btn-retry-jos" class="btn btn-primary w-full">もう一度試す</button>
+    `);
+  }
+
   function jos20Shell(stage, inner) {
     return `
       <section class="jos20-card space-y-4 fade-in">
@@ -2036,8 +2076,12 @@ ${note}`;
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(() => null);
+      if (data && data.ok === false) {
+        return { ok: false, code: data.code || 'network', reason: data.reason || '' };
+      }
       if (data && data.ok && data.principle && data.handoff) {
         return {
+          ok: true,
           principle: data.principle,
           core: data.core || '',
           handoff: data.handoff,
@@ -2045,28 +2089,22 @@ ${note}`;
         };
       }
     } catch (_) { /* fall through */ }
-    const o = (state.achieve || (state.judgmentStructure && state.judgmentStructure.desiredOutcome) || '向かいたいこと');
-    let principle = `今回の対話からは、あなたは「${o}」を実現しようとしているように見えます。`;
-    if (state.protect && state.protect.trim()) principle += `その際、「${state.protect}」は安易に犠牲にしない。`;
-    else if (state.jos20BoundaryAnswer) principle += `また、「${state.jos20BoundaryAnswer}」を超える選択は採らない、という線があるように見えます。`;
-    const theme = (state.introDump.split(/\n/).map((l) => l.trim()).find(Boolean) || '今回の判断').slice(0, 160);
-    const lines = [`${theme.replace(/。$/, '')}を考えています。`, `私が実現したいのは、${o.replace(/。$/, '')}です。`];
-    if (state.protect && state.protect.trim()) {
-      lines.push(`その実現に向かう過程でも、${state.protect}は安易に失いたくありません。`);
+    if (allowClientMock()) {
+      const o = (state.achieve || (state.judgmentStructure && state.judgmentStructure.desiredOutcome) || '向かいたいこと');
+      let principle = `今回の対話からは、あなたは「${o}」を実現しようとしているように見えます。`;
+      if (state.protect && state.protect.trim()) principle += `その際、「${state.protect}」は安易に犠牲にしない。`;
+      return {
+        ok: true,
+        principle,
+        core: `進む方向は「${o}」。`,
+        handoff: `${o}について、この目的をできる限り実現できる複数の選択肢を提示してください。最終判断は私が行います。`,
+        source: 'mock'
+      };
     }
-    if (state.jos20BoundaryAnswer) {
-      lines.push(`${state.jos20BoundaryAnswer}。`);
-    }
-    lines.push('この目的をできる限り実現できる複数の選択肢を提示してください。それぞれについて、期待できる成果、失うもの、リスク、長期的な信頼への影響を比較してください。');
-    if ((state.protect && state.protect.trim()) || state.jos20BoundaryAnswer) {
-      lines.push('また、私の判断基準や継続可能性と衝突する点があれば明示してください。');
-    }
-    lines.push('最終判断は私が行います。');
     return {
-      principle,
-      core: `進む方向は「${o}」。`,
-      handoff: lines.join('\n'),
-      source: 'mock'
+      ok: false,
+      code: 'network',
+      reason: 'うまく接続できませんでした。入力内容は残っています。もう一度お試しください。'
     };
   }
 
@@ -2141,6 +2179,17 @@ ${note}`;
         } catch (_) { /* 論点は内部材料 */ }
       }
       const inferred = await requestInferPrinciple();
+      if (!inferred || inferred.ok === false) {
+        state.jos20Error = {
+          code: (inferred && inferred.code) || 'network',
+          reason: (inferred && inferred.reason) || '今回は判断基準を十分な精度で整理できませんでした。入力内容は残っています。もう一度試すか、少し言葉を加えてください。'
+        };
+        state.jos20RetryKind = 'synthesize';
+        state.jos20Busy = false;
+        state.jos20Started = false;
+        render();
+        return;
+      }
       state.principle = inferred.principle;
       state.principleEdited = inferred.principle;
       state.judgmentCore = inferred.core
@@ -2148,12 +2197,15 @@ ${note}`;
       state.handoffText = inferred.handoff;
       persistJos20Entry();
     } catch (_) {
-      const inferred = await requestInferPrinciple();
-      state.principle = inferred.principle;
-      state.principleEdited = inferred.principle;
-      state.judgmentCore = inferred.core || state.criteriaCore;
-      state.handoffText = inferred.handoff;
-      persistJos20Entry();
+      state.jos20Error = {
+        code: 'network',
+        reason: 'うまく接続できませんでした。入力内容は残っています。もう一度お試しください。'
+      };
+      state.jos20RetryKind = 'synthesize';
+      state.jos20Busy = false;
+      state.jos20Started = false;
+      render();
+      return;
     }
     state.jos20Busy = false;
     step = 208;
@@ -2263,6 +2315,16 @@ ${note}`;
     }
 
     if (step === 202) {
+      if (state.jos20Error && state.jos20RetryKind === 'intro') {
+        root.innerHTML = jos20ErrorCard(1);
+        document.getElementById('btn-retry-jos').onclick = () => {
+          state.jos20Error = null;
+          state.introFetchStarted = false;
+          step = 202;
+          render();
+        };
+        return true;
+      }
       root.innerHTML = jos20Shell(1, `
         <div class="extract-spinner" aria-hidden="true"></div>
         <p class="q-title" style="text-align:center;margin-bottom:0">言葉を整えています…</p>
@@ -2271,11 +2333,19 @@ ${note}`;
       if (!state.introFetchStarted) {
         state.introFetchStarted = true;
         if (!state.introCategoryId) state.introCategoryId = 'vague';
-        runIntroPipeline().then(() => {
+        runIntroPipeline().then((ok) => {
+          if (ok === false || state.jos20Error) {
+            render();
+            return;
+          }
           step = 203;
           render();
         }).catch(() => {
-          step = 203;
+          state.jos20Error = {
+            code: 'network',
+            reason: 'うまく接続できませんでした。入力内容は残っています。もう一度お試しください。'
+          };
+          state.jos20RetryKind = 'intro';
           render();
         });
       }
@@ -2479,6 +2549,16 @@ ${note}`;
     }
 
     if (step === 207) {
+      if (state.jos20Error && state.jos20RetryKind === 'synthesize') {
+        root.innerHTML = jos20ErrorCard(2);
+        document.getElementById('btn-retry-jos').onclick = () => {
+          state.jos20Error = null;
+          state.jos20Started = false;
+          step = 207;
+          render();
+        };
+        return true;
+      }
       root.innerHTML = jos20Shell(2, `
         <div class="extract-spinner" aria-hidden="true"></div>
         <p class="q-title" style="text-align:center;margin-bottom:0">判断の基準を言葉にしています…</p>

@@ -6,6 +6,12 @@ import {
   parseDetectBoundaryJson,
   heuristicTension
 } from '../lib/detect-boundary.js';
+import {
+  allowMockFallback,
+  callOpenAiJson,
+  failPayload,
+  logJosFailure
+} from '../lib/jos-runtime.js';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -42,9 +48,14 @@ export default async function handler(req, res) {
     source: 'mock',
     ...mockDetectBoundary(payload)
   });
+  const useMock = allowMockFallback();
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return res.status(200).json(mock());
+  if (!apiKey) {
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', 'missing_openai_key');
+    return res.status(200).json(failPayload('config'));
+  }
 
   const consented = !!body.securityConsent;
   const checked = validateInvite({
@@ -52,44 +63,33 @@ export default async function handler(req, res) {
     inviteId: body.inviteId
   });
   if (!consented || !checked.ok) {
-    return res.status(200).json(mock());
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', consented ? 'invite' : 'no_consent');
+    return res.status(200).json({ ok: true, source: 'skip', needs_question: false, question: '', reason: 'no_model' });
   }
 
   const model = process.env.OPENAI_MODEL || 'gpt-4o';
-  let upstream;
-  try {
-    upstream = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.3,
-        max_tokens: 400,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: buildDetectBoundarySystem() },
-          { role: 'user', content: buildDetectBoundaryUser(payload) }
-        ]
-      })
-    });
-  } catch {
-    return res.status(200).json(mock());
+  const call = await callOpenAiJson({
+    apiKey,
+    model,
+    temperature: 0.3,
+    maxTokens: 400,
+    messages: [
+      { role: 'system', content: buildDetectBoundarySystem() },
+      { role: 'user', content: buildDetectBoundaryUser(payload) }
+    ]
+  });
+  if (!call.ok) {
+    if (useMock) return res.status(200).json(mock());
+    return res.status(200).json({ ok: true, source: 'skip', needs_question: false, question: '', reason: call.code });
   }
 
-  if (!upstream.ok) return res.status(200).json(mock());
-
-  let data;
-  try {
-    data = await upstream.json();
-  } catch {
-    return res.status(200).json(mock());
+  const parsed = parseDetectBoundaryJson(call.content);
+  if (!parsed) {
+    logJosFailure('parse', 'detect_boundary_parse');
+    if (useMock) return res.status(200).json(mock());
+    return res.status(200).json({ ok: true, source: 'skip', needs_question: false, question: '', reason: 'parse' });
   }
-
-  const parsed = parseDetectBoundaryJson(data?.choices?.[0]?.message?.content || '');
-  if (!parsed) return res.status(200).json(mock());
 
   let needs = parsed.needs_question;
   let question = parsed.question;

@@ -1,4 +1,5 @@
-import { extractStructureFromDump, generateHandoffFromStructure, generatePrincipleFromStructure } from '../lib/judgment-structure.js';
+import { extractStructureFromDump, generateHandoffFromStructure, generatePrincipleFromStructure, validateStructureQuality, validatePrincipleBundle } from '../lib/judgment-structure.js';
+import { allowMockFallback, classifyHttpStatus, userErrorMessage } from '../lib/jos-runtime.js';
 
 const cases = [
   {
@@ -60,4 +61,36 @@ if (failed) {
   console.error(`failed ${failed}`);
   process.exit(1);
 }
+
+const s7 = extractStructureFromDump(cases[6].dump);
+const q7 = validateStructureQuality(s7, cases[6].dump);
+if (!q7.ok) { console.error('quality7', q7); process.exit(1); }
+const sInvent = { desiredOutcome: '新しい事業を立ち上げたい', protectedValues: ['火星の植民権'], boundaryConditions: [] };
+const qi = validateStructureQuality(sInvent, '新しい事業を立ち上げたい');
+if (qi.ok || !qi.reasons.includes('invented_protect')) { console.error('invent', qi); process.exit(1); }
+const sAvoid = extractStructureFromDump('社員から反発されたくない。');
+const qa = validateStructureQuality(sAvoid, '社員から反発されたくない。');
+if (!qa.ok || qa.followup !== 'desired_outcome_missing') { console.error('avoid-follow', qa); process.exit(1); }
+const hijack = validatePrincipleBundle({
+  principle: 'x',
+  handoff: '失敗を避けるための選択肢を提示してください。最終判断は私が行います。',
+  structure: s7,
+  dump: cases[6].dump
+});
+if (hijack.ok) { console.error('hijack should fail'); process.exit(1); }
+const goodH = validatePrincipleBundle({
+  principle: generatePrincipleFromStructure(s7),
+  handoff: generateHandoffFromStructure(s7),
+  structure: s7,
+  dump: cases[6].dump
+});
+if (!goodH.ok) { console.error('good handoff', goodH); process.exit(1); }
+if (classifyHttpStatus(429) !== 'rate_limit') process.exit(1);
+if (!userErrorMessage('network').includes('接続')) process.exit(1);
+process.env.VERCEL_ENV = 'production';
+process.env.ALLOW_MOCK_FALLBACK = '';
+if (allowMockFallback()) { console.error('prod should not mock'); process.exit(1); }
+process.env.ALLOW_MOCK_FALLBACK = 'true';
+if (!allowMockFallback()) { console.error('flag should allow mock'); process.exit(1); }
+console.log('quality checks passed');
 console.log('all passed');

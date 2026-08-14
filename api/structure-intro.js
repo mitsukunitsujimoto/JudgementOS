@@ -6,6 +6,17 @@ import {
   mockStructureIntro,
   parseStructureIntroJson
 } from '../lib/structure-intro.js';
+import {
+  buildExtractRepairUser,
+  sanitizeStructure,
+  validateStructureQuality
+} from '../lib/judgment-structure.js';
+import {
+  allowMockFallback,
+  callOpenAiJson,
+  failPayload,
+  logJosFailure
+} from '../lib/jos-runtime.js';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -49,72 +60,88 @@ export default async function handler(req, res) {
     source: 'mock',
     ...mockStructureIntro({ categoryId, dumpText })
   });
+  const useMock = allowMockFallback();
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return res.status(200).json(mock());
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', 'missing_openai_key');
+    return res.status(200).json(failPayload('config'));
   }
 
-  // 同意・招待があるときだけ実モデル。なければモック（導入摩擦を増やさない）
   const consented = !!body.securityConsent;
   const checked = validateInvite({
     inviteCode: body.inviteCode,
     inviteId: body.inviteId
   });
   if (!consented || !checked.ok) {
-    return res.status(200).json(mock());
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', consented ? 'invite' : 'no_consent');
+    return res.status(200).json(failPayload('config'));
   }
 
   const model = process.env.OPENAI_MODEL || 'gpt-4o';
-  let upstream;
-  try {
-    upstream = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        max_tokens: 1000,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: buildStructureIntroSystem() },
-          {
-            role: 'user',
-            content: buildStructureIntroUser({ categoryId, categoryLabel, dumpText })
-          }
-        ]
-      })
+  const system = buildStructureIntroSystem();
+  const user1 = buildStructureIntroUser({ categoryId, categoryLabel, dumpText });
+
+  async function extractOnce(userContent) {
+    const call = await callOpenAiJson({
+      apiKey,
+      model,
+      temperature: 0.3,
+      maxTokens: 1000,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: userContent }
+      ]
     });
-  } catch {
-    return res.status(200).json(mock());
+    if (!call.ok) return { fail: call.code };
+    const parsed = parseStructureIntroJson(call.content);
+    if (!parsed) {
+      logJosFailure('parse', 'structure_intro_parse');
+      return { fail: 'parse' };
+    }
+    const structure = sanitizeStructure(parsed.structure || parsed, dumpText);
+    const quality = validateStructureQuality(structure, dumpText);
+    return { parsed, structure, quality };
   }
 
-  if (!upstream.ok) {
-    return res.status(200).json(mock());
+  let result = await extractOnce(user1);
+  if (result.fail) {
+    if (useMock) return res.status(200).json(mock());
+    return res.status(200).json(failPayload(result.fail));
   }
 
-  let data;
-  try {
-    data = await upstream.json();
-  } catch {
-    return res.status(200).json(mock());
+  if (!result.quality.ok) {
+    logJosFailure('semantic_validation', result.quality.reasons.join(','));
+    result = await extractOnce(buildExtractRepairUser(dumpText, result.quality.reasons));
+    if (result.fail) {
+      if (useMock) return res.status(200).json(mock());
+      return res.status(200).json(failPayload(result.fail));
+    }
+    if (!result.quality.ok) {
+      logJosFailure('regeneration_failed', result.quality.reasons.join(','));
+      if (useMock) return res.status(200).json(mock());
+      return res.status(200).json(failPayload('regeneration_failed'));
+    }
   }
 
-  const parsed = parseStructureIntroJson(data?.choices?.[0]?.message?.content || '');
-  if (!parsed) {
-    return res.status(200).json(mock());
+  const parsed = result.parsed;
+  const structure = result.structure;
+  if (result.quality.followup === 'desired_outcome_missing') {
+    structure.needsFollowup = true;
+    structure.followupReason = 'desired_outcome_missing';
+    structure.followupQuestion = structure.followupQuestion
+      || 'それを避けた先で、今回、本当は何を実現したいのでしょう？';
   }
 
   return res.status(200).json({
     ok: true,
     source: 'model',
     model,
-    realization: parsed.realization,
-    protection: parsed.protection,
-    constraints_recommend: parsed.constraints_recommend,
-    structure: parsed.structure || null
+    realization: structure.desiredOutcome || parsed.realization || '',
+    protection: (structure.protectedValues && structure.protectedValues[0]) || parsed.protection || '',
+    constraints_recommend: parsed.constraints_recommend || [],
+    structure
   });
 }

@@ -2,9 +2,17 @@ import { validateInvite } from '../lib/monitor-invites.js';
 import {
   buildInferPrincipleSystem,
   buildInferPrincipleUser,
+  buildInferRepairUser,
   mockInferPrinciple,
   parseInferPrincipleJson
 } from '../lib/infer-principle.js';
+import { validatePrincipleBundle } from '../lib/judgment-structure.js';
+import {
+  allowMockFallback,
+  callOpenAiJson,
+  failPayload,
+  logJosFailure
+} from '../lib/jos-runtime.js';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -45,9 +53,14 @@ export default async function handler(req, res) {
     source: 'mock',
     ...mockInferPrinciple(payload)
   });
+  const useMock = allowMockFallback();
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return res.status(200).json(mock());
+  if (!apiKey) {
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', 'missing_openai_key');
+    return res.status(200).json(failPayload('config'));
+  }
 
   const consented = !!body.securityConsent;
   const checked = validateInvite({
@@ -55,51 +68,65 @@ export default async function handler(req, res) {
     inviteId: body.inviteId
   });
   if (!consented || !checked.ok) {
-    return res.status(200).json(mock());
+    if (useMock) return res.status(200).json(mock());
+    logJosFailure('config', consented ? 'invite' : 'no_consent');
+    return res.status(200).json(failPayload('config'));
   }
 
   const model = process.env.OPENAI_MODEL || 'gpt-4o';
-  let upstream;
-  try {
-    upstream = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        max_tokens: 1200,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: buildInferPrincipleSystem() },
-          { role: 'user', content: buildInferPrincipleUser(payload) }
-        ]
-      })
+  const system = buildInferPrincipleSystem();
+
+  async function inferOnce(userContent) {
+    const call = await callOpenAiJson({
+      apiKey,
+      model,
+      temperature: 0.4,
+      maxTokens: 1200,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: userContent }
+      ]
     });
-  } catch {
-    return res.status(200).json(mock());
+    if (!call.ok) return { fail: call.code };
+    const parsed = parseInferPrincipleJson(call.content);
+    if (!parsed) {
+      logJosFailure('parse', 'infer_principle_parse');
+      return { fail: 'parse' };
+    }
+    const quality = validatePrincipleBundle({
+      principle: parsed.principle,
+      handoff: parsed.handoff,
+      structure: payload.structure,
+      dump: payload.dump
+    });
+    return { parsed, quality };
   }
 
-  if (!upstream.ok) return res.status(200).json(mock());
-
-  let data;
-  try {
-    data = await upstream.json();
-  } catch {
-    return res.status(200).json(mock());
+  let result = await inferOnce(buildInferPrincipleUser(payload));
+  if (result.fail) {
+    if (useMock) return res.status(200).json(mock());
+    return res.status(200).json(failPayload(result.fail));
   }
-
-  const parsed = parseInferPrincipleJson(data?.choices?.[0]?.message?.content || '');
-  if (!parsed) return res.status(200).json(mock());
+  if (!result.quality.ok) {
+    logJosFailure('semantic_validation', result.quality.reasons.join(','));
+    result = await inferOnce(buildInferRepairUser(payload, result.quality.reasons));
+    if (result.fail) {
+      if (useMock) return res.status(200).json(mock());
+      return res.status(200).json(failPayload(result.fail));
+    }
+    if (!result.quality.ok) {
+      logJosFailure('regeneration_failed', result.quality.reasons.join(','));
+      if (useMock) return res.status(200).json(mock());
+      return res.status(200).json(failPayload('regeneration_failed'));
+    }
+  }
 
   return res.status(200).json({
     ok: true,
     source: 'model',
     model,
-    principle: parsed.principle,
-    core: parsed.core,
-    handoff: parsed.handoff
+    principle: result.parsed.principle,
+    core: result.parsed.core,
+    handoff: result.parsed.handoff
   });
 }
