@@ -5,7 +5,10 @@
  *
  * 残す: structure-intro / hypotheses / store / 招待・同意
  * UIから隠す: 映し返し・掘る・論点・判断文脈・振り返りの工程名
- * 統合: 多数ステップを対話5問＋3層アウトプットへ
+ * 会話へ吸収: 映し返し（203の自然な返し）、掘る（曖昧なときだけ205）
+ * 裏側へ: 論点抽出・制約タグ・structure-intro
+ * 任意化: 振り返り（210）
+ * 統合: 固定5問を可変フォローへ。クライマックス＝判断原則→AIに渡す
  * 新設: infer-principle API、Layer1-3
  *
  * ?flow=classic で 1.5 画面（工程名つき）
@@ -221,7 +224,10 @@
     handoffText: '',
     judgmentCore: '',
     jos20Busy: false,
-    jos20Started: false
+    jos20Started: false,
+    jos20AskCount: 0,
+    jos20AskKind: '',
+    jos20WhyAsked: false
   };
 
   const INTRO_CATEGORIES = [
@@ -263,7 +269,7 @@
   let viewMode = 'flow'; // flow | history | theme
 
   // 101–104 → 105–107（掘る循環1周）→ ⑥以降。旧①–⑤は履歴復帰用に残す
-  const STEP_ORDER = [201, 202, 203, 204, 205, 206, 207, 208, 101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
+  const STEP_ORDER = [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 101, 102, 103, 104, 105, 106, 107, 6, 7, 8, 9, 10, 13, 14, 17, 15, 16, 18, 11, 12, 1, 2, 3, 4, 5];
 
   function stepIndex(s) {
     return STEP_ORDER.indexOf(s);
@@ -1040,7 +1046,9 @@ ${note}`;
       205: 'なぜ守るか',
       206: '動かせない条件',
       207: '基準を言葉にしています',
-      208: '今回の判断',
+      208: '判断原則',
+      209: 'AIに渡す',
+      210: 'もう少し振り返る',
       101: 'テーマを選ぶ',
       102: '頭の中を出す',
       103: '思考を分類中',
@@ -1519,7 +1527,8 @@ ${note}`;
       introDigDone: false, introDigFocusId: '', introDigNote: '',
       changeSummary: null, changeSummaryBusy: false, changeSummaryStarted: false,
       principle: '', principleEdited: '', principleFeedback: '',
-      handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false
+      handoffText: '', judgmentCore: '', jos20Busy: false, jos20Started: false,
+      jos20AskCount: 0, jos20AskKind: '', jos20WhyAsked: false
     });
     concernDraft = '';
     viewMode = 'flow';
@@ -2088,6 +2097,56 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     render();
   }
 
+  function jos20Thin(s) {
+    const t = String(s || '').replace(/\s+/g, ' ').trim();
+    if (t.length < 16) return true;
+    if (/未抽出|未設定/.test(t)) return true;
+    return false;
+  }
+
+  function jos20HasReasonCue() {
+    return /ので|だから|ため|から、|理由/.test(`${state.protect} ${state.introDigNote}`);
+  }
+
+  function jos20FillConstraintsQuietly() {
+    if (state.introConstraintTags.length && !String(state.constraints || '').trim()) {
+      state.constraints = state.introConstraintTags.join('／');
+    }
+  }
+
+  /** 追加質問は「基準がまだ曖昧なときだけ」。最大2問。 */
+  function jos20GoNextTalkOrSynthesize() {
+    jos20FillConstraintsQuietly();
+    const asks = state.jos20AskCount || 0;
+    if (jos20Thin(state.achieve) && asks < 2 && state.jos20AskKind !== 'realize') {
+      state.jos20AskKind = 'realize';
+      step = 204;
+      render();
+      return;
+    }
+    if (jos20Thin(state.protect) && asks < 2 && state.jos20AskKind !== 'protect') {
+      state.jos20AskKind = 'protect';
+      step = 204;
+      render();
+      return;
+    }
+    if (
+      !jos20Thin(state.achieve)
+      && !jos20Thin(state.protect)
+      && !String(state.introDigNote || '').trim()
+      && !jos20HasReasonCue()
+      && !state.jos20WhyAsked
+      && asks < 2
+    ) {
+      step = 205;
+      render();
+      return;
+    }
+    state.jos20Started = false;
+    step = 207;
+    render();
+  }
+
   function bindJos20TextNext(fieldId, assign, nextStep, minLen) {
     const ta = document.getElementById(fieldId);
     const next = document.getElementById('btn-next');
@@ -2125,7 +2184,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
         <textarea id="field-intro-dump" class="textarea textarea-dump" rows="6" placeholder="例）売上は伸ばしたいが、儲け主義に見られてブランドを損ねたくない">${escapeHtml(state.introDump)}</textarea>
         <div class="dump-actions">
           <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>次へ</button>
+          <button type="button" id="btn-next" class="btn btn-primary" ${state.introDump.trim().length >= 4 ? '' : 'disabled'}>話し終わる</button>
         </div>
       `);
       bindJos20TextNext('field-intro-dump', (v) => { state.introDump = v; }, 202, 4);
@@ -2153,79 +2212,116 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     }
 
     if (step === 203) {
+      const editing = state.introEditAchieve || state.introEditProtect;
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">このことで、実現したいことは何ですか？</p>
-        <p class="q-help">今この判断で、向かいたい変化・到達したい姿です。違うところは直してください。</p>
-        <textarea id="field-achieve" class="textarea" rows="4">${escapeHtml(state.achieve)}</textarea>
-        <div class="dump-actions">
-          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
-        </div>
+        <p class="q-title">今のお話から、こう見えます</p>
+        <p class="q-help">答えではありません。向かいたいことと、失いたくないことの両立です。</p>
+        ${editing ? `
+          <label class="field-label">向かいたいこと</label>
+          <textarea id="field-achieve" class="textarea" rows="3">${escapeHtml(state.achieve)}</textarea>
+          <label class="field-label" style="margin-top:0.75rem">失いたくないこと</label>
+          <textarea id="field-protect" class="textarea" rows="3">${escapeHtml(state.protect)}</textarea>
+          <button type="button" id="btn-next" class="btn btn-primary w-full mt-3">直した</button>
+        ` : `
+          <div class="layer-card">
+            <p class="text-sm leading-relaxed text-slate-200">
+              <strong>「${escapeHtml(state.achieve || '（まだ言葉になっていない）')}」</strong>を実現したい一方で、<br>
+              <strong>「${escapeHtml(state.protect || '（まだ言葉になっていない）')}」</strong>は失いたくないように見えます。
+            </p>
+            ${state.judgmentCore ? '' : ''}
+          </div>
+          <p class="q-help" style="margin-top:0.5rem">判断の中心は、この両立にありそうです。</p>
+          <button type="button" id="btn-ok" class="btn btn-primary w-full">この理解で進む</button>
+          <button type="button" id="btn-edit" class="btn btn-ghost w-full">少し違う</button>
+        `}
       `);
-      bindJos20TextNext('field-achieve', (v) => { state.achieve = v; }, 204, 2);
+      if (editing) {
+        const a = document.getElementById('field-achieve');
+        const p = document.getElementById('field-protect');
+        document.getElementById('btn-next').onclick = () => {
+          if (a) state.achieve = a.value.trim();
+          if (p) state.protect = p.value.trim();
+          state.introEditAchieve = false;
+          state.introEditProtect = false;
+          jos20GoNextTalkOrSynthesize();
+        };
+      } else {
+        document.getElementById('btn-ok').onclick = () => jos20GoNextTalkOrSynthesize();
+        document.getElementById('btn-edit').onclick = () => {
+          state.introEditAchieve = true;
+          state.introEditProtect = true;
+          render();
+        };
+      }
       return true;
     }
 
     if (step === 204) {
+      const realize = state.jos20AskKind === 'realize';
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">それでも、失いたくないもの・守りたいものはありますか？</p>
-        <p class="q-help">変化を進めるときに、崩したくないもの・そう見られたくないものです。</p>
-        <textarea id="field-protect" class="textarea" rows="4">${escapeHtml(state.protect)}</textarea>
+        <p class="q-title">${realize
+          ? '向かいたいことは、もう少し言うと何ですか？'
+          : 'それでも、失いたくないものはありますか？'}</p>
+        <p class="q-help">工程ではありません。いまの話を、もう一文だけはっきりさせます。</p>
+        <textarea id="field-follow" class="textarea" rows="4">${escapeHtml(realize ? state.achieve : state.protect)}</textarea>
         <div class="dump-actions">
           <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+          <button type="button" id="btn-next" class="btn btn-primary">進む</button>
         </div>
       `);
-      bindJos20TextNext('field-protect', (v) => { state.protect = v; }, 205, 2);
+      const ta = document.getElementById('field-follow');
+      bindSpeechMic(ta, document.getElementById('btn-mic'));
+      document.getElementById('btn-next').onclick = () => {
+        const v = (ta?.value || '').trim();
+        if (v.length < 2) { ta?.focus(); return; }
+        if (realize) state.achieve = v;
+        else state.protect = v;
+        state.jos20AskCount = (state.jos20AskCount || 0) + 1;
+        jos20GoNextTalkOrSynthesize();
+      };
       return true;
     }
 
     if (step === 205) {
       root.innerHTML = jos20Shell(1, `
-        <p class="q-title">なぜ、それは守りたいのでしょう？</p>
+        <p class="q-title">それを守りたいのは、なぜでしょう？</p>
         <p class="q-help">一文で構いません。わからなければ、感じていることで大丈夫です。</p>
         <textarea id="field-why" class="textarea" rows="4">${escapeHtml(state.introDigNote)}</textarea>
         <div class="dump-actions">
           <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary">次へ</button>
+          <button type="button" id="btn-next" class="btn btn-primary">進む</button>
         </div>
         <button type="button" id="btn-skip" class="btn btn-ghost w-full">今は飛ばす</button>
       `);
-      bindJos20TextNext('field-why', (v) => { state.introDigNote = v; }, 206, 2);
-      const skip = document.getElementById('btn-skip');
-      if (skip) {
-        skip.onclick = () => {
-          step = 206;
-          render();
-        };
-      }
+      const ta = document.getElementById('field-why');
+      bindSpeechMic(ta, document.getElementById('btn-mic'));
+      const finishWhy = (v) => {
+        state.introDigNote = v;
+        state.introDigFocusId = 'protect';
+        state.introDigDone = true;
+        state.jos20WhyAsked = true;
+        applyDigNoteToAxis();
+        state.jos20AskCount = (state.jos20AskCount || 0) + 1;
+        jos20GoNextTalkOrSynthesize();
+      };
+      document.getElementById('btn-next').onclick = () => {
+        const v = (ta?.value || '').trim();
+        if (v.length < 2) { ta?.focus(); return; }
+        finishWhy(v);
+      };
+      document.getElementById('btn-skip').onclick = () => {
+        state.jos20WhyAsked = true;
+        state.jos20AskCount = (state.jos20AskCount || 0) + 1;
+        jos20GoNextTalkOrSynthesize();
+      };
       return true;
     }
 
     if (step === 206) {
-      root.innerHTML = jos20Shell(1, `
-        <p class="q-title">判断するうえで、動かせない条件はありますか？</p>
-        <p class="q-help">予算、期限、規程、人数など。なければ「特にない」で進められます。</p>
-        <textarea id="field-constraints" class="textarea" rows="3" placeholder="特にない、でも構いません">${escapeHtml(state.constraints)}</textarea>
-        <div class="dump-actions">
-          <button type="button" id="btn-mic" class="btn btn-ghost mic-btn" aria-pressed="false">マイクで話す</button>
-          <button type="button" id="btn-next" class="btn btn-primary">基準を見る</button>
-        </div>
-      `);
-      const ta = document.getElementById('field-constraints');
-      const next = document.getElementById('btn-next');
-      bindSpeechMic(ta, document.getElementById('btn-mic'));
-      if (ta) {
-        ta.oninput = () => { state.constraints = ta.value; };
-      }
-      if (next) {
-        next.onclick = () => {
-          state.constraints = (ta?.value || '').trim();
-          state.jos20Started = false;
-          step = 207;
-          render();
-        };
-      }
+      jos20FillConstraintsQuietly();
+      state.jos20Started = false;
+      step = 207;
+      render();
       return true;
     }
 
@@ -2241,55 +2337,34 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
 
     if (step === 208) {
       const principle = state.principleEdited || state.principle;
-      root.innerHTML = jos20Shell(3, `
-        <p class="q-title">自分の基準が見えました</p>
-        <p class="q-help">答えをもらったのではありません。何で決めるかが、言葉になっています。</p>
-
-        <div class="layer-card">
-          <p class="layer-kicker">今回の判断</p>
-          <dl class="layer-dl">
-            <div><dt>実現したいこと</dt><dd>${escapeHtml(state.achieve || '（未記入）')}</dd></div>
-            <div><dt>守りたいもの</dt><dd>${escapeHtml(state.protect || '（未記入）')}</dd></div>
-            <div><dt>主な条件</dt><dd>${escapeHtml(state.constraints || '特になし')}</dd></div>
-            <div><dt>判断の核心</dt><dd>${escapeHtml(state.judgmentCore || '（整理中）')}</dd></div>
-          </dl>
-        </div>
-
+      root.innerHTML = jos20Shell(2, `
+        <p class="q-title">あなたの判断原則</p>
+        <p class="q-help">今回の対話から見えた、何で決めるかです。</p>
+        ${state.judgmentCore ? `<p class="q-help">今のお話で、判断の中心はここにありそうです。<br><strong class="text-[hsl(var(--foreground))]">${escapeHtml(state.judgmentCore)}</strong></p>` : ''}
         <div class="layer-card layer-card-accent">
-          <p class="layer-kicker">私の判断原則</p>
           ${state.principleFeedback === 'edit' ? `
             <textarea id="field-principle" class="textarea" rows="5">${escapeHtml(principle)}</textarea>
             <button type="button" id="btn-save-principle" class="btn btn-primary w-full mt-2">この言葉にする</button>
           ` : `
             <p class="layer-principle">${escapeHtml(principle)}</p>
             <div class="fb-row">
-              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'yes' ? ' is-on' : ''}" data-fb="yes">その通り</button>
-              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'diff' ? ' is-on' : ''}" data-fb="diff">少し違う</button>
-              <button type="button" class="btn btn-ghost fb-btn${state.principleFeedback === 'edit' ? ' is-on' : ''}" data-fb="edit">修正したい</button>
+              <button type="button" class="btn btn-primary fb-btn" data-fb="yes">その通り</button>
+              <button type="button" class="btn btn-ghost fb-btn" data-fb="diff">少し違う</button>
             </div>
           `}
         </div>
-
-        <div class="layer-card">
-          <p class="layer-kicker">この判断基準をAIに渡す</p>
-          <p class="q-help" style="margin-bottom:0.5rem">ChatGPTなどへ、そのまま貼れます。最終判断はあなたが行います。</p>
-          <textarea id="field-handoff" class="ai-prompt-box" rows="10">${escapeHtml(state.handoffText)}</textarea>
-          <button type="button" id="btn-copy-handoff" class="btn btn-primary w-full mt-2">コピーする</button>
-          <span id="copy-handoff-toast" class="hidden text-xs text-center text-[hsl(var(--primary))] block mt-2">コピーしました</span>
-        </div>
-
-        <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
       `);
       root.querySelectorAll('[data-fb]').forEach((btn) => {
         btn.onclick = () => {
           const fb = btn.getAttribute('data-fb');
-          if (fb === 'edit') {
+          if (fb === 'diff') {
             state.principleFeedback = 'edit';
             render();
             return;
           }
-          state.principleFeedback = fb;
+          state.principleFeedback = 'yes';
           persistJos20Entry();
+          step = 209;
           render();
         };
       });
@@ -2303,23 +2378,68 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
           }
           state.principleFeedback = 'edit-saved';
           persistJos20Entry();
+          step = 209;
           render();
         };
       }
+      return true;
+    }
+
+    if (step === 209) {
+      root.innerHTML = jos20Shell(3, `
+        <p class="q-title">AIに渡す</p>
+        <p class="q-help">この判断基準を前提に、選択肢を出してもらう文です。最終判断はあなたが行います。</p>
+        <textarea id="field-handoff" class="ai-prompt-box" rows="12">${escapeHtml(state.handoffText)}</textarea>
+        <button type="button" id="btn-copy-handoff" class="btn btn-primary w-full mt-2">コピーする</button>
+        <span id="copy-handoff-toast" class="hidden text-xs text-center text-[hsl(var(--primary))] block mt-2">コピーしました</span>
+        <button type="button" id="btn-reflect" class="btn btn-ghost w-full">もう少し振り返る</button>
+        <button type="button" id="btn-home" class="btn btn-ghost w-full">トップへ</button>
+      `);
       const ho = document.getElementById('field-handoff');
-      if (ho) {
-        ho.oninput = () => { state.handoffText = ho.value; };
-      }
-      const copy = document.getElementById('btn-copy-handoff');
-      if (copy) {
-        copy.onclick = () => {
-          state.handoffText = (document.getElementById('field-handoff')?.value || state.handoffText);
-          persistJos20Entry();
-          copyText(state.handoffText, 'copy-handoff-toast');
-        };
-      }
-      document.getElementById('btn-home').onclick = () => {
-        goLanding();
+      if (ho) ho.oninput = () => { state.handoffText = ho.value; };
+      document.getElementById('btn-copy-handoff').onclick = () => {
+        state.handoffText = (document.getElementById('field-handoff')?.value || state.handoffText);
+        persistJos20Entry();
+        copyText(state.handoffText, 'copy-handoff-toast');
+      };
+      document.getElementById('btn-reflect').onclick = () => {
+        step = 210;
+        render();
+      };
+      document.getElementById('btn-home').onclick = () => goLanding();
+      return true;
+    }
+
+    if (step === 210) {
+      const g = state.criteriaGrowth || emptyCriteriaGrowth();
+      root.innerHTML = jos20Shell(2, `
+        <p class="q-title">もう少し振り返る</p>
+        <p class="q-help">必須ではありません。残しておきたい変化だけ、短く。</p>
+        <label class="field-label">最初の私は</label>
+        <textarea id="field-first" class="textarea" rows="2">${escapeHtml(g.firstMe || '')}</textarea>
+        <label class="field-label">今の私は</label>
+        <textarea id="field-now" class="textarea" rows="2">${escapeHtml(g.nowMe || '')}</textarea>
+        <label class="field-label">一番変わった判断基準</label>
+        <textarea id="field-chg" class="textarea" rows="2">${escapeHtml(g.criteriaChange || '')}</textarea>
+        <label class="field-label">本当の目的</label>
+        <textarea id="field-purpose" class="textarea" rows="2">${escapeHtml(g.truePurpose || '')}</textarea>
+        <button type="button" id="btn-save-ref" class="btn btn-primary w-full">残して戻る</button>
+        <button type="button" id="btn-skip-ref" class="btn btn-ghost w-full">戻る</button>
+      `);
+      document.getElementById('btn-save-ref').onclick = () => {
+        state.criteriaGrowth = Object.assign(emptyCriteriaGrowth(), g, {
+          firstMe: (document.getElementById('field-first')?.value || '').trim(),
+          nowMe: (document.getElementById('field-now')?.value || '').trim(),
+          criteriaChange: (document.getElementById('field-chg')?.value || '').trim(),
+          truePurpose: (document.getElementById('field-purpose')?.value || '').trim()
+        });
+        persistJos20Entry();
+        step = 209;
+        render();
+      };
+      document.getElementById('btn-skip-ref').onclick = () => {
+        step = 209;
+        render();
       };
       return true;
     }
@@ -2347,7 +2467,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
     }
     const prog = `${phaseNavHtml()}${stepBackHtml()}<p class="step-progress"><em>JudgmentOS</em> · ${progressLabel()}</p>`;
 
-    if (useJos20Ui() && step >= 201 && step <= 208) {
+    if (useJos20Ui() && step >= 201 && step <= 210) {
       renderJos20(root);
       return;
     }
@@ -3548,7 +3668,7 @@ ${state.constraints ? `動かせない条件：${state.constraints}\n` : ''}
         if (!packed) return;
         loadEntryIntoState(packed.theme, packed.entry);
         if (packed.entry.jos20 || packed.entry.handoffText || packed.entry.principle) {
-          step = 208;
+          step = packed.entry.handoffText ? 209 : 208;
         } else {
           const done = hasCriteriaReflection(packed.entry.criteriaGrowth);
           if (packed.entry.contextAfter && !done) {
